@@ -63,7 +63,6 @@ struct Goods {
   int money;
   int x;
   int y;
-  bool ing;  // 正在被运输
   Goods* pre;
   Goods* next;
 } * head_goods;
