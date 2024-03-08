@@ -36,7 +36,9 @@ struct Robot {
 struct Berth {
   int x;
   int y;
+  // 到虚拟点的时间
   int transport_time;
+  // 每帧可以装载的物品数
   int loading_speed;
   Berth() {}
   Berth(int x, int y, int transport_time, int loading_speed) {
@@ -47,8 +49,21 @@ struct Berth {
   }
 } berth[berth_num + 10];
 
+// 船
 struct Boat {
-  int num, pos, status;
+  int num;
+
+  // 目标泊位，虚拟点为-1
+  int pos;
+
+  /*
+   * 状态
+   * 可能值：
+   * - 0 运输中
+   * - 1 运行状态
+   * - 2 泊位外等待
+   */
+  int status;
 } boat[10];
 
 // 货物
@@ -59,56 +74,82 @@ struct Goods {
     this->money = money;
     this->birth = birth;
   }
-  int birth;
-  int money;
+  int birth;  // 生成帧
+  int money;  // 价值
   int x;
   int y;
-  Goods* pre;
-  Goods* next;
-} * head_goods;
-
-/*
- * 将货物放入链表
- */
-void PushGoods(Goods*& new_goods) {
-  if (head_goods->next == NULL) {
-    // 空链表
-    head_goods->next = new_goods;
-    head_goods->pre = new_goods;
-    new_goods->next = head_goods;
-    new_goods->pre = head_goods;
-
-  } else {
-    new_goods->pre = head_goods->pre;
-    head_goods->pre->next = new_goods;
-    head_goods->pre = new_goods;
-    new_goods->next = head_goods;
-  }
+  Goods* pre;  // 双向链表连接货物
+  Goods* next;  // 按生存周期排列的，具有队列性质，又可随机删除
 };
 
-// 删除货物
-void DeleteGoods(Goods*& goods) {
-  goods->pre->next = goods->next;
-  goods->next->pre = goods->pre;
-  delete goods;
-  goods = NULL;
-}
+// 货物管理器
+struct GoodsManager {
+  Goods* head_goods;
+  /*
+   * 将货物放入链表
+   */
+  void PushGoods(Goods*& new_goods) {
+    if (head_goods->next == NULL) {
+      // 空链表
+      head_goods->next = new_goods;
+      head_goods->pre = new_goods;
+      new_goods->next = head_goods;
+      new_goods->pre = head_goods;
 
-// 刷新货物链表
-void FreshGoodsLists() {
-  Goods* cur = head_goods->next;
-  while (cur != head_goods) {
-    if (id - cur->birth == LIFETIME) {
-      Goods* temp = cur->next;
-      DeleteGoods(cur);
-      cur = temp;
     } else {
-      // 剪枝
-      break;
+      new_goods->pre = head_goods->pre;
+      head_goods->pre->next = new_goods;
+      head_goods->pre = new_goods;
+      new_goods->next = head_goods;
+    }
+  };
+
+  // 删除货物
+  void DeleteGoods(Goods*& goods) {
+    goods->pre->next = goods->next;
+    goods->next->pre = goods->pre;
+    delete goods;
+    goods = NULL;
+  }
+
+  // 刷新货物链表
+  void FreshGoodsLists() {
+    Goods* cur = head_goods->next;
+    while (cur != head_goods) {
+      if (id - cur->birth == LIFETIME) {
+        Goods* temp = cur->next;
+        DeleteGoods(cur);
+        cur = temp;
+      } else {
+        // 剪枝
+        break;
+      }
     }
   }
-}
+} g_goodsmanager;
 
+// 决策
+struct decision {
+  /*
+   * - 0 机器人
+   * - 1 船
+   */
+  int type;
+
+  // 机器人或者船的id
+  int id;
+
+  // 第二参数
+  int param;
+};
+
+// 决策队列
+queue<decision> q_decision;
+// 清空决策队列
+void ClearQueue(queue<decision>& q) {
+  queue<decision> empty;
+  swap(empty, q);
+}
 // 初始化
 void Init() {
   // 地图数据
@@ -138,7 +179,7 @@ bool Input() {
       int x, y, val;
       scanf("%d%d%d", &x, &y, &val);
       Goods* new_goods = new Goods(x, y, val, id);
-      PushGoods(new_goods);
+      g_goodsmanager.PushGoods(new_goods);
     }
 
     // 机器人实时数据
@@ -157,15 +198,56 @@ bool Input() {
   return 0;
 }
 
-// 更新货物
+/*
+ * 机器人做决策
+ * 移动后的动作决策建立在成功移动后
+ * 所以移动前动作和移动放一个循环判断
+ * 移动后动作单独判断做了移动决策的机器人
+ *
+ */
+void DecisionRobot() {
+  for (int i = 0; i < 10; ++i) {
+    // --------- 移动前动作 ---------
+
+    // --------- 移动 ---------
+  }
+
+  // --------- 移动后动作 ---------
+}
+/*
+ * 船做决策
+ * 根据帧数据状态来决策
+ */
+void DecisionBoat() {
+  for (int i = 0; i < 5; ++i) {
+    // status 0 运输中 无需考虑决策
+    if (boat[i].status == 1) {
+      if (boat[i].pos == -1) {
+        // 在虚拟点
+        // 决策去哪个泊位
+      } else {
+        // 决策是否驶离
+      }
+    } else if (boat[i].status == 2) {
+      // 在等待
+      // 可以决策是否换船舶，换哪个船舶
+    }
+  }
+}
 
 int main() {
   Init();
-  OutputController output_controller;
   while (Input()) {
-    // 决策
+    // --------- 准备阶段 ----------
+    g_goodsmanager.FreshGoodsLists();  // 刷新货物链表
+    ClearQueue(q_decision);            // 清空决策队列
 
-    // 输出
+    // --------- 决策阶段 ----------
+    DecisionRobot();
+    DecisionBoat();
+
+    // --------- 输出阶段 ----------
+    // 根据决策表输出
     puts("OK");
     fflush(stdout);
   }

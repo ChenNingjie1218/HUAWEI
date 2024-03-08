@@ -51,5 +51,5 @@ struct OutputController {
     printf("go %d", boat_id);
     fflush(stdout);
   }
-};
+} output_controller;
 #endif
