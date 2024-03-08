@@ -17,12 +17,39 @@ const int N = 210;
 
 int money, boat_capacity;
 int id;  // 帧号
+
+/*
+ * - · 空地
+ * - * 海洋
+ * - # 障碍
+ * - A 机器人起始位置，总共10个
+ * - B 大小为4*4，标识泊位的位置
+ */
 char ch[N][N];
-int gds[N][N];  // 暂时不知道干嘛的？
+bool gds[N][N] = {false};  // 该点是否有货物
+
+// 货物
+struct Goods {
+  Goods(int x, int y, int money, int birth) {
+    this->x = x;
+    this->y = y;
+    this->money = money;
+    this->birth = birth;
+  }
+  int birth;  // 生成帧
+  int money;  // 价值
+  int x;
+  int y;
+  Goods* pre;  // 双向链表连接货物
+  Goods* next;  // 按生存周期排列的，具有队列性质，又可随机删除
+};
 
 // 机器人
 struct Robot {
-  int x, y, goods;
+  int x, y;
+  // 是否携带货物
+  int goods;
+  // 是否是正常运行状态
   int status;
   int mbx, mby;  //什么意思？
   Robot() {}
@@ -30,6 +57,14 @@ struct Robot {
     x = startX;
     y = startY;
   }
+  Goods* target_goods;
+
+  // 更新目标货物
+  void UpdateTargetGoods(Goods* goods);
+  // 更新路线
+  void UpdateTargetRoot();
+  // 清目标货物，重置容忍次数
+  void ResetTargetGoods();
 } robot[robot_num + 10];
 
 // 泊位
@@ -51,6 +86,7 @@ struct Berth {
 
 // 船
 struct Boat {
+  // 货物数量
   int num;
 
   // 目标泊位，虚拟点为-1
@@ -66,22 +102,6 @@ struct Boat {
   int status;
 } boat[10];
 
-// 货物
-struct Goods {
-  Goods(int x, int y, int money, int birth) {
-    this->x = x;
-    this->y = y;
-    this->money = money;
-    this->birth = birth;
-  }
-  int birth;  // 生成帧
-  int money;  // 价值
-  int x;
-  int y;
-  Goods* pre;  // 双向链表连接货物
-  Goods* next;  // 按生存周期排列的，具有队列性质，又可随机删除
-};
-
 // 货物管理器
 struct GoodsManager {
   Goods* head_goods;
@@ -89,6 +109,7 @@ struct GoodsManager {
    * 将货物放入链表
    */
   void PushGoods(Goods*& new_goods) {
+    gds[new_goods->x][new_goods->y] = true;
     if (head_goods->next == NULL) {
       // 空链表
       head_goods->next = new_goods;
@@ -106,6 +127,7 @@ struct GoodsManager {
 
   // 删除货物
   void DeleteGoods(Goods*& goods) {
+    gds[goods->x][goods->y] = false;
     goods->pre->next = goods->next;
     goods->next->pre = goods->pre;
     delete goods;
@@ -167,6 +189,8 @@ void Init() {
   scanf("%s", okk);
   printf("OK\n");
   fflush(stdout);
+
+  // --------- 其他初始化 ----------
 }
 
 // 每帧的数据
@@ -208,10 +232,25 @@ bool Input() {
 void DecisionRobot() {
   for (int i = 0; i < 10; ++i) {
     // --------- 移动前动作 ---------
+    if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B') {
+      // 卸货
+    }
 
-    // --------- 移动 ---------
+    // 决策，更新目标货物
+
+    if (!robot[i].goods && robot[i].target_goods &&
+        robot[i].target_goods->x == robot[i].x &&
+        robot[i].target_goods->y == robot[i].y) {
+      // 装货
+
+      // 决策更新目标泊位
+    }
   }
 
+  // --------- 移动 ---------
+  // 决策是否移动
+
+  // 如果移动决策移动后动作
   // --------- 移动后动作 ---------
 }
 /*
