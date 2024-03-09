@@ -60,7 +60,7 @@ struct Robot {
   void ResetTargetGoods();
 
   //拿到货物后寻找港口
-  int FindBerth();
+  static int FindBerth(int i);
 } robot[robot_num + 10];
 
 // 泊位
@@ -355,7 +355,7 @@ void DecisionRobot() {
       g_goodsmanager.DeleteGoods(robot[i].target_goods);
 
       // 决策更新目标泊位和泊位权重
-      robot[i].berth_id = robot[i].FindBerth();
+      robot[i].berth_id = Robot::FindBerth(i);
       berth_weight[robot[i].berth_id]++;
     }
 
@@ -388,6 +388,9 @@ void DecisionRobot() {
   // --------- 移动后动作 ---------
 }
 
+/*
+ * 寻找目标货物
+ */
 void Robot::UpdateTargetGoods(int i) {
   double goods_weight = 0, cur_weight = 0;
   Goods *p_goods = g_goodsmanager.head_goods->next;
@@ -410,6 +413,23 @@ void Robot::UpdateTargetGoods(int i) {
   }
   robot[i].target_goods = cur_goods;
   robot[i].path = route;
+}
+
+int Robot::FindBerth(int i) {
+  int length = 0, fin_length = 10000, fin_j = 0;
+  std::list<Point *> route, path;
+
+  // 寻找最近的泊位
+  for (int j = 0; j < 10; j++) {
+    route = astar(ch, robot[i].x, robot[i].y, berth[j].x, berth[j].y);
+    length = route.size();
+    if (length < fin_length) {
+      fin_length = length;
+      robot[i].path = route;  //更新机器人的行动路径
+      fin_j = j;
+    }
+  }
+  return fin_j;
 }
 
 /*
