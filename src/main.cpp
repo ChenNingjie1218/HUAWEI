@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <string>
 
+#include "Astar.h"
 #include "output_controller.h"
 
 using namespace std;
@@ -16,7 +17,9 @@ const int berth_num = 10;
 const int N = 210;
 
 int money, boat_capacity;
-int id;  // 帧号
+int id; // 帧号
+
+#define BERTH_WEIGHT_AFTER_BOAT_CHOOSE 1 //船选择泊位后，泊位权重的减少
 
 /*
  * - · 空地
@@ -26,7 +29,10 @@ int id;  // 帧号
  * - B 大小为4*4，标识泊位的位置
  */
 char ch[N][N];
-bool gds[N][N] = {false};  // 该点是否有货物
+bool gds[N][N] = {false}; // 该点是否有货物
+
+// 港口权重
+int berth_weight[10];
 
 // 货物
 struct Goods {
@@ -36,22 +42,27 @@ struct Goods {
     this->money = money;
     this->birth = birth;
   }
-  int birth;  // 生成帧
-  int money;  // 价值
+  int birth; // 生成帧
+  int money; // 价值
   int x;
   int y;
-  Goods* pre;  // 双向链表连接货物
-  Goods* next;  // 按生存周期排列的，具有队列性质，又可随机删除
+  Goods* pre; // 双向链表连接货物
+  Goods* next; // 按生存周期排列的，具有队列性质，又可随机删除
 };
 
 // 机器人
 struct Robot {
   int x, y;
+
   // 是否携带货物
   int goods;
+
   // 是否是正常运行状态
   int status;
-  int mbx, mby;  //什么意思？
+  int mbx, mby; //什么意思？
+
+  // 目标港口
+  int berth_id;
   Robot() {}
   Robot(int startX, int startY) {
     x = startX;
@@ -60,11 +71,17 @@ struct Robot {
   Goods* target_goods;
 
   // 更新目标货物
-  void UpdateTargetGoods(Goods* goods);
+  // void UpdateTargetGoods(Goods* goods);
+  static void UpdateTargetGoods(int i);
+
   // 更新路线
   void UpdateTargetRoot();
+
   // 清目标货物，重置容忍次数
   void ResetTargetGoods();
+
+  //拿到货物后寻找港口
+  int FindBerth();
 } robot[robot_num + 10];
 
 // 泊位
@@ -100,6 +117,13 @@ struct Boat {
    * - 2 泊位外等待
    */
   int status;
+  Boat() { num = 0; }
+
+  //虚拟点选择泊位
+  static void ChooseBerth(int i, int rand_berth);
+
+  //离开港口的条件
+  static void LeaveCond(int i);
 } boat[10];
 
 // 货物管理器
@@ -151,10 +175,13 @@ struct GoodsManager {
 } g_goodsmanager;
 
 // 决策
-struct decision {
+struct Decision {
   /*
-   * - 0 机器人
-   * - 1 船
+   * - 1 机器人move
+   * - 2 机器人get
+   * - 3 机器人pull
+   * - 4 船ship
+   * - 5 船go
    */
   int type;
 
@@ -163,19 +190,25 @@ struct decision {
 
   // 第二参数
   int param;
+  Decision(int type, int id, int param) {
+    this->type = type;
+    this->id = id;
+    this->param = param;
+  }
 };
 
 // 决策队列
-queue<decision> q_decision;
+queue<Decision> q_decision;
 // 清空决策队列
-void ClearQueue(queue<decision>& q) {
-  queue<decision> empty;
+void ClearQueue(queue<Decision>& q) {
+  queue<Decision> empty;
   swap(empty, q);
 }
 // 初始化
 void Init() {
   // 地图数据
-  for (int i = 1; i <= n; i++) scanf("%s", ch[i] + 1);
+  for (int i = 1; i <= n; i++)
+    scanf("%s", ch[i] + 1);
   // 泊位数据
   for (int i = 0; i < berth_num; i++) {
     int id;
@@ -213,7 +246,8 @@ bool Input() {
     }
 
     // 船的实时数据
-    for (int i = 0; i < 5; i++) scanf("%d%d\n", &boat[i].status, &boat[i].pos);
+    for (int i = 0; i < 5; i++)
+      scanf("%d%d\n", &boat[i].status, &boat[i].pos);
 
     char okk[100];
     scanf("%s", okk);
@@ -234,16 +268,27 @@ void DecisionRobot() {
     // --------- 移动前动作 ---------
     if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B') {
       // 卸货
+      Decision decision(3, i, -1);
+      q_decision.push(decision);
+
+      // 增加泊位权重
+      berth_weight[robot->berth_id]++;
+      robot[i].berth_id = -1;
     }
 
     // 决策，更新目标货物
+    Robot::UpdateTargetGoods(i);
 
     if (!robot[i].goods && robot[i].target_goods &&
         robot[i].target_goods->x == robot[i].x &&
         robot[i].target_goods->y == robot[i].y) {
       // 装货
+      Decision decision(2, i, -1);
+      q_decision.push(decision);
 
-      // 决策更新目标泊位
+      // 决策更新目标泊位和泊位权重
+      robot[i].berth_id = robot[i].FindBerth();
+      berth_weight[robot[i].berth_id]++;
     }
   }
 
@@ -253,19 +298,45 @@ void DecisionRobot() {
   // 如果移动决策移动后动作
   // --------- 移动后动作 ---------
 }
+
+void Robot::UpdateTargetGoods(int i) {
+  double goods_weight = 0, cur_weight = 0;
+  Goods* p_goods = g_goodsmanager.head_goods->next;
+  Goods* cur_goods = p_goods;
+
+  // 遍历货物链表
+  while (p_goods) {
+    // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
+    // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
+    if (cur_weight > goods_weight) {
+      cur_goods = p_goods;
+      goods_weight = cur_weight;
+    }
+    p_goods = p_goods->next;
+  }
+  robot[i].target_goods = cur_goods;
+  g_goodsmanager.DeleteGoods(cur_goods); //别人不能再来抢这个货物
+}
+
 /*
  * 船做决策
  * 根据帧数据状态来决策
  */
 void DecisionBoat() {
+  //最大权重泊位，权重都为0就随机泊位
+  int rand_berth = 0;
+
   for (int i = 0; i < 5; ++i) {
     // status 0 运输中 无需考虑决策
     if (boat[i].status == 1) {
       if (boat[i].pos == -1) {
         // 在虚拟点
+
         // 决策去哪个泊位
+        Boat::ChooseBerth(i, rand_berth);
       } else {
         // 决策是否驶离
+        Boat::LeaveCond(i);
       }
     } else if (boat[i].status == 2) {
       // 在等待
@@ -274,12 +345,48 @@ void DecisionBoat() {
   }
 }
 
+/*
+ * 船在虚拟点选择泊位
+ * 依据1 前往泊位的机器人数量
+ */
+void Boat::ChooseBerth(int i, int rand_berth) {
+  int max_berth = 0;
+  for (int j = 0; j < 10; j++) {
+    if (berth_weight[j] > max_berth) {
+      max_berth = j;
+    }
+  }
+  if (max_berth == 0) {
+    boat[i].pos = ++rand_berth % 10;
+  } else {
+    boat[i].pos = max_berth;
+    berth_weight[max_berth] -= BERTH_WEIGHT_AFTER_BOAT_CHOOSE; //权重减少
+  }
+  Decision decision(4, i, boat[i].pos);
+  q_decision.push(decision); // 决策入队
+}
+
+/*
+ * 船在泊位何时离开
+ * 决策依据：
+ * 1 船的容量和当前装载量
+ * 2 船在泊位停留的时间 ？
+ * 3 正在前往该泊位的机器人数量 ？
+ */
+void Boat::LeaveCond(int i) {
+  // 容量达到70%就走
+  if (boat[i].num > boat_capacity * 0.7) {
+    Decision decision(5, i, -1);
+    q_decision.push(decision);
+  }
+}
+
 int main() {
   Init();
   while (Input()) {
     // --------- 准备阶段 ----------
-    g_goodsmanager.FreshGoodsLists();  // 刷新货物链表
-    ClearQueue(q_decision);            // 清空决策队列
+    g_goodsmanager.FreshGoodsLists(); // 刷新货物链表
+    ClearQueue(q_decision);           // 清空决策队列
 
     // --------- 决策阶段 ----------
     DecisionRobot();
