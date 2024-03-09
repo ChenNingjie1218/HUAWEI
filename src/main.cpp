@@ -6,34 +6,10 @@
 
 #include "Astar.h"
 #include "output_controller.h"
+#include "panel.h"
+
 
 using namespace std;
-// 货物生存周期
-const int LIFETIME = 20;
-
-// 地图长度
-const int n = 200;
-const int robot_num = 10;
-const int berth_num = 10;
-const int N = 210;
-
-int money, boat_capacity;
-int id;  // 帧号
-
-#define BERTH_WEIGHT_AFTER_BOAT_CHOOSE 1  //船选择泊位后，泊位权重的减少
-
-/*
- * - · 空地
- * - * 海洋
- * - # 障碍
- * - A 机器人起始位置，总共10个
- * - B 大小为4*4，标识泊位的位置
- */
-char ch[N][N];
-bool gds[N][N] = {false};  // 该点是否有货物
-
-// 港口权重
-int berth_weight[10];
 
 // 货物
 struct Goods {
@@ -405,6 +381,7 @@ void DecisionRobot() {
   for (int i = 0; i < size; ++i) {
     next_points[i].OutPut();
   }
+
   // 如果移动决策移动后动作
   // --------- 移动后动作 ---------
 }
@@ -413,11 +390,13 @@ void Robot::UpdateTargetGoods(int i) {
   double goods_weight = 0, cur_weight = 0;
   Goods *p_goods = g_goodsmanager.head_goods->next;
   Goods *cur_goods = p_goods;
+  std::list<Point *> list_res;
 
   // 遍历货物链表
   while (p_goods) {
     // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
     // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
+    list_res = astar(ch, robot[i].x, robot[i].y, p_goods->x, p_goods->y);
     if (cur_weight > goods_weight) {
       cur_goods = p_goods;
       goods_weight = cur_weight;

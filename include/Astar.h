@@ -6,12 +6,8 @@
 #include <iostream>
 #include <list>  //链表
 #include <vector>
-// extern int k_Cost1;
-// extern int k_Cost2;
-const int k_Cost1 = 10;  //走一格消耗10
-const int k_Cost2 = 14;  //斜移走一个消耗14
-#define COL 210
-#define ROW 210
+#include "panel.h"
+#include "param.h"
 
 typedef struct _Point {
   int x, y;               // x为行，y为列
