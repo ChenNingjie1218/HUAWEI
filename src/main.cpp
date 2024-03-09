@@ -8,7 +8,6 @@
 #include "output_controller.h"
 #include "panel.h"
 
-
 using namespace std;
 
 // 货物
@@ -352,6 +351,9 @@ void DecisionRobot() {
       Decision decision(2, i, -1);
       q_decision.push(decision);
 
+      // 捡到货物将其从链表删除
+      g_goodsmanager.DeleteGoods(robot[i].target_goods);
+
       // 决策更新目标泊位和泊位权重
       robot[i].berth_id = robot[i].FindBerth();
       berth_weight[robot[i].berth_id]++;
@@ -390,21 +392,24 @@ void Robot::UpdateTargetGoods(int i) {
   double goods_weight = 0, cur_weight = 0;
   Goods *p_goods = g_goodsmanager.head_goods->next;
   Goods *cur_goods = p_goods;
-  std::list<Point *> list_res;
+  std::list<Point *> route, path;
 
   // 遍历货物链表
   while (p_goods) {
     // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
     // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
-    list_res = astar(ch, robot[i].x, robot[i].y, p_goods->x, p_goods->y);
+    route = astar(ch, robot[i].x, robot[i].y, p_goods->x, p_goods->y);
+    cur_weight =
+        0.5 * (p_goods->money - 1) / 999 + 0.5 * (route.size() - 1) / 399.0;
     if (cur_weight > goods_weight) {
       cur_goods = p_goods;
       goods_weight = cur_weight;
+      path = route;
     }
     p_goods = p_goods->next;
   }
   robot[i].target_goods = cur_goods;
-  g_goodsmanager.DeleteGoods(cur_goods);  //别人不能再来抢这个货物
+  robot[i].path = route;
 }
 
 /*
