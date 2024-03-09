@@ -1,21 +1,22 @@
 #ifndef ASTAR_H_
 #define ASTAR_H_
+#include <string.h>
+
 #include <cmath>
 #include <iostream>
-#include <list> //链表
-#include <string.h>
+#include <list>  //链表
 #include <vector>
 // extern int k_Cost1;
 // extern int k_Cost2;
-const int k_Cost1 = 10; //走一格消耗10
-const int k_Cost2 = 14; //斜移走一个消耗14
+const int k_Cost1 = 10;  //走一格消耗10
+const int k_Cost2 = 14;  //斜移走一个消耗14
 #define COL 210
 #define ROW 210
 
 typedef struct _Point {
-  int x, y;              // x为行，y为列
-  int F, G, H;           // F=G+H;
-  struct _Point* parent; //父节点的坐标
+  int x, y;               // x为行，y为列
+  int F, G, H;            // F=G+H;
+  struct _Point* parent;  //父节点的坐标
 } Point;
 
 //分配一个节点
@@ -33,7 +34,7 @@ std::list<Point*> GetPath(const Point* startPoint, const Point* endPoint);
 //查找路径的小方法,返回一个终点，根据终点可以回溯到起点
 static Point* findPath(
     const Point* startPoint,
-    const Point* endPoint); //用static是为了只能在函数内部调用而不能单独的使用
+    const Point* endPoint);  //用static是为了只能在函数内部调用而不能单独的使用
 
 //返回开放列表中F的最小值的点
 static Point* getLeastFPoint();
@@ -61,15 +62,15 @@ void clearAstarMaze();
   终止点的横坐标，end_y: 终止点的纵坐标
   @return list
 */
-list<Point*> astar(char (*map)[COL], int start_x, int start_y, int end_x,
-                   int end_y);
+std::list<Point*> astar(char (*map)[COL], int start_x, int start_y, int end_x,
+                        int end_y);
 
-static int* maze; //初始化迷宫
-static int cols;  //二维数组对应的列
-static int lines; //二维数组对应的行
+static int* maze;  //初始化迷宫
+static int cols;   //二维数组对应的列
+static int lines;  //二维数组对应的行
 
-static std::list<Point*> openList;  //开放列表
-static std::list<Point*> closeList; //关闭列表
+static std::list<Point*> openList;   //开放列表
+static std::list<Point*> closeList;  //关闭列表
 
 // 地图数据转换
 void Translatedata(char (*start)[COL], int* m) {
@@ -92,7 +93,7 @@ void Translatedata(char (*start)[COL], int* m) {
 }
 
 /*初始化地图*/
-void InitAstarMaze(int* _maze, int _line, int colums) { //一级指针保存二维数组
+void InitAstarMaze(int* _maze, int _line, int colums) {  //一级指针保存二维数组
   maze = _maze;
   lines = _line;
   cols = colums;
@@ -101,7 +102,7 @@ void InitAstarMaze(int* _maze, int _line, int colums) { //一级指针保存二�
 /*分配节点*/
 Point* AllocPoint(int x, int y) {
   Point* temp = new Point;
-  memset(temp, 0, sizeof(Point)); //清理养成好习惯
+  memset(temp, 0, sizeof(Point));  //清理养成好习惯
 
   temp->x = x;
   temp->y = y;
@@ -115,7 +116,7 @@ std::list<Point*> GetPath(const Point* startPoint, const Point* endPoint) {
 
   //返回路径
   while (result) {
-    path.push_front(result); //这样起点就是在这个链表的最前面了
+    path.push_front(result);  //这样起点就是在这个链表的最前面了
     result = result->parent;
   }
 
@@ -125,7 +126,7 @@ std::list<Point*> GetPath(const Point* startPoint, const Point* endPoint) {
 /*查找路径的小方法,返回一个终点，根据终点可以回溯到起点*/
 static Point* findPath(const Point* startPoint, const Point* endPoint) {
   openList.push_back(
-      AllocPoint(startPoint->x, startPoint->y)); //重新分配更加的安全，置入起点
+      AllocPoint(startPoint->x, startPoint->y));  //重新分配更加的安全，置入起点
 
   while (!openList.empty()) {
     // 1、获取开放表中最小的F值
@@ -145,17 +146,16 @@ static Point* findPath(const Point* startPoint, const Point* endPoint) {
       //如果没在开放列表中就加入到开放列表，设置当前节点为父节点
       Point* exist = isInList(openList, target);
       if (!exist) {
-
         target->parent = curPoint;
         target->G =
-            caloG(curPoint, target); //父节点的G加上某个数就好（自己设计的）
+            caloG(curPoint, target);  //父节点的G加上某个数就好（自己设计的）
         target->H = caloH(target, endPoint);
         target->F = caloF(target);
 
         openList.push_back(target);
-      } else { //如果已存在就重新计算G值看要不要替代
+      } else {  //如果已存在就重新计算G值看要不要替代
         int tempG = caloG(curPoint, target);
-        if (tempG < target->G) { //更新
+        if (tempG < target->G) {  //更新
           exist->parent = curPoint;
           exist->G = tempG;
           exist->F = caloF(target);
@@ -164,10 +164,10 @@ static Point* findPath(const Point* startPoint, const Point* endPoint) {
         delete *iter;
       }
 
-    } // end for循环
+    }  // end for循环
 
     surroundPoints.clear();
-    Point* resPoint = isInList(openList, endPoint); //终点是否在openList上
+    Point* resPoint = isInList(openList, endPoint);  //终点是否在openList上
     if (resPoint) {
       return resPoint;
     }
@@ -182,11 +182,11 @@ static Point* getLeastFPoint() {
   if (!openList.empty()) {
     Point* resPoint = openList.front();
 
-    std::list<Point*>::const_iterator itor; //定义迭代器，用于遍历链表
+    std::list<Point*>::const_iterator itor;  //定义迭代器，用于遍历链表
 
     //迭代器遍历，C++特性,直接理解成平时我们用的for
     for (itor = openList.begin(); itor != openList.end(); itor++) {
-      Point* p = *itor; //把元素拿出来
+      Point* p = *itor;  //把元素拿出来
       if (p->F < resPoint->F) {
         resPoint = p;
       }
@@ -218,7 +218,7 @@ static bool isCanreach(const Point* point, const Point* target) {
   if (target->x < 0 || target->x > (lines - 1) || target->y < 0 ||
       target->y > (cols - 1) ||
       (maze[target->x * cols + target->y] ==
-       1) //找到对应的二维数组中的位置-》障碍物
+       1)  //找到对应的二维数组中的位置-》障碍物
       || (maze[target->x * cols + target->y] == 2) ||
       (target->x == point->x && target->y == point->y) ||
       isInList(closeList, target)) {
@@ -226,7 +226,7 @@ static bool isCanreach(const Point* point, const Point* target) {
   }
 
   if (abs(point->x - target->x) + abs(point->y - target->y) ==
-      1) { //我们现在只考虑上下左右4个点
+      1) {  //我们现在只考虑上下左右4个点
     return true;
   } else {
     return false;
@@ -238,7 +238,7 @@ static Point* isInList(const std::list<Point*>& list, const Point* point) {
   std::list<Point*>::const_iterator itor;
   for (itor = list.begin(); itor != list.end(); itor++) {
     if ((*itor)->x == point->x && (*itor)->y == point->y) {
-      return *itor; //存在返回该节点
+      return *itor;  //存在返回该节点
     }
   }
   return NULL;
@@ -248,12 +248,12 @@ static int caloG(const Point* temp_start, const Point* point) {
   int extraG =
       (abs(point->x - temp_start->x) + abs(point->y - temp_start->y)) == 1
           ? k_Cost1
-          : k_Cost2; //周围的点与扩散点的差值,是否为斜边
+          : k_Cost2;  //周围的点与扩散点的差值,是否为斜边
   int parentG =
       (point->parent == NULL
            ? NULL
-           : point->parent->G); //如果是初始值为null，其他的点是父类的G值
-  return parentG + extraG; //返回两个量相加
+           : point->parent->G);  //如果是初始值为null，其他的点是父类的G值
+  return parentG + extraG;  //返回两个量相加
 }
 
 static int caloH(const Point* point, const Point* end) {
@@ -272,17 +272,16 @@ void clearAstarMaze() {
   std::list<Point*>::iterator itor;
   for (itor = openList.begin(); itor != openList.end();) {
     delete *itor;
-    itor = openList.erase(itor); //获取到下一个节点
+    itor = openList.erase(itor);  //获取到下一个节点
   }
   for (itor = closeList.begin(); itor != closeList.end();) {
     delete *itor;
-    itor = closeList.erase(itor); //获取到下一个节点
+    itor = closeList.erase(itor);  //获取到下一个节点
   }
 }
 
-list<Point*> astar(char (*map)[COL], int start_x, int start_y, int end_x,
-                   int end_y) {
-
+std::list<Point*> astar(char (*map)[COL], int start_x, int start_y, int end_x,
+                        int end_y) {
   int m[ROW][COL];
 
   Translatedata(map, &m[0][0]);
@@ -293,10 +292,10 @@ list<Point*> astar(char (*map)[COL], int start_x, int start_y, int end_x,
   Point* end = AllocPoint(end_x, end_y);
 
   //寻找路径
-  list<Point*> path = GetPath(start, end);
+  std::list<Point*> path = GetPath(start, end);
 
   //设置迭代器遍历
-  list<Point*>::const_iterator iter; //迭代器
+  // std::list<Point*>::const_iterator iter;  //迭代器
 
   // cout << "(" << start->x << "," << start->y << ")"
   //      << "------>(" << end->x << "," << end->y << ")" << endl;
@@ -328,6 +327,7 @@ list<Point*> astar(char (*map)[COL], int start_x, int start_y, int end_x,
   // iter = path.erase(iter);
   // sleep(1); //休眠
   // }
-  clearAstarMaze();
+  // clearAstarMaze();
+  return path;
 }
 #endif
