@@ -466,6 +466,10 @@ void DecisionRobot() {
                                                  next_points[save_point].y);
             // 给机器人安排新落点
             add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
+            // 将让的位加入让位机器的人path
+            robot[next_points[give_up_point].list_robot[0]].path.push_front(
+                AllocPoint(next_points[save_point].x,
+                           next_points[save_point].y));
             // 废弃旧落点
             next_points[give_up_point].count = 0;
             next_points.push_back(add_next_point);
@@ -493,6 +497,10 @@ void DecisionRobot() {
                                                  next_points[save_point].y);
             // 给机器人安排新落点
             add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
+            // 将让的位加入让位机器的人path
+            robot[next_points[give_up_point].list_robot[0]].path.push_front(
+                AllocPoint(next_points[save_point].x,
+                           next_points[save_point].y));
             // 废弃旧落点
             next_points[give_up_point].count = 0;
             next_points.push_back(add_next_point);
@@ -520,6 +528,10 @@ void DecisionRobot() {
                                                  next_points[save_point].y + 1);
             // 给机器人安排新落点
             add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
+            // 将让的位加入让位机器的人path
+            robot[next_points[give_up_point].list_robot[0]].path.push_front(
+                AllocPoint(next_points[save_point].x,
+                           next_points[save_point].y));
             // 废弃旧落点
             next_points[give_up_point].count = 0;
             next_points.push_back(add_next_point);
@@ -547,6 +559,10 @@ void DecisionRobot() {
                                                  next_points[save_point].y - 1);
             // 给机器人安排新落点
             add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
+            // 将让的位加入让位机器的人path
+            robot[next_points[give_up_point].list_robot[0]].path.push_front(
+                AllocPoint(next_points[save_point].x,
+                           next_points[save_point].y));
             // 废弃旧落点
             next_points[give_up_point].count = 0;
             next_points.push_back(add_next_point);
