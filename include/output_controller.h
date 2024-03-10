@@ -16,7 +16,7 @@ struct OutputController {
    * - 3:下
    */
   void SendMove(int robot_id, int move_tag) {
-    printf("move %d %d", robot_id, move_tag);
+    printf("move %d %d\n", robot_id, move_tag);
     fflush(stdout);
   }
 
@@ -24,7 +24,7 @@ struct OutputController {
    * 获取货物
    */
   void SendGet(int robot_id) {
-    printf("get %d", robot_id);
+    printf("get %d\n", robot_id);
     fflush(stdout);
   }
 
@@ -32,7 +32,7 @@ struct OutputController {
    * 卸货
    */
   void SendPull(int robot_id) {
-    printf("pull %d", robot_id);
+    printf("pull %d\n", robot_id);
     fflush(stdout);
   }
 
@@ -40,7 +40,7 @@ struct OutputController {
    * 某船移动到某泊位
    */
   void SendShip(int boat_id, int berth_id) {
-    printf("ship %d %d", boat_id, berth_id);
+    printf("ship %d %d\n", boat_id, berth_id);
     fflush(stdout);
   }
 
@@ -48,7 +48,7 @@ struct OutputController {
    * 某船从泊位驶出至虚拟点运输货物
    */
   void SendGo(int boat_id) {
-    printf("go %d", boat_id);
+    printf("go %d\n", boat_id);
     fflush(stdout);
   }
 } output_controller;

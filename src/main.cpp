@@ -7,11 +7,19 @@
 #include "Astar.h"
 #include "output_controller.h"
 #include "param.h"
-
+#define DEBUG
+#ifdef DEBUG
+FILE *debug_map_file = fopen("./debug_map.txt", "w");
+FILE *debug_command_file = fopen("./debug.txt", "w");
+#endif
 using namespace std;
 
 // 货物
 struct Goods {
+  Goods() {
+    this->pre = this;
+    this->next = this;
+  }
   Goods(int x, int y, int money, int birth) {
     this->x = x;
     this->y = y;
@@ -200,13 +208,13 @@ struct Boat {
 
 // 货物管理器
 struct GoodsManager {
-  Goods *head_goods;
+  Goods *head_goods = new Goods();
   /*
    * 将货物放入链表
    */
-  void PushGoods(Goods *&new_goods) {
+  void PushGoods(Goods *new_goods) {
     gds[new_goods->x][new_goods->y] = true;
-    if (head_goods->next == NULL) {
+    if (head_goods->next == head_goods) {
       // 空链表
       head_goods->next = new_goods;
       head_goods->pre = new_goods;
@@ -331,6 +339,12 @@ struct NextPoint {
         param = DECISION_ROBOT_DOWN;
       }
       q_decision.push(Decision(DECISION_TYPE_ROBOT_MOVE, robot_id, param));
+
+      // 如果走的是路径中的点，删除robot的path中走了的
+      std::list<Point *>::const_iterator iter = robot[robot_id].path.begin();
+      if (this->x == (*iter)->x && this->y == (*iter)->y) {
+        robot[robot_id].RemoveFirst();
+      }
     }
   }
 };
@@ -339,17 +353,39 @@ struct NextPoint {
 void Init() {
   // 地图数据
   for (int i = 1; i <= n; i++) scanf("%s", ch[i] + 1);
+#ifdef DEBUG
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= n; j++) {
+      fprintf(debug_map_file, "%c", ch[i][j]);
+    }
+    fprintf(debug_map_file, "\n");
+  }
+#endif
   // 泊位数据
   for (int i = 0; i < berth_num; i++) {
     int id;
     scanf("%d", &id);
     scanf("%d%d%d%d", &berth[id].x, &berth[id].y, &berth[id].transport_time,
           &berth[id].loading_speed);
+#ifdef DEBUG
+    fprintf(
+        debug_map_file,
+        "泊位 %d: x = %d, y = %d, transport_time = %d, loading_speed = %d\n",
+        id, berth[id].x, berth[id].y, berth[id].transport_time,
+        berth[id].loading_speed);
+#endif
   }
   // 船容积
   scanf("%d", &boat_capacity);
+#ifdef DEBUG
+  fprintf(debug_map_file, "船容量：%d\n", boat_capacity);
+#endif
   char okk[100];
   scanf("%s", okk);
+#ifdef DEBUG
+  fprintf(debug_map_file, "%s", okk);
+  fclose(debug_map_file);
+#endif
   printf("OK\n");
   fflush(stdout);
 
@@ -358,52 +394,77 @@ void Init() {
 
 // 每帧的数据
 bool Input() {
-  if (scanf("%d%d", &id, &money) != EOF) {
-    // 新增货物
-    int num;
-    scanf("%d", &num);
-    for (int i = 1; i <= num; i++) {
-      int x, y, val;
-      scanf("%d%d%d", &x, &y, &val);
-      Goods *new_goods = new Goods(x, y, val, id);
-      g_goodsmanager.PushGoods(new_goods);
-    }
-
-    // 机器人实时数据
-    for (int i = 0; i < robot_num; i++) {
-      int temp_goods = 0;
-      scanf("%d%d%d%d", &robot[i].goods, &robot[i].x, &robot[i].y,
-            &robot[i].status);
-
-      //放置成功船上货物加一
-      if (robot[i].goods - temp_goods == 1) {
-        boat[berth[robot[i].berth_id].q_boat.front()].num++;
-      }
-    }
-
-    // 船的实时数据
-    for (int i = 0; i < 5; i++) {
-      int temp_status = 0;
-      scanf("%d%d\n", &temp_status, &boat[i].pos);
-
-      // 到达泊位入队
-      if (temp_status != boat[i].status && boat[i].pos != -1) {
-        berth[boat[i].pos].q_boat.push(i);
-      }
-
-      // 离开泊位出队
-      if (temp_status != boat[i].status && boat[i].pos == -1) {
-        // 先到港口先出队，还未考虑到港口后在去别的港口的情况
-        berth[boat[i].pos].q_boat.pop();
-      }
-      boat[i].status = temp_status;
-    }
-
-    char okk[100];
-    scanf("%s", okk);
-    return 1;
+  // if (scanf("%d%d", &id, &money) != EOF) {
+  scanf("%d%d", &id, &money);
+#ifdef DEBUG
+  fprintf(debug_command_file, "id = %d, money = %d\n", id, money);
+#endif
+  // 新增货物
+  int num;
+  scanf("%d", &num);
+#ifdef DEBUG
+  fprintf(debug_command_file, "new goods num = %d\n", num);
+#endif
+  for (int i = 1; i <= num; i++) {
+    int x, y, val;
+    scanf("%d%d%d", &x, &y, &val);
+#ifdef DEBUG
+    fprintf(debug_command_file, "goods %d info: x = %d, y = %d, money = %d\n",
+            i, x, y, val);
+#endif
+    Goods *new_goods = new Goods(x, y, val, id);
+    g_goodsmanager.PushGoods(new_goods);
   }
-  return 0;
+  // 机器人实时数据
+  for (int i = 0; i < robot_num; i++) {
+    int temp_goods = 0;
+    scanf("%d%d%d%d", &robot[i].goods, &robot[i].x, &robot[i].y,
+          &robot[i].status);
+#ifdef DEBUG
+    fprintf(debug_command_file,
+            "robot %d info: goods = %d, x = %d, y = %d, status = %d\n", i,
+            robot[i].goods, robot[i].x, robot[i].y, robot[i].status);
+#endif
+    //放置成功船上货物加一
+    if (robot[i].goods - temp_goods == 1) {
+      boat[berth[robot[i].berth_id].q_boat.front()].num++;
+    }
+  }
+
+  // 船的实时数据
+  for (int i = 0; i < 5; i++) {
+    int temp_status = 0;
+    scanf("%d%d\n", &temp_status, &boat[i].pos);
+
+    // 到达泊位入队
+    if (temp_status != boat[i].status && boat[i].pos != -1) {
+      berth[boat[i].pos].q_boat.push(i);
+    }
+
+    // 离开泊位出队
+    if (temp_status != boat[i].status && boat[i].pos == -1) {
+      // 先到港口先出队，还未考虑到港口后在去别的港口的情况
+      berth[boat[i].pos].q_boat.pop();
+    }
+    boat[i].status = temp_status;
+#ifdef DEBUG
+    fprintf(debug_command_file, "boat %d info: status = %d, pos = %d\n", i,
+            temp_status, boat[i].pos);
+#endif
+  }
+#ifdef DEBUG
+  if (id == 2) {
+    fclose(debug_command_file);
+  }
+#endif
+  char okk[100];
+  scanf("%s", okk);
+#ifdef DEBUG
+  fprintf(debug_command_file, "%s\n", okk);
+#endif
+  //   return 1;
+  // }
+  // return 0;
 }
 
 /*
@@ -528,9 +589,8 @@ void DecisionRobot() {
             // 给机器人安排新落点
             add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
             // 将让的位加入让位机器的人path
-            robot[next_points[give_up_point].list_robot[0]].path.push_front(
-                AllocPoint(next_points[save_point].x,
-                           next_points[save_point].y));
+            robot[next_points[give_up_point].list_robot[0]].AddFirst(
+                next_points[save_point].x, next_points[save_point].y);
             // 废弃旧落点
             next_points[give_up_point].count = 0;
             next_points.push_back(add_next_point);
@@ -559,9 +619,8 @@ void DecisionRobot() {
             // 给机器人安排新落点
             add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
             // 将让的位加入让位机器的人path
-            robot[next_points[give_up_point].list_robot[0]].path.push_front(
-                AllocPoint(next_points[save_point].x,
-                           next_points[save_point].y));
+            robot[next_points[give_up_point].list_robot[0]].AddFirst(
+                next_points[save_point].x, next_points[save_point].y);
             // 废弃旧落点
             next_points[give_up_point].count = 0;
             next_points.push_back(add_next_point);
@@ -590,9 +649,8 @@ void DecisionRobot() {
             // 给机器人安排新落点
             add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
             // 将让的位加入让位机器的人path
-            robot[next_points[give_up_point].list_robot[0]].path.push_front(
-                AllocPoint(next_points[save_point].x,
-                           next_points[save_point].y));
+            robot[next_points[give_up_point].list_robot[0]].AddFirst(
+                next_points[save_point].x, next_points[save_point].y);
             // 废弃旧落点
             next_points[give_up_point].count = 0;
             next_points.push_back(add_next_point);
@@ -621,9 +679,8 @@ void DecisionRobot() {
             // 给机器人安排新落点
             add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
             // 将让的位加入让位机器的人path
-            robot[next_points[give_up_point].list_robot[0]].path.push_front(
-                AllocPoint(next_points[save_point].x,
-                           next_points[save_point].y));
+            robot[next_points[give_up_point].list_robot[0]].AddFirst(
+                next_points[save_point].x, next_points[save_point].y);
             // 废弃旧落点
             next_points[give_up_point].count = 0;
             next_points.push_back(add_next_point);
@@ -764,7 +821,8 @@ void Boat::LeaveCond(int i) {
 
 int main() {
   Init();
-  while (Input()) {
+  for (int i = 0; i < 15000; ++i) {
+    Input();
     // --------- 准备阶段 ----------
     g_goodsmanager.FreshGoodsLists();  // 刷新货物链表
     ClearQueue(q_decision);            // 清空决策队列
@@ -781,18 +839,35 @@ int main() {
       switch (next_decision.type) {
         case DECISION_TYPE_ROBOT_MOVE:
           output_controller.SendMove(next_decision.id, next_decision.param);
+#ifdef DEBUG
+          fprintf(debug_command_file, "move %d %d\n", next_decision.id,
+                  next_decision.param);
+#endif
           break;
         case DECISION_TYPE_ROBOT_GET:
           output_controller.SendGet(next_decision.id);
+#ifdef DEBUG
+          fprintf(debug_command_file, "get %d\n", next_decision.id);
+#endif
           break;
         case DECISION_TYPE_ROBOT_PULL:
           output_controller.SendPull(next_decision.id);
+#ifdef DEBUG
+          fprintf(debug_command_file, "pull %d\n", next_decision.id);
+#endif
           break;
         case DECISION_TYPE_BOAT_SHIP:
           output_controller.SendShip(next_decision.id, next_decision.param);
+#ifdef DEBUG
+          fprintf(debug_command_file, "ship %d %d\n", next_decision.id,
+                  next_decision.param);
+#endif
           break;
         case DECISION_TYPE_BOAT_GO:
           output_controller.SendGo(next_decision.id);
+#ifdef DEBUG
+          fprintf(debug_command_file, "go %d\n", next_decision.id);
+#endif
           break;
         default:
           std::cerr << "ERROR DECISION TYPE!" << std::endl;
@@ -800,7 +875,69 @@ int main() {
       }
     }
     puts("OK");
+#ifdef DEBUG
+    fprintf(debug_command_file, "OK\n");
+    fclose(debug_map_file);
+#endif
     fflush(stdout);
   }
+//   while (Input()) {
+//     // --------- 准备阶段 ----------
+//     g_goodsmanager.FreshGoodsLists();  // 刷新货物链表
+//     ClearQueue(q_decision);            // 清空决策队列
+
+//     // --------- 决策阶段 ----------
+//     DecisionRobot();
+//     DecisionBoat();
+
+//     // --------- 输出阶段 ----------
+//     // 根据决策表输出
+//     while (!q_decision.empty()) {
+//       Decision next_decision = q_decision.front();
+//       q_decision.pop();
+//       switch (next_decision.type) {
+//         case DECISION_TYPE_ROBOT_MOVE:
+//           output_controller.SendMove(next_decision.id, next_decision.param);
+// #ifdef DEBUG
+//           fprintf(debug_command_file, "move %d %d", next_decision.id,
+//                   next_decision.param);
+// #endif
+//           break;
+//         case DECISION_TYPE_ROBOT_GET:
+//           output_controller.SendGet(next_decision.id);
+// #ifdef DEBUG
+//           fprintf(debug_command_file, "get %d", next_decision.id);
+// #endif
+//           break;
+//         case DECISION_TYPE_ROBOT_PULL:
+//           output_controller.SendPull(next_decision.id);
+// #ifdef DEBUG
+//           fprintf(debug_command_file, "pull %d", next_decision.id);
+// #endif
+//           break;
+//         case DECISION_TYPE_BOAT_SHIP:
+//           output_controller.SendShip(next_decision.id, next_decision.param);
+// #ifdef DEBUG
+//           fprintf(debug_command_file, "ship %d %d", next_decision.id,
+//                   next_decision.param);
+// #endif
+//           break;
+//         case DECISION_TYPE_BOAT_GO:
+//           output_controller.SendGo(next_decision.id);
+// #ifdef DEBUG
+//           fprintf(debug_command_file, "go %d", next_decision.id);
+// #endif
+//           break;
+//         default:
+//           std::cerr << "ERROR DECISION TYPE!" << std::endl;
+//           break;
+//       }
+//     }
+//     puts("OK");
+//     fflush(stdout);
+//   }
+#ifdef DEBUG
+  fclose(debug_command_file);
+#endif
   return 0;
 }
