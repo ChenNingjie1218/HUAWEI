@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <list>
 
 #include "Astar.h"
@@ -57,6 +58,30 @@ struct Robot {
 
   // 清目标货物，重置容忍次数
   void ResetTargetGoods();
+
+  // 清除path
+  void ClearPath() {
+    for (std::list<Point *>::iterator it = path.begin(); it != path.end();
+         it++) {
+      path.remove(*it);
+      free((*it));
+    }
+  }
+
+  // 删除path的第一个点
+  void RemoveFirst() {
+    std::list<Point *>::iterator it = path.begin();
+    path.remove(*it);
+    free(*it);
+  }
+
+  // 在头位置添加一个点
+  void AddFirst(int x, int y) {
+    Point t;
+    t.x = x;
+    t.y = y;
+    path.push_front(&t);
+  }
 
   /*
    * 判断哪个机器人优先级高
@@ -599,12 +624,13 @@ void Robot::UpdateTargetGoods(int i) {
   std::list<Point *> route, path;
 
   // 遍历货物链表
-  while (p_goods) {
+  while (p_goods == g_goodsmanager.head_goods) {
     // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
     // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
     route = astar(ch, robot[i].x, robot[i].y, p_goods->x, p_goods->y);
+    if (route.empty()) continue;
     cur_weight =
-        0.5 * (p_goods->money - 1) / 999 + 0.5 * (route.size() - 1) / 399.0;
+        0.5 * (p_goods->money - 1) / 999 - 0.5 * (route.size() - 1) / 399.0;
     if (cur_weight > goods_weight) {
       cur_goods = p_goods;
       goods_weight = cur_weight;

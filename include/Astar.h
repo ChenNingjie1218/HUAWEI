@@ -3,10 +3,14 @@
 #include <string.h>
 
 #include <cmath>
+#include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <list>  //链表
+#include <map>
+#include <utility>
 #include <vector>
-#include "panel.h"
+
 #include "param.h"
 
 typedef struct _Point {
@@ -34,6 +38,8 @@ static Point* findPath(
 
 //返回开放列表中F的最小值的点
 static Point* getLeastFPoint();
+
+std::list<Point*> findAllCurPoint(Point* cur);
 
 //获取周围的节点
 static std::vector<Point*> getSurroundPoint(const Point* point);
@@ -125,41 +131,45 @@ static Point* findPath(const Point* startPoint, const Point* endPoint) {
       AllocPoint(startPoint->x, startPoint->y));  //重新分配更加的安全，置入起点
 
   while (!openList.empty()) {
-    // 1、获取开放表中最小的F值
+    // 1、获取开放表中最小的F值，最小值F可能不唯一就会造成得到的解可能不是最优解
     Point* curPoint = getLeastFPoint();
-
+    // 得到所有和curPoint相等的值
+    std::list<Point*> res = findAllCurPoint(curPoint);
     // 2、把当前节点放到closeList中
     openList.remove(curPoint);
     closeList.push_back(curPoint);
 
     // 3、找到当前节点周围可到达的节点并计算F值
-    std::vector<Point*> surroundPoints = getSurroundPoint(curPoint);
+    std::vector<Point*> surroundPoints;
+    for (auto it = res.begin(); it != res.end(); it++) {
+      surroundPoints = getSurroundPoint(*it);
 
-    std::vector<Point*>::const_iterator iter;
-    for (iter = surroundPoints.begin(); iter != surroundPoints.end(); iter++) {
-      Point* target = *iter;
+      std::vector<Point*>::const_iterator iter;
+      for (iter = surroundPoints.begin(); iter != surroundPoints.end();
+           iter++) {
+        Point* target = *iter;
 
-      //如果没在开放列表中就加入到开放列表，设置当前节点为父节点
-      Point* exist = isInList(openList, target);
-      if (!exist) {
-        target->parent = curPoint;
-        target->G =
-            caloG(curPoint, target);  //父节点的G加上某个数就好（自己设计的）
-        target->H = caloH(target, endPoint);
-        target->F = caloF(target);
+        //如果没在开放列表中就加入到开放列表，设置当前节点为父节点
+        Point* exist = isInList(openList, target);
+        if (!exist) {
+          target->parent = *it;
+          target->G =
+              caloG(*it, target);  //父节点的G加上某个数就好（自己设计的）
+          target->H = caloH(target, endPoint);
+          target->F = caloF(target);
 
-        openList.push_back(target);
-      } else {  //如果已存在就重新计算G值看要不要替代
-        int tempG = caloG(curPoint, target);
-        if (tempG < target->G) {  //更新
-          exist->parent = curPoint;
-          exist->G = tempG;
-          exist->F = caloF(target);
+          openList.push_back(target);
+        } else {  //如果已存在就重新计算G值看要不要替代
+          int tempG = caloG(*it, target);
+          if (tempG < target->G) {  //更新
+            exist->parent = *it;
+            exist->G = tempG;
+            exist->F = caloF(target);
+          }
+
+          delete *iter;
         }
-
-        delete *iter;
       }
-
     }  // end for循环
 
     surroundPoints.clear();
@@ -190,6 +200,17 @@ static Point* getLeastFPoint() {
     return resPoint;
   }
   return NULL;
+}
+
+std::list<Point*> findAllCurPoint(Point* cur) {
+  std::list<Point*> temp;
+  std::list<Point*>::iterator iter;
+  for (iter = openList.begin(); iter != openList.end(); iter++) {
+    if ((*iter)->F == cur->F) {
+      temp.push_back(*iter);
+    }
+  }
+  return temp;
 }
 
 /*获取周围的节点*/
@@ -278,6 +299,14 @@ void clearAstarMaze() {
 
 std::list<Point*> astar(char (*map)[COL], int start_x, int start_y, int end_x,
                         int end_y) {
+  std::list<Point*> path;
+  if ((start_x == end_x) && (start_y == end_y)) {
+    Point t;
+    t.x = start_x;
+    t.y = start_y;
+    path.push_back(&t);
+    return path;
+  }
   int m[ROW][COL];
 
   Translatedata(map, &m[0][0]);
@@ -288,42 +317,63 @@ std::list<Point*> astar(char (*map)[COL], int start_x, int start_y, int end_x,
   Point* end = AllocPoint(end_x, end_y);
 
   //寻找路径
-  std::list<Point*> path = GetPath(start, end);
-
-  //设置迭代器遍历
-  // std::list<Point*>::const_iterator iter;  //迭代器
-
-  // cout << "(" << start->x << "," << start->y << ")"
-  //      << "------>(" << end->x << "," << end->y << ")" << endl;
-  // cout << "****************** 寻路结果 ********************************"
-  //      << endl;
-  //  int num = 0;
-  // std::map<int, char> map_num;
-  // map_num[0] = '0';
-  // map_num[1] = '1';
-  // map_num[2] = '2';
-  // map_num[3] = '3';
-  // map_num[4] = '4';
-  // map_num[5] = '5';
-  // map_num[6] = '6';
-  // map_num[7] = '7';
-  // map_num[8] = '8';
-  // map_num[9] = '9';
-  // for (iter = path.begin(); iter != path.end();) {
-  //   Point *cur = *iter;
-  //   cout << '(' << cur->x << "," << cur->y << ')' << endl;
-  //   num %= 10;
-  //   if (ch[cur->x][cur->y] == '.'){
-  //     ch[cur->x][cur->y] = map_num[num];
-  //   }else {
-  //     exit(-1);
-  //   }
-  //   num++;
-  // cur;//不用再进行释放了因为在openList和closeList链表中我们最后都有清理，如果再清理就会报错
-  // iter = path.erase(iter);
-  // sleep(1); //休眠
+  path = GetPath(start, end);
+  // for (std::list<Point*>::iterator it = path.begin(); it != path.end(); it++)
+  // {
+  //   Point* cur = *it;
+  //   std::cout << "(" << cur->x << "," << cur->y << ")" << std::endl;
   // }
-  // clearAstarMaze();
+  clearAstarMaze();
   return path;
+}
+
+/**
+  @brief 把路径输出到文件, 检测路径是不是对的
+*/
+void PutIntoFile(std::string pathname, std::list<Point*>& path) {
+  FILE* fp = fopen(pathname.c_str(), "w");  // 打开文件，创建文件流对象
+  char m[N][N];
+  if (fp != NULL) {  // 确保文件成功打开
+    int num = 0;
+    std::map<int, char> map_num;
+    map_num[0] = '0';
+    map_num[1] = '1';
+    map_num[2] = '2';
+    map_num[3] = '3';
+    map_num[4] = '4';
+    map_num[5] = '5';
+    map_num[6] = '6';
+    map_num[7] = '7';
+    map_num[8] = '8';
+    map_num[9] = '9';
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        m[i][j] = ch[i][j];
+      }
+    }
+    std::list<Point*>::iterator iter;
+    for (iter = path.begin(); iter != path.end(); iter++) {
+      Point* cur = *iter;
+      std::cout << "(" << cur->x << "," << cur->y << ")" << std::endl;
+      num %= 10;
+      if (m[cur->x][cur->y] == '.') {
+        m[cur->x][cur->y] = map_num[num];
+      } else {
+        exit(-1);
+      }
+      num++;
+    }
+    for (int i = 1; i <= n; i++) {
+      for (int j = 1; j <= n; j++) {
+        fprintf(fp, "%c", m[i][j]);
+        // std::cout << m[i][j];
+      }
+      fprintf(fp, "\n");
+      // std::cout << std::endl;
+    }
+    fclose(fp);  // 关闭文件
+  } else {
+    std::cout << "无法打开文件。" << std::endl;
+  }
 }
 #endif
