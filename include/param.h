@@ -16,7 +16,6 @@ const int N = 210;
 int money, boat_capacity;
 int id;  // 帧号
 
-
 #define BERTH_WEIGHT_AFTER_BOAT_CHOOSE 1  //船选择泊位后，泊位权重的减少
 
 /*
@@ -31,4 +30,12 @@ bool gds[N][N] = {false};  // 该点是否有货物
 
 // 港口权重
 int berth_weight[10];
+
+// 决策类型
+#define DECISION_TYPE_ROBOT_MOVE 1
+#define DECISION_TYPE_ROBOT_GET 2
+#define DECISION_TYPE_ROBOT_PULL 3
+#define DECISION_TYPE_BOAT_SHIP 4
+#define DECISION_TYPE_BOAT_GO 5
+
 #endif

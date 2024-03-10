@@ -2,11 +2,9 @@
 
 #include <cstdio>
 #include <list>
-#include <string>
 
 #include "Astar.h"
 #include "output_controller.h"
-#include "panel.h"
 
 using namespace std;
 
@@ -333,7 +331,7 @@ void DecisionRobot() {
     // --------- 移动前动作 ---------
     if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B') {
       // 卸货
-      Decision decision(3, i, -1);
+      Decision decision(DECISION_TYPE_ROBOT_PULL, i, -1);
       q_decision.push(decision);
 
       // 增加泊位权重
@@ -348,7 +346,7 @@ void DecisionRobot() {
         robot[i].target_goods->x == robot[i].x &&
         robot[i].target_goods->y == robot[i].y) {
       // 装货
-      Decision decision(2, i, -1);
+      Decision decision(DECISION_TYPE_ROBOT_GET, i, -1);
       q_decision.push(decision);
 
       // 捡到货物将其从链表删除
@@ -476,7 +474,7 @@ void Boat::ChooseBerth(int i, int rand_berth) {
     boat[i].pos = max_berth;
     berth_weight[max_berth] -= BERTH_WEIGHT_AFTER_BOAT_CHOOSE;  //权重减少
   }
-  Decision decision(4, i, boat[i].pos);
+  Decision decision(DECISION_TYPE_BOAT_SHIP, i, boat[i].pos);
   q_decision.push(decision);  // 决策入队
 }
 
@@ -490,7 +488,7 @@ void Boat::ChooseBerth(int i, int rand_berth) {
 void Boat::LeaveCond(int i) {
   // 容量达到70%就走
   if (boat[i].num > boat_capacity * 0.7) {
-    Decision decision(5, i, -1);
+    Decision decision(DECISION_TYPE_BOAT_GO, i, -1);
     q_decision.push(decision);
   }
 }
@@ -508,6 +506,30 @@ int main() {
 
     // --------- 输出阶段 ----------
     // 根据决策表输出
+    while (!q_decision.empty()) {
+      Decision next_decision = q_decision.front();
+      q_decision.pop();
+      switch (next_decision.type) {
+        case DECISION_TYPE_ROBOT_MOVE:
+          output_controller.SendMove(next_decision.id, next_decision.param);
+          break;
+        case DECISION_TYPE_ROBOT_GET:
+          output_controller.SendGet(next_decision.id);
+          break;
+        case DECISION_TYPE_ROBOT_PULL:
+          output_controller.SendPull(next_decision.id);
+          break;
+        case DECISION_TYPE_BOAT_SHIP:
+          output_controller.SendShip(next_decision.id, next_decision.param);
+          break;
+        case DECISION_TYPE_BOAT_GO:
+          output_controller.SendGo(next_decision.id);
+          break;
+        default:
+          std::cerr << "ERROR DECISION TYPE!" << std::endl;
+          break;
+      }
+    }
     puts("OK");
     fflush(stdout);
   }
