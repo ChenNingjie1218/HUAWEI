@@ -365,14 +365,12 @@ void DecisionRobot() {
       // 增加泊位权重
       berth_weight[robot->berth_id]++;
       robot[i].berth_id = -1;
-    }
-
-    // 决策，更新目标货物
-    Robot::UpdateTargetGoods(i);
-
-    if (!robot[i].goods && robot[i].target_goods &&
-        robot[i].target_goods->x == robot[i].x &&
-        robot[i].target_goods->y == robot[i].y) {
+      // 决策，更新目标货物, 当前不持有货物
+      Robot::UpdateTargetGoods(i);
+      robot[i].goods = false;
+    } else if (!robot[i].goods && robot[i].target_goods &&
+               robot[i].target_goods->x == robot[i].x &&
+               robot[i].target_goods->y == robot[i].y) {
       // 装货
       Decision decision(DECISION_TYPE_ROBOT_GET, i, -1);
       q_decision.push(decision);
@@ -383,6 +381,13 @@ void DecisionRobot() {
       // 决策更新目标泊位和泊位权重
       robot[i].berth_id = Robot::FindBerth(i);
       berth_weight[robot[i].berth_id]++;
+
+      //当前持有货物
+      robot[i].goods = true;
+    }
+
+    if (!robot[i].goods) {
+      Robot::UpdateTargetGoods(i);
     }
 
     // 存落点
@@ -596,8 +601,8 @@ void Robot::UpdateTargetGoods(int i) {
 }
 
 int Robot::FindBerth(int i) {
-  int length = 0, fin_length = 10000, fin_j = 0;
-  std::list<Point *> route, path;
+  int length = 0, fin_length = 50000, fin_j = 0;
+  std::list<Point *> route;
 
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
