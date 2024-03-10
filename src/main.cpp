@@ -68,6 +68,15 @@ struct Robot {
     }
   }
 
+  // 清除path
+  static void ClearPath(std::list<Point *> temp_path) {
+    for (std::list<Point *>::iterator it = temp_path.begin();
+         it != temp_path.end(); it++) {
+      temp_path.remove(*it);
+      free((*it));
+    }
+  }
+
   // 删除path的第一个点
   void RemoveFirst() {
     std::list<Point *>::iterator it = path.begin();
@@ -146,10 +155,15 @@ struct Robot {
 struct Berth {
   int x;
   int y;
+
   // 到虚拟点的时间
   int transport_time;
+
   // 每帧可以装载的物品数
   int loading_speed;
+
+  //到泊位的船队列
+  queue<int> q_boat;
   Berth() {}
   Berth(int x, int y, int transport_time, int loading_speed) {
     this->x = x;
@@ -357,12 +371,33 @@ bool Input() {
 
     // 机器人实时数据
     for (int i = 0; i < robot_num; i++) {
+      int temp_goods = 0;
       scanf("%d%d%d%d", &robot[i].goods, &robot[i].x, &robot[i].y,
             &robot[i].status);
+
+      //放置成功船上货物加一
+      if (robot[i].goods - temp_goods == 1) {
+        boat[berth[robot[i].berth_id].q_boat.front()].num++;
+      }
     }
 
     // 船的实时数据
-    for (int i = 0; i < 5; i++) scanf("%d%d\n", &boat[i].status, &boat[i].pos);
+    for (int i = 0; i < 5; i++) {
+      int temp_status = 0;
+      scanf("%d%d\n", &temp_status, &boat[i].pos);
+
+      // 到达泊位入队
+      if (temp_status != boat[i].status && boat[i].pos != -1) {
+        berth[boat[i].pos].q_boat.push(i);
+      }
+
+      // 离开泊位出队
+      if (temp_status != boat[i].status && boat[i].pos == -1) {
+        // 先到港口先出队，还未考虑到港口后在去别的港口的情况
+        berth[boat[i].pos].q_boat.pop();
+      }
+      boat[i].status = temp_status;
+    }
 
     char okk[100];
     scanf("%s", okk);
@@ -382,7 +417,8 @@ void DecisionRobot() {
   std::vector<NextPoint> next_points;
   for (int i = 0; i < 10; ++i) {
     // --------- 移动前动作 ---------
-    if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B') {
+    if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B' &&
+        !berth[robot[i].berth_id].q_boat.empty()) {
       // 卸货
       Decision decision(DECISION_TYPE_ROBOT_PULL, i, -1);
       q_decision.push(decision);
@@ -405,7 +441,7 @@ void DecisionRobot() {
 
       // 决策更新目标泊位和泊位权重
       robot[i].berth_id = Robot::FindBerth(i);
-      berth_weight[robot[i].berth_id]++;
+      // berth_weight[robot[i].berth_id]++;
 
       //当前持有货物
       robot[i].goods = true;
@@ -627,6 +663,8 @@ void Robot::UpdateTargetGoods(int i) {
   while (p_goods == g_goodsmanager.head_goods) {
     // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
     // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
+
+    Robot::ClearPath(route);  // 清空上一次计算的路径
     route = astar(ch, robot[i].x, robot[i].y, p_goods->x, p_goods->y);
     if (route.empty()) continue;
     cur_weight =
@@ -634,12 +672,13 @@ void Robot::UpdateTargetGoods(int i) {
     if (cur_weight > goods_weight) {
       cur_goods = p_goods;
       goods_weight = cur_weight;
+      Robot::ClearPath(path);  // 清空上一次计算的路径
       path = route;
     }
     p_goods = p_goods->next;
   }
   robot[i].target_goods = cur_goods;
-  robot[i].path = route;
+  robot[i].path = path;
 }
 
 int Robot::FindBerth(int i) {
@@ -648,7 +687,8 @@ int Robot::FindBerth(int i) {
 
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
-    route = astar(ch, robot[i].x, robot[i].y, berth[j].x, berth[j].y);
+    Robot::ClearPath(route);  // 清空上一次计算的路径
+    route = astar(ch, robot[i].x, robot[i].y, berth[j].x + 1, berth[j].y + 1);
     length = route.size();
     if (length < fin_length) {
       fin_length = length;
@@ -715,8 +755,8 @@ void Boat::ChooseBerth(int i, int rand_berth) {
  * 3 正在前往该泊位的机器人数量 ？
  */
 void Boat::LeaveCond(int i) {
-  // 容量达到70%就走
-  if (boat[i].num > boat_capacity * 0.7) {
+  // 容量达到80%就走
+  if (boat[i].num >= boat_capacity * 0.8) {
     Decision decision(DECISION_TYPE_BOAT_GO, i, -1);
     q_decision.push(decision);
   }
