@@ -5,6 +5,7 @@
 
 #include "Astar.h"
 #include "output_controller.h"
+#include "param.h"
 
 using namespace std;
 
@@ -56,6 +57,61 @@ struct Robot {
 
   // 清目标货物，重置容忍次数
   void ResetTargetGoods();
+
+  /*
+   * 判断哪个机器人优先级高
+   * @ret - 1 第一个优先级高
+   * @ret - 2 第二个优先级高
+   * 同等优先级默认第一个优先级高
+   *
+   * --- 优先级策略 ---
+   * 优先级高到低：
+   * - 都有货物价值高优先
+   * - 有一个有货物，没货物优先
+   * - 都没货物，目标货物生命周期少的优先
+   * - 有人没目标货物，有目标货物的优先
+   * - 都没目标货物，先判断的优先
+   */
+  //
+  static int JudgePriority(Robot *first, Robot *second) {
+    // 如果都有货物，价值高的优先
+    if (first->goods && second->goods) {
+      if (first->goods_money < second->goods_money) {
+        return 2;
+      } else {
+        return 1;
+      }
+    } else if (first->goods) {
+      // 如果有一个有货物，没货物的优先
+      // 第一个机器人有，第二个机器人没有
+      return 2;
+    } else if (second->goods) {
+      // 如果有一个有货物，没货物的优先
+      // 第一个机器人没有，第二个机器人有
+      return 1;
+    } else {
+      // 如果都没有货物，目标货物生命低的优先
+      if (first->target_goods && second->target_goods) {
+        // 都有目标货物
+        if (first->target_goods->birth <= second->target_goods->birth) {
+          return 1;
+        } else {
+          return 2;
+        }
+      } else if (first->target_goods) {
+        // 有一个有目标货物
+        // 第一个机器人有目标货物,第二个机器人没有
+        return 1;
+      } else if (second->target_goods) {
+        // 有一个有目标货物
+        // 第一个机器人没有目标货物，第二个有
+        return 2;
+      } else {
+        // 都没有目标货物
+        return 1;
+      }
+    }
+  }
 
   //拿到货物后寻找港口
   static int FindBerth(int i);
@@ -191,7 +247,7 @@ struct NextPoint {
   // 机器人数量
   int count;
   // 要走这个点的机器人
-  Robot *l_robot[4];
+  int list_robot[4];
   NextPoint() {}
   NextPoint(int x, int y) {
     this->x = x;
@@ -200,71 +256,43 @@ struct NextPoint {
   }
   /*
    * 落点选择机器人决策
-   * 优先级高到低：
-   * - 都有货物价值高优先
-   * - 有一个有货物，没货物优先
-   * - 都没货物，目标货物生命周期少的优先
-   * - 有人没目标货物，有目标货物的优先
-   * - 都没目标货物，先判断的优先
    *
    * - 插入算法：插入排序
    */
-  void PushRobot(Robot *robot) {
-    for (int i = count - 1; i >= 0; --i) {
-      // 如果都有货物，价值高的优先
-      if (robot->goods && l_robot[i]->goods) {
-        if (robot->goods_money > l_robot[i]->goods) {
-          l_robot[i + 1] = l_robot[i];
-          continue;
-        } else {
-          l_robot[i + 1] = robot;
-          break;
-        }
-      } else if (robot->goods) {
-        // 如果有一个有货物，没货物的优先
-        // 当前新机器人有货物
-        l_robot[i + 1] = l_robot[i];
-        continue;
-      } else if (l_robot[i]->goods) {
-        // 如果有一个有货物，没货物的优先
-        // 当前新机器人没货物
-        l_robot[i + 1] = robot;
+  void PushRobot(int robot_id) {
+    int i;
+    for (i = count - 1; i >= 0; --i) {
+      if (Robot::JudgePriority(&robot[list_robot[i]], &robot[robot_id]) == 1) {
+        list_robot[i + 1] = robot_id;
         break;
       } else {
-        // 如果都没有货物，目标货物生命低的优先
-        if (robot->target_goods && l_robot[i]->target_goods) {
-          // 都有目标货物
-          if (robot->target_goods->birth < l_robot[i]->target_goods->birth) {
-            l_robot[i + 1] = l_robot[i];
-            continue;
-          } else {
-            l_robot[i + 1] = robot;
-            break;
-          }
-        } else if (robot->target_goods) {
-          // 有一个有目标货物
-          // 当前新机器人有目标货物
-          l_robot[i + 1] = l_robot[i];
-          continue;
-        } else if (l_robot[i]->target_goods) {
-          // 有一个有目标货物
-          // 新机器人没有目标货物
-          l_robot[i + 1] = robot;
-          break;
-        } else {
-          // 都没有目标货物
-          l_robot[i + 1] = robot;
-          break;
-        }
+        list_robot[i + 1] = list_robot[i];
       }
+    }
+    // 新机器人优先级最高
+    if (i < 0) {
+      list_robot[0] = robot_id;
     }
     ++count;
   }
 
   // 做决策
   void OutPut() {
-    // 判断死锁
-    //
+    // 该落点有机器人决策落入
+    if (count) {
+      int robot_id = list_robot[0];
+      int param;
+      if (this->x == robot[robot_id].x + 1) {
+        param = DECISION_ROBOT_RIGHT;
+      } else if (this->x == robot[robot_id].x - 1) {
+        param = DECISION_ROBOT_LEFT;
+      } else if (this->y == robot[robot_id].y + 1) {
+        param = DECISION_ROBOT_UP;
+      } else {
+        param = DECISION_ROBOT_DOWN;
+      }
+      q_decision.push(Decision(DECISION_TYPE_ROBOT_MOVE, robot_id, param));
+    }
   }
 };
 
@@ -361,11 +389,11 @@ void DecisionRobot() {
     if (!robot[i].path.empty()) {
       std::list<Point *>::iterator iter = robot[i].path.begin();  //迭代器
       bool same_flag = false;
-      for (int i = 0; i < next_points.size(); ++i) {
-        if (next_points[i].x == (*iter)->x && next_points[i].y == (*iter)->y) {
+      for (int j = 0; j < next_points.size(); ++j) {
+        if (next_points[j].x == (*iter)->x && next_points[j].y == (*iter)->y) {
           // 有相同落点
           same_flag = true;
-          next_points[i].PushRobot(&robot[i]);
+          next_points[i].PushRobot(i);
           break;
         }
       }
@@ -376,8 +404,162 @@ void DecisionRobot() {
   }
 
   // --------- 移动 ---------
-  // 决策是否移动
+
+  // 决策移动
   int size = next_points.size();
+  // 判断对碰死锁，更新next_points
+  for (int i = 0; i < size; ++i) {
+    for (int j = i + 1; j < size; ++j) {
+      if (next_points[i].count && next_points[j].count &&
+          next_points[i].x == robot[next_points[j].list_robot[0]].x &&
+          next_points[i].y == robot[next_points[j].list_robot[0]].y &&
+          robot[next_points[i].list_robot[0]].x == next_points[j].x &&
+          robot[next_points[i].list_robot[0]].y && next_points[j].y) {
+        // 给优先级高的机器人让位
+        /*
+         * 判断让位机器人能不能让位
+         * @param leave 让位标志
+         * - 0 无法让位
+         * - 1 向右让位
+         * - 2 向左让位
+         * - 3 向上让位
+         * - 4 向下让位
+         */
+        int leave = 0;
+        int give_up_point;
+        int save_point;
+        if (Robot::JudgePriority(&robot[next_points[i].list_robot[0]],
+                                 &robot[next_points[j].list_robot[0]]) == 1) {
+          /*
+           * 这里有点绕作如下解释：
+           * next_points[i].list_robot[0]是站在next_points[j]上的机器人
+           * next_points[j].list_robot[0]是站在next_points[i]上的机器人
+           * 所以next_points[i].list_robot[0]优先级高，就要放弃位置为next_points[j]
+           */
+          save_point = i;
+          give_up_point = j;
+        } else {
+          save_point = j;
+          give_up_point = i;
+        }
+
+        //企图向右让位
+        if (ch[next_points[save_point].x + 1][next_points[save_point].y] ==
+            '*') {
+          bool can_leave = true;
+          for (int k = 0; k < size; ++k) {
+            if (next_points[save_point].x + 1 == next_points[k].x) {
+              // 右边位置即将被某个机器人占用
+              can_leave = false;
+              break;
+            }
+          }
+          if (can_leave) {
+            leave = 1;
+            // 增加新落点
+            NextPoint add_next_point = NextPoint(next_points[save_point].x + 1,
+                                                 next_points[save_point].y);
+            // 给机器人安排新落点
+            add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
+            // 废弃旧落点
+            next_points[give_up_point].count = 0;
+            next_points.push_back(add_next_point);
+            // 更新size
+            size = next_points.size();
+            break;
+          }
+        }
+
+        // 企图向左让位
+        if (ch[next_points[save_point].x - 1][next_points[save_point].y] ==
+            '*') {
+          bool can_leave = true;
+          for (int k = 0; k < size; ++k) {
+            if (next_points[save_point].x - 1 == next_points[k].x) {
+              // 右边位置即将被某个机器人占用
+              can_leave = false;
+              break;
+            }
+          }
+          if (can_leave) {
+            leave = 2;
+            // 增加新落点
+            NextPoint add_next_point = NextPoint(next_points[save_point].x - 1,
+                                                 next_points[save_point].y);
+            // 给机器人安排新落点
+            add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
+            // 废弃旧落点
+            next_points[give_up_point].count = 0;
+            next_points.push_back(add_next_point);
+            // 更新size
+            size = next_points.size();
+            break;
+          }
+        }
+
+        // 企图向上让位
+        if (ch[next_points[save_point].x][next_points[save_point].y + 1] ==
+            '*') {
+          bool can_leave = true;
+          for (int k = 0; k < size; ++k) {
+            if (next_points[save_point].y + 1 == next_points[k].y) {
+              // 上边位置即将被某个机器人占用
+              can_leave = false;
+              break;
+            }
+          }
+          if (can_leave) {
+            leave = 3;
+            // 增加新落点
+            NextPoint add_next_point = NextPoint(next_points[save_point].x,
+                                                 next_points[save_point].y + 1);
+            // 给机器人安排新落点
+            add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
+            // 废弃旧落点
+            next_points[give_up_point].count = 0;
+            next_points.push_back(add_next_point);
+            // 更新size
+            size = next_points.size();
+            break;
+          }
+        }
+
+        // 企图向下让位
+        if (ch[next_points[save_point].x][next_points[save_point].y - 1] ==
+            '*') {
+          bool can_leave = true;
+          for (int k = 0; k < size; ++k) {
+            if (next_points[save_point].y - 1 == next_points[k].y) {
+              // 下边位置即将被某个机器人占用
+              can_leave = false;
+              break;
+            }
+          }
+          if (can_leave) {
+            leave = 4;
+            // 增加新落点
+            NextPoint add_next_point = NextPoint(next_points[save_point].x,
+                                                 next_points[save_point].y - 1);
+            // 给机器人安排新落点
+            add_next_point.PushRobot(next_points[give_up_point].list_robot[0]);
+            // 废弃旧落点
+            next_points[give_up_point].count = 0;
+            next_points.push_back(add_next_point);
+            // 更新size
+            size = next_points.size();
+            break;
+          }
+        }
+
+        // 无法让位 两个机器人放弃移动
+        next_points[i].count = 0;
+        next_points[j].count = 0;
+        break;
+      }
+    }
+  }
+  // 下决策
+  size = next_points.size();
   for (int i = 0; i < size; ++i) {
     next_points[i].OutPut();
   }
