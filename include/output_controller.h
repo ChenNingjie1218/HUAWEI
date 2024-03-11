@@ -1,11 +1,11 @@
 #ifndef OUTPUT_CONTROLLER_H
 #define OUTPUT_CONTROLLER_H
-#include <stdio.h>
 /*
  * 输出
  *
  */
 struct OutputController {
+  static OutputController*& GetInstance();
   /*
    * 机器人如何移动
    * @param move_tag - 往哪移动
@@ -15,41 +15,27 @@ struct OutputController {
    * - 2:上
    * - 3:下
    */
-  void SendMove(int robot_id, int move_tag) {
-    printf("move %d %d\n", robot_id, move_tag);
-    fflush(stdout);
-  }
-
+  void SendMove(int robot_id, int move_tag);
   /*
    * 获取货物
    */
-  void SendGet(int robot_id) {
-    printf("get %d\n", robot_id);
-    fflush(stdout);
-  }
-
+  void SendGet(int robot_id);
   /*
    * 卸货
    */
-  void SendPull(int robot_id) {
-    printf("pull %d\n", robot_id);
-    fflush(stdout);
-  }
-
+  void SendPull(int robot_id);
   /*
    * 某船移动到某泊位
    */
-  void SendShip(int boat_id, int berth_id) {
-    printf("ship %d %d\n", boat_id, berth_id);
-    fflush(stdout);
-  }
+  void SendShip(int boat_id, int berth_id);
 
   /*
    * 某船从泊位驶出至虚拟点运输货物
    */
-  void SendGo(int boat_id) {
-    printf("go %d\n", boat_id);
-    fflush(stdout);
-  }
-} output_controller;
+  void SendGo(int boat_id);
+
+  // 将决策发送给判题器
+  void Output();
+  static OutputController* instance_;
+};
 #endif
