@@ -61,7 +61,7 @@ struct Robot {
   static int JudgePriority(Robot *first, Robot *second);
 
   //拿到货物后寻找港口
-  int FindBerth();
+  void FindBerth();
 };
 
 #endif

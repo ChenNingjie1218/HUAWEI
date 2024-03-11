@@ -124,7 +124,7 @@ void Robot::UpdateTargetGoods() {
   }
 }
 
-int Robot::FindBerth() {
+void Robot::FindBerth() {
   int length = 0, fin_length = 50000, fin_j = 0;
   std::list<Point *> route;
 
@@ -139,5 +139,5 @@ int Robot::FindBerth() {
       fin_j = j;
     }
   }
-  return fin_j;
+  berth_id = fin_j;
 }

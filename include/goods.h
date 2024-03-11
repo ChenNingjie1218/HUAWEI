@@ -13,8 +13,6 @@ struct Goods {
   Goods *next;  // 按生存周期排列的，具有队列性质，又可随机删除
 };
 
-extern bool gds[N][N];
-extern int id;
 // 货物管理器
 struct GoodsManager {
   static GoodsManager *&GetInstance() {

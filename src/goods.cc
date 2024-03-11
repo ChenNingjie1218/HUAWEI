@@ -1,4 +1,8 @@
 #include "goods.h"
+
+extern bool gds[N][N];
+extern int id;
+
 Goods::Goods() {
   this->pre = this;
   this->next = this;

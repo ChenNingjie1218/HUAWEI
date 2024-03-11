@@ -9,8 +9,6 @@
 extern Boat boat[10];
 extern Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
-// 港口权重
-extern int berth_weight[10];
 
 Decision::Decision(int type, int id, int param) {
   this->type = type;
@@ -247,7 +245,7 @@ void DecisionManager::DecisionRobot() {
       q_decision.push(decision);
 
       // 增加泊位权重
-      berth_weight[robot->berth_id]++;
+      ++berth[robot->berth_id].weight;
       robot[i].berth_id = -1;
       // 决策，更新目标货物, 当前不持有货物
       robot[i].UpdateTargetGoods();
@@ -263,7 +261,7 @@ void DecisionManager::DecisionRobot() {
       GoodsManager::GetInstance()->DeleteGoods(robot[i].target_goods);
 
       // 决策更新目标泊位和泊位权重
-      robot[i].berth_id = robot[i].FindBerth();
+      robot[i].FindBerth();
       // berth_weight[robot[i].berth_id]++;
 
       //当前持有货物

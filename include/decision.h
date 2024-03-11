@@ -65,6 +65,7 @@ struct DecisionManager {
 
   // 解决面对面死锁
   void SolveFaceToFaceDeadLock(std::vector<NextPoint>& next_points);
+
   // 决策队列
   std::queue<Decision> q_decision;
   static DecisionManager* instance_;
