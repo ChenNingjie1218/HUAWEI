@@ -5,7 +5,7 @@ const int k_Cost2 = 14;  //斜移走一个消耗14
 #define COL 210
 #define ROW 210
 // 货物生存周期
-const int LIFETIME = 20;
+const int LIFETIME = 1000;
 
 // 地图长度
 const int n = 200;
