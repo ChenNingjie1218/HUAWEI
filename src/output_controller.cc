@@ -6,6 +6,7 @@
 
 #include "decision.h"
 #include "param.h"
+OutputController* OutputController::instance_ = nullptr;
 OutputController*& OutputController::GetInstance() {
   if (!instance_) {
     instance_ = new OutputController();

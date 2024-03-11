@@ -2,7 +2,7 @@
 
 extern bool gds[N][N];
 extern int id;
-
+GoodsManager *GoodsManager::instance_ = nullptr;
 Goods::Goods() {
   this->pre = this;
   this->next = this;

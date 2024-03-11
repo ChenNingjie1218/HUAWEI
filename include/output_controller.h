@@ -5,6 +5,12 @@
  *
  */
 struct OutputController {
+ private:
+  OutputController() = default;
+  OutputController(const OutputController& other) = default;
+  static OutputController* instance_;
+
+ public:
   static OutputController*& GetInstance();
   /*
    * 机器人如何移动
@@ -36,6 +42,5 @@ struct OutputController {
 
   // 将决策发送给判题器
   void Output();
-  static OutputController* instance_;
 };
 #endif

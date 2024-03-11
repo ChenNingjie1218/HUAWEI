@@ -10,6 +10,7 @@
 extern Berth berth[berth_num + 10];
 extern Robot robot[robot_num + 10];
 extern Boat boat[10];
+InputController* InputController::instance_ = nullptr;
 
 InputController*& InputController::GetInstance() {
   if (!instance_) {

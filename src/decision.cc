@@ -9,6 +9,7 @@
 extern Boat boat[10];
 extern Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
+DecisionManager *DecisionManager::instance_ = nullptr;
 
 Decision::Decision(int type, int id, int param) {
   this->type = type;

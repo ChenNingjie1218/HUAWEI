@@ -45,6 +45,12 @@ struct NextPoint {
 
 // 决策管理
 struct DecisionManager {
+ private:
+  DecisionManager() = default;
+  DecisionManager(const DecisionManager& other) = default;
+  static DecisionManager* instance_;
+
+ public:
   static DecisionManager*& GetInstance();
   // 清空决策队列
   void ClearQueue();
@@ -68,7 +74,6 @@ struct DecisionManager {
 
   // 决策队列
   std::queue<Decision> q_decision;
-  static DecisionManager* instance_;
 };
 
 #endif

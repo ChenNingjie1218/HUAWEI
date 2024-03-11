@@ -5,6 +5,7 @@
 Boat boat[10];
 extern Berth berth[berth_num + 10];
 extern int boat_capacity;
+int Boat::boat_capacity = 0;
 
 Boat::Boat() { num = 0; }
 

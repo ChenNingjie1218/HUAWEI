@@ -15,6 +15,12 @@ struct Goods {
 
 // 货物管理器
 struct GoodsManager {
+ private:
+  GoodsManager() = default;
+  GoodsManager(const GoodsManager &other) = default;
+  static GoodsManager *instance_;
+
+ public:
   static GoodsManager *&GetInstance() {
     if (!instance_) {
       instance_ = new GoodsManager();
@@ -32,7 +38,6 @@ struct GoodsManager {
   // 刷新货物链表
   void FreshGoodsLists();
 
-  static GoodsManager *instance_;
   Goods *head_goods = new Goods();
 };
 #endif
