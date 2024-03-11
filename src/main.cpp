@@ -6,8 +6,10 @@
 #include <list>
 
 #include "Astar.h"
+#include "goods.h"
 #include "output_controller.h"
 #include "param.h"
+
 // #define DEBUG
 #ifdef DEBUG
 FILE *debug_map_file = fopen("./debug_map.txt", "w");
@@ -26,25 +28,6 @@ int money, boat_capacity;
 int id;  // 帧号
 // 港口权重
 int berth_weight[10];
-// 货物
-struct Goods {
-  Goods() {
-    this->pre = this;
-    this->next = this;
-  }
-  Goods(int x, int y, int money, int birth) {
-    this->x = x;
-    this->y = y;
-    this->money = money;
-    this->birth = birth;
-  }
-  int birth;  // 生成帧
-  int money;  // 价值
-  int x;
-  int y;
-  Goods *pre;  // 双向链表连接货物
-  Goods *next;  // 按生存周期排列的，具有队列性质，又可随机删除
-};
 
 // 机器人
 struct Robot {
@@ -210,54 +193,6 @@ struct Boat {
   static void LeaveCond(int i);
 } boat[10];
 
-// 货物管理器
-struct GoodsManager {
-  Goods *head_goods = new Goods();
-  /*
-   * 将货物放入链表
-   */
-  void PushGoods(Goods *new_goods) {
-    gds[new_goods->x][new_goods->y] = true;
-    if (head_goods->next == head_goods) {
-      // 空链表
-      head_goods->next = new_goods;
-      head_goods->pre = new_goods;
-      new_goods->next = head_goods;
-      new_goods->pre = head_goods;
-
-    } else {
-      new_goods->pre = head_goods->pre;
-      head_goods->pre->next = new_goods;
-      head_goods->pre = new_goods;
-      new_goods->next = head_goods;
-    }
-  };
-
-  // 删除货物
-  void DeleteGoods(Goods *&goods) {
-    gds[goods->x][goods->y] = false;
-    goods->pre->next = goods->next;
-    goods->next->pre = goods->pre;
-    delete goods;
-    goods = NULL;
-  }
-
-  // 刷新货物链表
-  void FreshGoodsLists() {
-    Goods *cur = head_goods->next;
-    while (cur != head_goods) {
-      if (id - cur->birth == LIFETIME) {
-        Goods *temp = cur->next;
-        DeleteGoods(cur);
-        cur = temp;
-      } else {
-        // 剪枝
-        break;
-      }
-    }
-  }
-} g_goodsmanager;
-
 // 决策
 struct Decision {
   /*
@@ -417,7 +352,7 @@ bool Input() {
             i, x, y, val);
 #endif
     Goods *new_goods = new Goods(x, y, val, id);
-    g_goodsmanager.PushGoods(new_goods);
+    GoodsManager::GetInstance()->PushGoods(new_goods);
   }
 
   // 机器人实时数据
@@ -498,7 +433,7 @@ void DecisionRobot() {
       q_decision.push(decision);
 
       // 捡到货物将其从链表删除
-      g_goodsmanager.DeleteGoods(robot[i].target_goods);
+      GoodsManager::GetInstance()->DeleteGoods(robot[i].target_goods);
 
       // 决策更新目标泊位和泊位权重
       robot[i].berth_id = Robot::FindBerth(i);
@@ -713,11 +648,12 @@ void DecisionRobot() {
 void Robot::UpdateTargetGoods(int i) {
   std::cerr << "UpdateTargetGoods" << std::endl;
   double goods_weight = 0, cur_weight = 0;
-  Goods *p_goods = g_goodsmanager.head_goods->next;
+  Goods *head_goods = GoodsManager::GetInstance()->head_goods;
+  Goods *p_goods = head_goods->next;
   Goods *cur_goods = p_goods;
   std::list<Point *> route, path;
   // 遍历货物链表
-  while (p_goods != g_goodsmanager.head_goods) {
+  while (p_goods != head_goods) {
     // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
     // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
     route = astar(ch, robot[i].x, robot[i].y, p_goods->x, p_goods->y);
@@ -835,8 +771,8 @@ int main() {
     // #endif
     Input();
     // --------- 准备阶段 ----------
-    g_goodsmanager.FreshGoodsLists();  // 刷新货物链表
-    ClearQueue(q_decision);            // 清空决策队列
+    GoodsManager::GetInstance()->FreshGoodsLists();  // 刷新货物链表
+    ClearQueue(q_decision);                          // 清空决策队列
 
     // --------- 决策阶段 ----------
     DecisionRobot();
