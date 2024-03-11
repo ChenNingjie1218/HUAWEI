@@ -2,8 +2,8 @@
 #define PARAM_H_
 #include <list>
 
-const int k_Cost1 = 10;  //走一格消耗10
-const int k_Cost2 = 14;  //斜移走一个消耗14
+const int k_Cost1 = 0;
+const int k_Cost2 = 2;
 #define COL 210
 #define ROW 210
 #include <condition_variable>

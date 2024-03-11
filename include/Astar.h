@@ -28,23 +28,23 @@ Point* AllocPoint(int x, int y);
 void Translatedata(char (*start)[N], int* m);
 
 //通过A*算法寻找路径
-std::list<Point*> GetPath(const Point* startPoint, const Point* endPoint);
+std::list<Point*> GetPath(const Point* startPoint, const Point* endPoint,
+                          int flag);
 
 //查找路径的小方法,返回一个终点，根据终点可以回溯到起点
-Point* findPath(
-    const Point* startPoint,
-    const Point* endPoint);  //用static是为了只能在函数内部调用而不能单独的使用
+Point* findPath(const Point* startPoint, const Point* endPoint,
+                int flag);  //用static是为了只能在函数内部调用而不能单独的使用
 
 //返回开放列表中F的最小值的点
-Point* getLeastFPoint();
+Point* getLeastFPoint(int flag);
 
 std::list<Point*> findAllCurPoint(Point* cur);
 
 //获取周围的节点
-std::vector<Point*> getSurroundPoint(const Point* point);
+std::vector<Point*> getSurroundPoint(const Point* point, int flag);
 
 //某个点是否可达
-bool isCanreach(const Point* point, const Point* target);
+bool isCanreach(const Point* point, const Point* target, int flag);
 
 //是否存在某个list中，这里用作是否存在closeList/openList中
 Point* isInList(const std::list<Point*>& list, const Point* point);
@@ -55,7 +55,7 @@ int caloH(const Point* point, const Point* end);
 int caloF(const Point* point);
 
 //清理资源
-void clearAstarMaze();
+void clearAstarMaze(int flag);
 
 /**
   @brief 接口函数
@@ -63,10 +63,13 @@ void clearAstarMaze();
   终止点的横坐标，end_y: 终止点的纵坐标
   @return list
 */
-std::list<Point*> astar(int start_x, int start_y, int end_x, int end_y);
+void astar(int start_x, int start_y, int end_x, int end_y, int flag);
+std::list<Point*> AtsarThreads(int start_x, int start_y, int end_x, int end_y);
 
-static std::list<Point*> openList;   //开放列表
-static std::list<Point*> closeList;  //关闭列表
+static std::list<Point*> openList1;   //开放列表
+static std::list<Point*> closeList1;  //关闭列表
+static std::list<Point*> openList2;
+static std::list<Point*> closeList2;
 
 // 地图数据转换
 void Translatedata(char (*start)[N], int* m);
