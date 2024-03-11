@@ -1,14 +1,11 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-#include <list>
+#define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;
 #define COL 210
 #define ROW 210
-#include <condition_variable>
-#include <mutex>
-#include <thread>
 // 货物生存周期
 const int LIFETIME = 1000;
 

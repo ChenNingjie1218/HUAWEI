@@ -6,6 +6,9 @@
 
 #include "decision.h"
 #include "param.h"
+#ifdef DEBUG
+extern FILE* debug_command_file;
+#endif
 OutputController* OutputController::instance_ = nullptr;
 OutputController*& OutputController::GetInstance() {
   if (!instance_) {

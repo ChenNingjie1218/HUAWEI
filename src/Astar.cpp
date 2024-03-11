@@ -4,11 +4,14 @@
 #include <unistd.h>
 
 #include <cmath>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
 #include <list>  //链表
 #include <map>
+#include <mutex>
+#include <thread>
 #include <vector>
 std::mutex mtx;
 std::condition_variable condition;
@@ -16,6 +19,7 @@ std::list<Point*> l1;
 std::list<Point*> l2;
 int isnotify = false;
 int translate_map[N][N];
+extern char ch[N][N];
 // 地图数据转换
 void Translatedata(char (*start)[N], int* m) {
   // std::cout << "123" << std::endl;

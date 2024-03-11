@@ -10,6 +10,10 @@
 extern Berth berth[berth_num + 10];
 extern Robot robot[robot_num + 10];
 extern Boat boat[10];
+#ifdef DEBUG
+extern FILE* debug_command_file;
+extern FILE* debug_map_file;
+#endif
 InputController* InputController::instance_ = nullptr;
 
 InputController*& InputController::GetInstance() {
@@ -59,7 +63,7 @@ void InputController::Init() {
   // 船容积
   scanf("%d", &Boat::boat_capacity);
 #ifdef DEBUG
-  fprintf(debug_map_file, "船容量：%d\n", boat_capacity);
+  fprintf(debug_map_file, "船容量：%d\n", Boat::boat_capacity);
 #endif
   char okk[100];
   scanf("%s", okk);

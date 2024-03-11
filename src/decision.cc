@@ -1,5 +1,6 @@
 #include "decision.h"
 
+#include <iostream>
 #include <queue>
 
 #include "berth.h"
@@ -9,6 +10,7 @@
 extern Boat boat[10];
 extern Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
+extern char ch[N][N];
 DecisionManager *DecisionManager::instance_ = nullptr;
 
 Decision::Decision(int type, int id, int param) {
@@ -249,6 +251,7 @@ void DecisionManager::DecisionRobot() {
       ++berth[robot->berth_id].weight;
       robot[i].berth_id = -1;
       // 决策，更新目标货物, 当前不持有货物
+      std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
       robot[i].UpdateTargetGoods();
       robot[i].goods = false;
     } else if (!robot[i].goods && robot[i].target_goods &&
@@ -269,6 +272,7 @@ void DecisionManager::DecisionRobot() {
       robot[i].goods = true;
     }
     if (!robot[i].goods) {
+      std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
       robot[i].UpdateTargetGoods();
     }
     std::cerr << "robot " << i << " path size:" << robot[i].path.size()

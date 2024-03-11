@@ -3,23 +3,18 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <cmath>
 #include <cstddef>
 #include <cstdio>
-#include <iostream>
 #include <list>  //链表
-#include <map>
+#include <string>
 #include <vector>
 
 #include "param.h"
-extern char ch[N][N];
 typedef struct _Point {
   int x, y;                      // x为行，y为列
   int F = 0, G, H;               // F=G+H;
   struct _Point* parent = NULL;  //父节点的坐标
 } Point;
-
-extern int translate_map[N][N];
 
 //分配一个节点
 Point* AllocPoint(int x, int y);

@@ -1,5 +1,7 @@
 #include "robot.h"
 
+#include <iostream>
+
 #include "berth.h"
 Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
@@ -93,7 +95,6 @@ int Robot::JudgePriority(Robot *first, Robot *second) {
  * 寻找目标货物
  */
 void Robot::UpdateTargetGoods() {
-  std::cerr << "UpdateTargetGoods" << std::endl;
   double goods_weight = 0, cur_weight = 0;
   Goods *head_goods = GoodsManager::GetInstance()->head_goods;
   Goods *p_goods = head_goods->next;
@@ -102,8 +103,9 @@ void Robot::UpdateTargetGoods() {
   while (p_goods != head_goods) {
     // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
     // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
-    route = astar(ch, x, y, p_goods->x, p_goods->y);
-    std::cerr << "route size:" << route.size() << std::endl;
+    std::cerr << "start astar" << std::endl;
+    route = AtsarThreads(x, y, p_goods->x, p_goods->y);
+    std::cerr << "astar finished, route size:" << route.size() << std::endl;
     if (route.empty()) {
       std::cerr << "route empty" << std::endl;
       p_goods = p_goods->next;
@@ -112,7 +114,7 @@ void Robot::UpdateTargetGoods() {
     cur_weight =
         0.5 * (p_goods->money - 1) / 999 - 0.5 * (route.size() - 1) / 399.0 + 1;
     if (cur_weight > goods_weight) {
-      std::cerr << "update" << std::endl;
+      std::cerr << "update path" << std::endl;
       target_goods = p_goods;
       goods_weight = cur_weight;
       // robot[i].ClearPath();  // 清空上一次计算的路径
@@ -131,7 +133,7 @@ void Robot::FindBerth() {
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
     // Robot::ClearPath(route);  // 清空上一次计算的路径
-    route = astar(ch, x, y, berth[j].x + 1, berth[j].y + 1);
+    route = AtsarThreads(x, y, berth[j].x + 1, berth[j].y + 1);
     length = route.size();
     if (length < fin_length) {
       fin_length = length;
