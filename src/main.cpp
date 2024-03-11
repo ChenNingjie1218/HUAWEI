@@ -2,18 +2,30 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 #include <list>
 
 #include "Astar.h"
 #include "output_controller.h"
 #include "param.h"
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 FILE *debug_map_file = fopen("./debug_map.txt", "w");
 FILE *debug_command_file = fopen("./debug.txt", "w");
 #endif
-using namespace std;
-
+/*
+ * - · 空地
+ * - * 海洋
+ * - # 障碍
+ * - A 机器人起始位置，总共10个
+ * - B 大小为4*4，标识泊位的位置
+ */
+char ch[N][N];
+bool gds[N][N] = {false};  // 该点是否有货物
+int money, boat_capacity;
+int id;  // 帧号
+// 港口权重
+int berth_weight[10];
 // 货物
 struct Goods {
   Goods() {
@@ -69,20 +81,12 @@ struct Robot {
 
   // 清除path
   void ClearPath() {
-    for (std::list<Point *>::iterator it = path.begin(); it != path.end();
-         it++) {
-      path.remove(*it);
-      free((*it));
+    std::cerr << "ClearPath: path size ---- " << path.size() << std::endl;
+    std::list<Point *>::iterator it = path.begin();
+    while (it != path.end()) {
+      delete *it;
     }
-  }
-
-  // 清除path
-  static void ClearPath(std::list<Point *> temp_path) {
-    for (std::list<Point *>::iterator it = temp_path.begin();
-         it != temp_path.end(); it++) {
-      temp_path.remove(*it);
-      free((*it));
-    }
+    path.clear();
   }
 
   // 删除path的第一个点
@@ -171,7 +175,7 @@ struct Berth {
   int loading_speed;
 
   //到泊位的船队列
-  queue<int> q_boat;
+  std::queue<int> q_boat;
   Berth() {}
   Berth(int x, int y, int transport_time, int loading_speed) {
     this->x = x;
@@ -278,10 +282,10 @@ struct Decision {
 };
 
 // 决策队列
-queue<Decision> q_decision;
+std::queue<Decision> q_decision;
 // 清空决策队列
-void ClearQueue(queue<Decision> &q) {
-  queue<Decision> empty;
+void ClearQueue(std::queue<Decision> &q) {
+  std::queue<Decision> empty;
   swap(empty, q);
 }
 
@@ -415,6 +419,7 @@ bool Input() {
     Goods *new_goods = new Goods(x, y, val, id);
     g_goodsmanager.PushGoods(new_goods);
   }
+
   // 机器人实时数据
   for (int i = 0; i < robot_num; i++) {
     int temp_goods = 0;
@@ -452,11 +457,6 @@ bool Input() {
             temp_status, boat[i].pos);
 #endif
   }
-#ifdef DEBUG
-  if (id == 2) {
-    fclose(debug_command_file);
-  }
-#endif
   char okk[100];
   scanf("%s", okk);
 #ifdef DEBUG
@@ -507,11 +507,11 @@ void DecisionRobot() {
       //当前持有货物
       robot[i].goods = true;
     }
-
     if (!robot[i].goods) {
       Robot::UpdateTargetGoods(i);
     }
-
+    std::cerr << "robot " << i << " path size:" << robot[i].path.size()
+              << std::endl;
     // 存落点
     if (!robot[i].path.empty()) {
       std::list<Point *>::iterator iter = robot[i].path.begin();  //迭代器
@@ -711,31 +711,39 @@ void DecisionRobot() {
  * 寻找目标货物
  */
 void Robot::UpdateTargetGoods(int i) {
+  std::cerr << "UpdateTargetGoods" << std::endl;
   double goods_weight = 0, cur_weight = 0;
   Goods *p_goods = g_goodsmanager.head_goods->next;
   Goods *cur_goods = p_goods;
   std::list<Point *> route, path;
-
   // 遍历货物链表
-  while (p_goods == g_goodsmanager.head_goods) {
+  while (p_goods != g_goodsmanager.head_goods) {
     // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
     // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
-
-    Robot::ClearPath(route);  // 清空上一次计算的路径
     route = astar(ch, robot[i].x, robot[i].y, p_goods->x, p_goods->y);
-    if (route.empty()) continue;
+    std::cerr << "route size:" << route.size() << std::endl;
+    if (route.empty()) {
+      std::cerr << "route empty" << std::endl;
+      p_goods = p_goods->next;
+      continue;
+    }
     cur_weight =
-        0.5 * (p_goods->money - 1) / 999 - 0.5 * (route.size() - 1) / 399.0;
+        0.5 * (p_goods->money - 1) / 999 - 0.5 * (route.size() - 1) / 399.0 + 1;
     if (cur_weight > goods_weight) {
+      std::cerr << "update" << std::endl;
       cur_goods = p_goods;
       goods_weight = cur_weight;
-      Robot::ClearPath(path);  // 清空上一次计算的路径
+      // robot[i].ClearPath();  // 清空上一次计算的路径
       path = route;
+    } else {
+      // Robot::ClearPath(route);
     }
     p_goods = p_goods->next;
   }
   robot[i].target_goods = cur_goods;
   robot[i].path = path;
+  std::cerr << "robot " << i << "update path, path size: " << path.size()
+            << std::endl;
 }
 
 int Robot::FindBerth(int i) {
@@ -744,7 +752,7 @@ int Robot::FindBerth(int i) {
 
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
-    Robot::ClearPath(route);  // 清空上一次计算的路径
+    // Robot::ClearPath(route);  // 清空上一次计算的路径
     route = astar(ch, robot[i].x, robot[i].y, berth[j].x + 1, berth[j].y + 1);
     length = route.size();
     if (length < fin_length) {
@@ -822,6 +830,9 @@ void Boat::LeaveCond(int i) {
 int main() {
   Init();
   for (int i = 0; i < 15000; ++i) {
+    // #ifdef DEBUG
+    //     if (i == 10) fclose(debug_command_file);
+    // #endif
     Input();
     // --------- 准备阶段 ----------
     g_goodsmanager.FreshGoodsLists();  // 刷新货物链表
@@ -874,10 +885,10 @@ int main() {
           break;
       }
     }
+
     puts("OK");
 #ifdef DEBUG
     fprintf(debug_command_file, "OK\n");
-    fclose(debug_map_file);
 #endif
     fflush(stdout);
   }

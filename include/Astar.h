@@ -4,15 +4,13 @@
 
 #include <cmath>
 #include <cstdio>
-#include <fstream>
 #include <iostream>
 #include <list>  //链表
 #include <map>
-#include <utility>
 #include <vector>
 
 #include "param.h"
-
+extern char ch[N][N];
 typedef struct _Point {
   int x, y;               // x为行，y为列
   int F, G, H;            // F=G+H;
