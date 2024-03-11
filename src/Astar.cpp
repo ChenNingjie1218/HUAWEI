@@ -11,6 +11,7 @@
 #include <list>  //链表
 #include <map>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <vector>
 std::mutex mtx;
@@ -107,8 +108,10 @@ Point* findPath(const Point* startPoint, const Point* endPoint, int flag) {
             exist->F = caloF(target);
             // std::cout << "替换" << std::endl;
           }
-
-          delete *iter;
+          if ((*iter) != NULL) {
+            delete *iter;
+            // (*iter) = NULL;
+          }
         }
         // }
       }  // end for循环
@@ -162,8 +165,7 @@ Point* findPath(const Point* startPoint, const Point* endPoint, int flag) {
             exist->F = caloF(target);
             // std::cout << "替换" << std::endl;
           }
-
-          delete *iter;
+          if ((*iter) != NULL) delete *iter;
         }
         // }
       }  // end for循环
@@ -230,7 +232,10 @@ std::vector<Point*> getSurroundPoint(const Point* point, int flag) {
         if (isCanreach(point, temp, flag)) {
           surroundPoints.push_back(temp);
         } else {
-          delete temp;
+          if (temp != NULL) {
+            delete temp;
+            temp = NULL;
+          }
         }
       }
     }
@@ -244,7 +249,10 @@ std::vector<Point*> getSurroundPoint(const Point* point, int flag) {
         if (isCanreach(point, temp, flag)) {
           surroundPoints.push_back(temp);
         } else {
-          delete temp;
+          if (temp != NULL) {
+            delete temp;
+            temp = NULL;
+          }
         }
       }
     }
@@ -327,143 +335,201 @@ void clearAstarMaze(int flag) {
   if (flag == 1) {
     std::list<Point*>::iterator itor;
     for (itor = openList1.begin(); itor != openList1.end();) {
-      delete *itor;
+      if ((*itor) != NULL) delete *itor;
       itor = openList1.erase(itor);  //获取到下一个节点
     }
     for (itor = closeList1.begin(); itor != closeList1.end();) {
-      delete *itor;
+      if ((*itor) != NULL) delete *itor;
       itor = closeList1.erase(itor);  //获取到下一个节点
     }
   } else {
     std::list<Point*>::iterator itor;
     for (itor = openList2.begin(); itor != openList2.end();) {
-      delete *itor;
+      if ((*itor) != NULL) delete *itor;
       itor = openList2.erase(itor);  //获取到下一个节点
     }
     for (itor = closeList2.begin(); itor != closeList2.end();) {
-      delete *itor;
+      if ((*itor) != NULL) delete *itor;
       itor = closeList2.erase(itor);  //获取到下一个节点
     }
   }
 }
 
-/**
-  清空list
-*/
-void clearList(std::list<Point*> l) {
-  std::list<Point*>::iterator it;
-  for (it = l.begin(); it != l.end(); it++) {
-    free(*it);
-  }
-}
-
-void astar(int start_x, int start_y, int end_x, int end_y, int flag) {
+std::list<Point*> AstarThreads(int start_x, int start_y, int end_x, int end_y) {
+  // Point* t = AllocPoint(0, 0);
+  // l1.push_back(t);
   std::list<Point*> path;
   if ((start_x == end_x) && (start_y == end_y)) {
     Point* t1 = AllocPoint(start_x, start_y);
-    Point* t2 = AllocPoint(start_x, start_y);
     path.push_back(t1);
-    path.push_back(t2);
-    if (flag == 1) {
-      clearList(l1);
-      l1 = path;
-      {
-        std::unique_lock<std::mutex> lock(mtx);
-        isnotify = true;
-      }
-      condition.notify_one();
-    } else {
-      clearList(l2);
-      l2 = path;
-      {
-        std::unique_lock<std::mutex> lock(mtx);
-        isnotify = true;
-      }
-      condition.notify_one();
-    }
-    return;
+
+    return path;
   }
   //设置
   Point* start = AllocPoint(start_x, start_y);
   Point* end = AllocPoint(end_x, end_y);
 
   //寻找路径
-  path = GetPath(start, end, flag);
+  path = GetPath(start, end, 1);
   // for (std::list<Point*>::iterator it = path.begin(); it != path.end(); it++)
   // {
   //   Point* cur = *it;
   //   std::cout << "(" << cur->x << "," << cur->y << ")" << std::endl;
   // }
   // clearAstarMaze();
-  // return path;
-  if (flag == 1) {
-    clearList(l1);
-    l1 = path;
-
-    {
-      std::unique_lock<std::mutex> lock(mtx);
-      isnotify = true;
-    }
-    condition.notify_one();
-  } else {
-    clearList(l2);
-    l2 = path;
-
-    {
-      std::unique_lock<std::mutex> lock(mtx);
-      isnotify = true;
-    }
-    condition.notify_one();
-  }
+  return path;
 }
 
-std::list<Point*> AtsarThreads(int start_x, int start_y, int end_x, int end_y) {
-  // 初始化l1 l2
-  Point* p1 = AllocPoint(0, 0);
-  Point* p2 = AllocPoint(0, 0);
-  l1.push_back(p1);
-  l2.push_back(p2);
-  std::thread t1([=] { astar(start_x, start_y, end_x, end_y, 1); });
-  t1.detach();
-  std::thread t2([=] { astar(end_x, end_y, start_x, start_y, 2); });
-  t2.detach();
-  int cond_num = 0;
-  int f = 0;
-  while (true) {
-    {
-      std::unique_lock<std::mutex> lock(mtx);
-      condition.wait(lock, [] { return isnotify; });
-      cond_num++;
-      isnotify = false;
-    }
-    if (l1.size() == 0) {
-      f = 1;
-      break;
-    } else if (l2.size() == 0) {
-      f = 1;
-      break;
-    } else {
-      if (cond_num == 2) {
-        break;
-      }
-    }
-  }
-  if (f == 1) {
-    // 表明不可达
-    std::list<Point*> temp;
-    return temp;
-  }
-  if (l1.size() < l2.size()) {
-    return l1;
-  }
-  // 需要翻转l2中的值
-  return l2;
-}
+// void astar(int start_x, int start_y, int end_x, int end_y, int flag) {
+//   std::list<Point*> path;
+//   if ((start_x == end_x) && (start_y == end_y)) {
+//     Point* t1 = AllocPoint(start_x, start_y);
+//     Point* t2 = AllocPoint(start_x, start_y);
+//     path.push_back(t1);
+//     path.push_back(t2);
+//     if (flag == 1) {
+//       {
+//         std::unique_lock<std::mutex> lock(mtx);
+//         if (l1.size()) l1.clear();
+//         l1 = path;
+//         isnotify = true;
+//       }
+//       condition.notify_one();
+//     } else {
+//       {
+//         std::unique_lock<std::mutex> lock(mtx);
+//         if (l2.size()) l2.clear();
+//         l2 = path;
 
+//         isnotify = true;
+//       }
+//       condition.notify_one();
+//       // }
+//     }
+//     return;
+//   }
+//   //设置
+//   Point* start = AllocPoint(start_x, start_y);
+//   Point* end = AllocPoint(end_x, end_y);
+
+//   //寻找路径
+//   path = GetPath(start, end, flag);
+//   // for (std::list<Point*>::iterator it = path.begin(); it != path.end();
+//   it++)
+//   // {
+//   //   Point* cur = *it;
+//   //   std::cout << "(" << cur->x << "," << cur->y << ")" << std::endl;
+//   // }
+//   // clearAstarMaze();
+//   // return path;
+//   if (flag == 1) {
+//     {
+//       std::unique_lock<std::mutex> lock(mtx);
+//       if (l1.size()) l1.clear();
+//       l1 = path;
+//       isnotify = true;
+//     }
+//     condition.notify_one();
+//   } else {
+//     {
+//       std::unique_lock<std::mutex> lock(mtx);
+//       if (l2.size()) l2.clear();
+//       l2 = path;
+//       isnotify = true;
+//     }
+//     // while (true) {
+//     condition.notify_one();
+//     // }
+//   }
+// }
+
+// std::list<Point*> AstarThreads(int start_x, int start_y, int end_x, int
+// end_y) {
+//   // 初始化l1 l2
+//   Point* p1 = AllocPoint(0, 0);
+//   Point* p2 = AllocPoint(0, 0);
+//   l1.push_back(p1);
+//   l2.push_back(p2);
+//   // Point* t = AllocPoint(0, 0);
+//   // l1.push_back(t);
+//   std::thread t1([=] { astar(start_x, start_y, end_x, end_y, 1); });
+//   // std::thread t2([=] { astar(end_x, end_y, start_x, start_y, 2); });
+//   // puts("1234");
+//   t1.detach();
+//   // puts("1234");
+//   // t2.detach();
+//   // puts("1234");
+//   // int cond_num = 0;
+//   // while (true) {
+//   {
+//     std::unique_lock<std::mutex> lock(mtx);
+//     // std::cout << "ss = " << isnotify << std::endl;
+//     condition.wait(lock, [&] {
+//       // std::cout << "dsd = " << isnotify << std::endl;
+//       return isnotify;
+//     });
+//     // cond_num++;
+//     isnotify = false;
+//     // if (l1.size() == 0) {
+//     //   break;
+//     // } else if (l2.size() == 0) {
+//     //   break;
+//     // } else {
+//     //   if (cond_num == 2) {
+//     //     std::cout << cond_num << std::endl;
+//     //     break;
+//     //   }
+//     // }
+//     // }
+//   }
+//   std::list<Point*> temp;
+//   if (l1.size() == 0 || l2.size() == 0) {
+//     // 表明不可达
+//     // std::list<Point*> temp;
+//     // 清理数据
+//     // clearAll();
+//     puts("1");
+//     return temp;
+//   }
+//   if (l1.size() != 1 && l2.size() == 1) {
+//     puts("2");
+//     return l1;
+//   } else if (l1.size() == 1 && l2.size() != 1) {
+//     puts("3");
+//     return l2;
+//   } else if (l1.size() != 1 && l2.size() != 1) {
+//     if (l1.size() < l2.size()) {
+//       puts("4");
+//       return l1;
+//     }
+//     puts("5");
+//     return l2;
+//   }
+//   std::cout << "l1 = " << l1.size() << " l2 = " << l2.size() << std::endl;
+//   for (auto it = l1.begin(); it != l1.end(); it++) {
+//     std::cout << "1 = " << (*it)->x << " " << (*it)->y << std::endl;
+//   }
+//   for (auto it = l2.begin(); it != l2.end(); it++) {
+//     std::cout << "2 = " << (*it)->x << " " << (*it)->y << std::endl;
+//   }
+//   // return temp;
+// }
+
+void clearAll() {
+  std::unique_lock<std::mutex> lock(mtx);
+  if (l1.size()) l1.clear();
+  if (l2.size()) l2.clear();
+  openList1.clear();
+  closeList1.clear();
+  openList2.clear();
+  closeList2.clear();
+  std::cout << "清理" << std::endl;
+  // isnotify = false;
+}
 /**
   @brief 把路径输出到文件, 检测路径是不是对的
 */
-void PutIntoFile(std::string pathname, std::list<Point*>& path) {
+void PutIntoFile(std::string pathname, std::list<Point*> path) {
   FILE* fp = fopen(pathname.c_str(), "w");  // 打开文件，创建文件流对象
   char m[N][N];
   if (fp != NULL) {  // 确保文件成功打开
@@ -488,8 +554,11 @@ void PutIntoFile(std::string pathname, std::list<Point*>& path) {
     for (iter = path.begin(); iter != path.end(); iter++) {
       Point* cur = *iter;
       std::cout << "(" << cur->x << "," << cur->y << ")" << std::endl;
+
       num %= 10;
-      if (m[cur->x][cur->y] == '.') {
+      auto p = m[cur->x][cur->y] - '0';
+      std::map<int, char>::iterator tt = map_num.find(p);
+      if (m[cur->x][cur->y] == '.' || tt == map_num.end()) {
         m[cur->x][cur->y] = map_num[num];
       } else {
         exit(-1);

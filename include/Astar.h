@@ -15,7 +15,7 @@ typedef struct _Point {
   int F = 0, G, H;               // F=G+H;
   struct _Point* parent = NULL;  //父节点的坐标
 } Point;
-
+void clearAll();
 //分配一个节点
 Point* AllocPoint(int x, int y);
 
@@ -59,7 +59,7 @@ void clearAstarMaze(int flag);
   @return list
 */
 void astar(int start_x, int start_y, int end_x, int end_y, int flag);
-std::list<Point*> AtsarThreads(int start_x, int start_y, int end_x, int end_y);
+std::list<Point*> AstarThreads(int start_x, int start_y, int end_x, int end_y);
 
 static std::list<Point*> openList1;   //开放列表
 static std::list<Point*> closeList1;  //关闭列表
@@ -70,12 +70,7 @@ static std::list<Point*> closeList2;
 void Translatedata(char (*start)[N], int* m);
 
 /**
-  清空list
-*/
-void clearList(std::list<Point*> l);
-
-/**
   @brief 把路径输出到文件, 检测路径是不是对的
 */
-void PutIntoFile(std::string pathname, std::list<Point*>& path);
+void PutIntoFile(std::string pathname, std::list<Point*> path);
 #endif

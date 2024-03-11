@@ -104,7 +104,11 @@ void Robot::UpdateTargetGoods() {
     // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
     // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
     std::cerr << "start astar" << std::endl;
-    route = AtsarThreads(x, y, p_goods->x, p_goods->y);
+    std::cerr << "(" << x << "," << y << ")---->(" << p_goods->x << ","
+              << p_goods->y << ")" << std::endl;
+    route = AstarThreads(x, y, p_goods->x, p_goods->y);
+    clearAll();
+    // route = AstarThreads(29, 88, 137, 117);
     std::cerr << "astar finished, route size:" << route.size() << std::endl;
     if (route.empty()) {
       std::cerr << "route empty" << std::endl;
@@ -133,7 +137,8 @@ void Robot::FindBerth() {
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
     // Robot::ClearPath(route);  // 清空上一次计算的路径
-    route = AtsarThreads(x, y, berth[j].x + 1, berth[j].y + 1);
+    route = AstarThreads(x, y, berth[j].x + 1, berth[j].y + 1);
+    clearAll();
     length = route.size();
     if (length < fin_length) {
       fin_length = length;
