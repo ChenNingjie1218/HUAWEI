@@ -60,6 +60,6 @@ struct Astar {
   // Astar() = default;
   Astar(int start_x, int start_y, int end_x, int end_y);
   // void ReUse(int start_x, int start_y, int end_x, int end_y);
-  bool AstarSearch(std::vector<Location> &path);
+  bool AstarSearch(std::vector<Location> &path, bool is_berth = 0);
 };
 #endif

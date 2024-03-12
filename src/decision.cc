@@ -265,6 +265,10 @@ void DecisionManager::DecisionRobot() {
     // --------- 移动前动作 ---------
     if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B' &&
         !berth[robot[i].berth_id].q_boat.empty()) {
+#ifdef DEBUG
+      std::cerr << "robot " << i << " 卸货：(" << robot[i].x << ","
+                << robot[i].y << ")" << std::endl;
+#endif
       // 卸货
       Decision decision(DECISION_TYPE_ROBOT_PULL, i, -1);
       q_decision.push(decision);
@@ -277,10 +281,18 @@ void DecisionManager::DecisionRobot() {
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif
       robot[i].UpdateTargetGoods();
+      if (!robot[i].path.empty()) {
+        // 有新的目标货物
+        robot[i].target_goods->robot_id = i;
+      }
       robot[i].goods = false;
     } else if (!robot[i].goods && robot[i].target_goods &&
                robot[i].target_goods->x == robot[i].x &&
                robot[i].target_goods->y == robot[i].y) {
+#ifdef DEBUG
+      std::cerr << "robot " << i << " 装货：(" << robot[i].x << ","
+                << robot[i].y << ")" << std::endl;
+#endif
       // 装货
       Decision decision(DECISION_TYPE_ROBOT_GET, i, -1);
       q_decision.push(decision);
@@ -295,11 +307,16 @@ void DecisionManager::DecisionRobot() {
       //当前持有货物
       robot[i].goods = true;
     }
-    if (!robot[i].goods) {
+    // if (!robot[i].goods) {
+    if (!robot[i].target_goods && !robot[i].goods) {
 #ifdef DEBUG
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif
       robot[i].UpdateTargetGoods();
+      if (!robot[i].path.empty()) {
+        // 有新的目标货物
+        robot[i].target_goods->robot_id = i;
+      }
     }
 #ifdef DEBUG
     std::cerr << "*************** robot " << i

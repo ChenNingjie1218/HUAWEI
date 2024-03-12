@@ -1,7 +1,10 @@
 #include "goods.h"
 
+#include "robot.h"
+
 extern bool gds[N][N];
 extern int id;
+extern Robot robot[robot_num + 10];
 GoodsManager *GoodsManager::instance_ = nullptr;
 Goods::Goods() {
   this->pre = this;
@@ -35,6 +38,8 @@ void GoodsManager::DeleteGoods(Goods *&goods) {
   gds[goods->x][goods->y] = false;
   goods->pre->next = goods->next;
   goods->next->pre = goods->pre;
+  // 清除机器人的目标货物
+  robot[goods->robot_id].target_goods = nullptr;
   delete goods;
   goods = nullptr;
 }

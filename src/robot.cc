@@ -102,6 +102,12 @@ void Robot::UpdateTargetGoods() {
   std::vector<Location> route;
   // 遍历货物链表
   while (p_goods != head_goods) {
+    if (p_goods->robot_id > -1) {
+      // 该货物被选过了 可以改进弄一个全局指针
+      // 但是有可能表前面的没有被选择，待定
+      p_goods = p_goods->next;
+      continue;
+    }
 // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
 // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
 #ifdef DEBUG
@@ -140,6 +146,7 @@ void Robot::UpdateTargetGoods() {
       goods_weight = cur_weight;
       // robot[i].ClearPath();  // 清空上一次计算的路径
       path = route;
+      break;
     } else {
       // Robot::ClearPath(route);
     }
@@ -155,7 +162,7 @@ void Robot::FindBerth() {
   for (int j = 0; j < 10; j++) {
     // Robot::ClearPath(route);  // 清空上一次计算的路径
     Astar astar(x, y, berth[j].x + 1, berth[j].y + 1);
-    if (astar.AstarSearch(route)) {
+    if (astar.AstarSearch(route, true)) {
       length = route.size();
       if (length < fin_length) {
         fin_length = length;

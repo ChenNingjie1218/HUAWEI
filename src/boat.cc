@@ -6,6 +6,7 @@ Boat boat[10];
 extern Berth berth[berth_num + 10];
 extern int boat_capacity;
 int Boat::boat_capacity = 0;
+extern int id;
 
 Boat::Boat() { num = 0; }
 
@@ -37,5 +38,5 @@ void Boat::ChooseBerth(int &rand_berth) {
  */
 bool Boat::LeaveCond() {
   // 容量达到80%就走
-  return num >= boat_capacity * 0.8;
+  return num >= boat_capacity * 0.8 || id > 13000;
 }

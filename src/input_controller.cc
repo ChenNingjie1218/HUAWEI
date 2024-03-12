@@ -1,7 +1,6 @@
 #include "input_controller.h"
 
 #include <cstdio>
-#include <iostream>
 
 #include "berth.h"
 #include "boat.h"
@@ -106,8 +105,10 @@ void InputController::Input() {
     fprintf(debug_command_file, "goods %d info: x = %d, y = %d, money = %d\n",
             i, x, y, val);
 #endif
-    Goods* new_goods = new Goods(x, y, val, id);
-    GoodsManager::GetInstance()->PushGoods(new_goods);
+    if (ch[x][y] == '.' || ch[x][y] == 'A' || ch[x][y] == 'B') {
+      Goods* new_goods = new Goods(x, y, val, id);
+      GoodsManager::GetInstance()->PushGoods(new_goods);
+    }
   }
 
   // 机器人实时数据

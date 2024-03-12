@@ -27,4 +27,7 @@ const int N = 210;
 #define DECISION_ROBOT_DOWN 3
 
 #define BERTH_WEIGHT_AFTER_BOAT_CHOOSE 1  //船选择泊位后，泊位权重的减少
+
+// A*算法深度
+#define A_STAR_DEEP 100
 #endif
