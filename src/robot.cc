@@ -11,31 +11,29 @@ Robot::Robot(int startX, int startY) {
   y = startY;
 }
 
-// 清除path
-void Robot::ClearPath() {
-#ifdef DEBUG
-  std::cerr << "ClearPath: path size ---- " << path.size() << std::endl;
-#endif
-  std::list<Point *>::iterator it = path.begin();
-  while (it != path.end()) {
-    delete *it;
-  }
-  path.clear();
-}
+// // 清除path
+// void Robot::ClearPath() {
+// #ifdef DEBUG
+//   std::cerr << "ClearPath: path size ---- " << path.size() << std::endl;
+// #endif
+//   std::list<Location>::iterator it = path.begin();
+//   while (it != path.end()) {
+//     delete *it;
+//   }
+//   path.clear();
+// }
 
 // 删除path的第一个点
 void Robot::RemoveFirst() {
-  std::list<Point *>::iterator it = path.begin();
-  path.remove(*it);
-  free(*it);
+  if (!path.empty()) {
+    path.erase(path.begin());
+  }
 }
 
 // 在头位置添加一个点
 void Robot::AddFirst(int x, int y) {
-  Point t;
-  t.x = x;
-  t.y = y;
-  path.push_front(&t);
+  Location t(x, y);
+  path.insert(path.begin(), t);
 }
 
 /*
@@ -96,35 +94,44 @@ int Robot::JudgePriority(Robot *first, Robot *second) {
 /*
  * 寻找目标货物
  */
+
 void Robot::UpdateTargetGoods() {
   double goods_weight = 0, cur_weight = 0;
   Goods *head_goods = GoodsManager::GetInstance()->head_goods;
   Goods *p_goods = head_goods->next;
-  std::list<Point *> route;
+  std::vector<Location> route;
   // 遍历货物链表
   while (p_goods != head_goods) {
 // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
 // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
 #ifdef DEBUG
-    std::cerr << "start astar" << std::endl;
+    std::cerr << "------- start astar -------" << std::endl;
     std::cerr << "(" << x << "," << y << ")---->(" << p_goods->x << ","
               << p_goods->y << ")" << std::endl;
 #endif
-    route = AstarThreads(x, y, p_goods->x, p_goods->y);
-    clearAll();
-// route = AstarThreads(29, 88, 137, 117);
-#ifdef DEBUG
-    std::cerr << "astar finished, route size:" << route.size() << std::endl;
-#endif
-    if (route.empty()) {
+    Astar astar(x, y, p_goods->x, p_goods->y);
+    // Astar astar(36, 173, 137, 117);
+    if (!astar.AstarSearch(route)) {
 #ifdef DEBUG
       std::cerr << "route empty" << std::endl;
 #endif
       p_goods = p_goods->next;
       continue;
     }
+    auto size = route.size();
+#ifdef DEBUG
+    std::cerr << "------- astar finished ------- route size:" << size
+              << std::endl
+              << std::endl;
+    std::vector<Location>::iterator it = route.begin();
+    for (int i = 0; i < size; ++i) {
+      std::cerr << "(" << it->x << "," << it->y << ") -> ";
+      ++it;
+    }
+    std::cerr << std::endl;
+#endif
     cur_weight =
-        0.5 * (p_goods->money - 1) / 999 - 0.5 * (route.size() - 1) / 399.0 + 1;
+        0.5 * (p_goods->money - 1) / 999 - 0.5 * (size - 1) / 399.0 + 1;
     if (cur_weight > goods_weight) {
 #ifdef DEBUG
       std::cerr << "update path" << std::endl;
@@ -142,18 +149,19 @@ void Robot::UpdateTargetGoods() {
 
 void Robot::FindBerth() {
   int length = 0, fin_length = 50000, fin_j = 0;
-  std::list<Point *> route;
+  std::vector<Location> route;
 
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
     // Robot::ClearPath(route);  // 清空上一次计算的路径
-    route = AstarThreads(x, y, berth[j].x + 1, berth[j].y + 1);
-    clearAll();
-    length = route.size();
-    if (length < fin_length) {
-      fin_length = length;
-      path = route;  //更新机器人的行动路径
-      fin_j = j;
+    Astar astar(x, y, berth[j].x + 1, berth[j].y + 1);
+    if (astar.AstarSearch(route)) {
+      length = route.size();
+      if (length < fin_length) {
+        fin_length = length;
+        path = route;  //更新机器人的行动路径
+        fin_j = j;
+      }
     }
   }
   berth_id = fin_j;

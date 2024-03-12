@@ -4,6 +4,7 @@
 
 #include <cstdio>
 
+#include "astar.h"
 #include "decision.h"
 #include "goods.h"
 #include "input_controller.h"

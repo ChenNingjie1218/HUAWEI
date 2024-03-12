@@ -2,7 +2,9 @@
 
 #include <iostream>
 #include <queue>
+#include <vector>
 
+#include "astar.h"
 #include "berth.h"
 #include "boat.h"
 #include "param.h"
@@ -60,6 +62,10 @@ void DecisionManager::DecisionBoat() {
         Decision decision(DECISION_TYPE_BOAT_SHIP, i, boat[i].pos);
         q_decision.push(decision);  // 决策入队
       } else if (boat[i].LeaveCond()) {
+        if (!berth[boat[i].pos].q_boat.empty()) {
+          berth[boat[i].pos].q_boat.pop();
+        }
+
 // 决策是否驶离
 #ifdef DEBUG
         std::cerr << "boat " << i << " leave" << boat[i].pos << std::endl;
@@ -296,15 +302,16 @@ void DecisionManager::DecisionRobot() {
       robot[i].UpdateTargetGoods();
     }
 #ifdef DEBUG
-    std::cerr << "robot " << i << " path size:" << robot[i].path.size()
+    std::cerr << "*************** robot " << i
+              << " path size: " << robot[i].path.size() << " *****************"
               << std::endl;
 #endif
     // 存落点
     if (!robot[i].path.empty()) {
-      std::list<Point *>::iterator iter = robot[i].path.begin();  //迭代器
+      std::vector<Location>::iterator iter = robot[i].path.begin();  //迭代器
       bool same_flag = false;
       for (int j = 0; j < next_points.size(); ++j) {
-        if (next_points[j].x == (*iter)->x && next_points[j].y == (*iter)->y) {
+        if (next_points[j].x == iter->x && next_points[j].y == iter->y) {
           // 有相同落点
           same_flag = true;
           next_points[j].PushRobot(i);
@@ -313,10 +320,10 @@ void DecisionManager::DecisionRobot() {
       }
       if (!same_flag) {
 #ifdef DEBUG
-        std::cerr << "add next_point (" << (*iter)->x << "," << (*iter)->y
-                  << ")" << std::endl;
+        std::cerr << "add next_point (" << iter->x << "," << iter->y << ")"
+                  << std::endl;
 #endif
-        next_points.push_back(NextPoint((*iter)->x, (*iter)->y, i));
+        next_points.push_back(NextPoint(iter->x, iter->y, i));
       }
     }
   }
@@ -376,6 +383,11 @@ void NextPoint::OutPut() {
   // 该落点有机器人决策落入
   if (count) {
     int robot_id = list_robot[0];
+#ifdef DEBUG
+    std::cerr << "robot " << robot_id << " decided to move from ("
+              << robot[robot_id].x << "," << robot[robot_id].y << ") to (" << x
+              << "," << y << ")" << std::endl;
+#endif
     int param;
     if (this->x == robot[robot_id].x + 1) {
       param = DECISION_ROBOT_DOWN;
@@ -390,8 +402,8 @@ void NextPoint::OutPut() {
         Decision(DECISION_TYPE_ROBOT_MOVE, robot_id, param));
 
     // 如果走的是路径中的点，删除robot的path中走了的
-    std::list<Point *>::const_iterator iter = robot[robot_id].path.begin();
-    if (this->x == (*iter)->x && this->y == (*iter)->y) {
+    std::vector<Location>::const_iterator iter = robot[robot_id].path.begin();
+    if (this->x == iter->x && this->y == iter->y) {
       robot[robot_id].RemoveFirst();
     }
   }

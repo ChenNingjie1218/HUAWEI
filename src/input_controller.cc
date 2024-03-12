@@ -1,6 +1,7 @@
 #include "input_controller.h"
 
 #include <cstdio>
+#include <iostream>
 
 #include "berth.h"
 #include "boat.h"
@@ -52,6 +53,8 @@ void InputController::Init() {
     scanf("%d", &id);
     scanf("%d%d%d%d", &berth[id].x, &berth[id].y, &berth[id].transport_time,
           &berth[id].loading_speed);
+    ++berth[id].x;
+    ++berth[id].y;
 #ifdef DEBUG
     fprintf(
         debug_map_file,
@@ -97,6 +100,8 @@ void InputController::Input() {
   for (int i = 1; i <= num; i++) {
     int x, y, val;
     scanf("%d%d%d", &x, &y, &val);
+    ++x;
+    ++y;
 #ifdef DEBUG
     fprintf(debug_command_file, "goods %d info: x = %d, y = %d, money = %d\n",
             i, x, y, val);
@@ -109,6 +114,8 @@ void InputController::Input() {
   for (int i = 0; i < robot_num; i++) {
     int temp_goods = 0;
     scanf("%d%d%d%d", &temp_goods, &robot[i].x, &robot[i].y, &robot[i].status);
+    ++robot[i].x;
+    ++robot[i].y;
 #ifdef DEBUG
     fprintf(debug_command_file,
             "robot %d info: goods = %d, x = %d, y = %d, status = %d\n", i,
@@ -132,10 +139,12 @@ void InputController::Input() {
     }
 
     // 离开泊位出队
-    if (temp_status != boat[i].status && boat[i].pos == -1) {
-      // 先到港口先出队，还未考虑到港口后在去别的港口的情况
-      berth[boat[i].pos].q_boat.pop();
-    }
+    // if (temp_status != boat[i].status && boat[i].pos == -1) {
+    //   // 先到港口先出队，还未考虑到港口后在去别的港口的情况
+    //   if (!berth[boat[i].pos].q_boat.empty()) {
+    //     berth[boat[i].pos].q_boat.pop();
+    //   }
+    // }
     boat[i].status = temp_status;
 #ifdef DEBUG
     fprintf(debug_command_file, "boat %d info: status = %d, pos = %d\n", i,

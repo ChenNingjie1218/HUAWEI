@@ -1,8 +1,7 @@
 #ifndef ROBOT_H_
 #define ROBOT_H_
-#include <list>
 
-#include "Astar.h"
+#include "astar.h"
 #include "goods.h"
 
 // 机器人
@@ -24,7 +23,7 @@ struct Robot {
   Robot(int startX, int startY);
 
   Goods *target_goods;
-  std::list<Point *> path;
+  std::vector<Location> path;
   // 更新目标货物
   void UpdateTargetGoods();
 
