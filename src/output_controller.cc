@@ -65,6 +65,17 @@ void OutputController::SendGo(int boat_id) {
 
 // 将决策发送给判题器
 void OutputController::Output() {
+#ifdef DEBUG
+  std::cerr << "-----------------------------------Output-----------"
+               "--------------------------"
+            << std::endl;
+  std::cerr << DecisionManager::GetInstance()->q_decision.size() << std::endl;
+  fprintf(
+      debug_command_file,
+      "-----------------------------OUTPUT:%d------------------------------\n",
+      DecisionManager::GetInstance()->q_decision.size());
+
+#endif
   // 根据决策表输出
   while (!DecisionManager::GetInstance()->q_decision.empty()) {
     Decision next_decision = DecisionManager::GetInstance()->q_decision.front();
@@ -103,7 +114,9 @@ void OutputController::Output() {
 #endif
         break;
       default:
+#ifdef DEBUG
         std::cerr << "ERROR DECISION TYPE!" << std::endl;
+#endif
         break;
     }
   }

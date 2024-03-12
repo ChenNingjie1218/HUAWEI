@@ -31,7 +31,7 @@ struct NextPoint {
   // 要走这个点的机器人
   int list_robot[4];
   NextPoint() {}
-  NextPoint(int x, int y);
+  NextPoint(int x, int y, int robot_id);
   /*
    * 落点选择机器人决策
    *

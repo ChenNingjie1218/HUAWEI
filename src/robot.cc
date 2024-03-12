@@ -13,7 +13,9 @@ Robot::Robot(int startX, int startY) {
 
 // 清除path
 void Robot::ClearPath() {
+#ifdef DEBUG
   std::cerr << "ClearPath: path size ---- " << path.size() << std::endl;
+#endif
   std::list<Point *>::iterator it = path.begin();
   while (it != path.end()) {
     delete *it;
@@ -101,24 +103,32 @@ void Robot::UpdateTargetGoods() {
   std::list<Point *> route;
   // 遍历货物链表
   while (p_goods != head_goods) {
-    // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
-    // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
+// 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
+// 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
+#ifdef DEBUG
     std::cerr << "start astar" << std::endl;
     std::cerr << "(" << x << "," << y << ")---->(" << p_goods->x << ","
               << p_goods->y << ")" << std::endl;
+#endif
     route = AstarThreads(x, y, p_goods->x, p_goods->y);
     clearAll();
-    // route = AstarThreads(29, 88, 137, 117);
+// route = AstarThreads(29, 88, 137, 117);
+#ifdef DEBUG
     std::cerr << "astar finished, route size:" << route.size() << std::endl;
+#endif
     if (route.empty()) {
+#ifdef DEBUG
       std::cerr << "route empty" << std::endl;
+#endif
       p_goods = p_goods->next;
       continue;
     }
     cur_weight =
         0.5 * (p_goods->money - 1) / 999 - 0.5 * (route.size() - 1) / 399.0 + 1;
     if (cur_weight > goods_weight) {
+#ifdef DEBUG
       std::cerr << "update path" << std::endl;
+#endif
       target_goods = p_goods;
       goods_weight = cur_weight;
       // robot[i].ClearPath();  // 清空上一次计算的路径

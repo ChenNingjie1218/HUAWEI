@@ -13,7 +13,7 @@ Boat::Boat() { num = 0; }
  * 船在虚拟点选择泊位
  * 依据1 前往泊位的机器人数量
  */
-void Boat::ChooseBerth(int rand_berth) {
+void Boat::ChooseBerth(int &rand_berth) {
   int max_berth = 0;
   for (int j = 0; j < 10; j++) {
     if (berth[j].weight > max_berth) {

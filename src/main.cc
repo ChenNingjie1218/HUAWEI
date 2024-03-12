@@ -23,9 +23,9 @@ int main() {
 #endif
   InputController::GetInstance()->Init();
   for (int i = 0; i < 15000; ++i) {
-#ifdef DEBUG
-    if (i == 1) fclose(debug_command_file);
-#endif
+    // #ifdef DEBUG
+    //     if (i == 1) fclose(debug_command_file);
+    // #endif
     InputController::GetInstance()->Input();
     // --------- 准备阶段 ----------
     GoodsManager::GetInstance()->FreshGoodsLists();  // 刷新货物链表

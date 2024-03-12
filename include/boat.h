@@ -21,7 +21,7 @@ struct Boat {
   Boat();
 
   //虚拟点选择泊位
-  void ChooseBerth(int rand_berth);
+  void ChooseBerth(int &rand_berth);
 
   //离开港口的条件
   bool LeaveCond();

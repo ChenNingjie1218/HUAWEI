@@ -79,6 +79,10 @@ void InputController::Init() {
 
 // 每帧的数据
 void InputController::Input() {
+#ifdef DEBUG
+  fprintf(debug_command_file,
+          "-----------------------------INPUT--------------------------\n");
+#endif
   // if (scanf("%d%d", &id, &money) != EOF) {
   scanf("%d%d", &id, &money);
 #ifdef DEBUG
@@ -104,17 +108,17 @@ void InputController::Input() {
   // 机器人实时数据
   for (int i = 0; i < robot_num; i++) {
     int temp_goods = 0;
-    scanf("%d%d%d%d", &robot[i].goods, &robot[i].x, &robot[i].y,
-          &robot[i].status);
+    scanf("%d%d%d%d", &temp_goods, &robot[i].x, &robot[i].y, &robot[i].status);
 #ifdef DEBUG
     fprintf(debug_command_file,
             "robot %d info: goods = %d, x = %d, y = %d, status = %d\n", i,
-            robot[i].goods, robot[i].x, robot[i].y, robot[i].status);
+            temp_goods, robot[i].x, robot[i].y, robot[i].status);
 #endif
     //放置成功船上货物加一
     if (robot[i].goods - temp_goods == 1) {
       boat[berth[robot[i].berth_id].q_boat.front()].num++;
     }
+    robot[i].goods = temp_goods;
   }
 
   // 船的实时数据
