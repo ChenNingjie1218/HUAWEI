@@ -124,7 +124,11 @@ void DecisionManager::SolveFaceToFaceDeadLock(
 
         //企图向右让位
         if (ch[next_points[save_point].x + 1][next_points[save_point].y] ==
-            '*') {
+                '.' ||
+            ch[next_points[save_point].x + 1][next_points[save_point].y] ==
+                'A' ||
+            ch[next_points[save_point].x + 1][next_points[save_point].y] ==
+                'B') {
           bool can_leave = true;
           for (int k = 0; k < size; ++k) {
             if (next_points[save_point].x + 1 == next_points[k].x) {
@@ -153,7 +157,11 @@ void DecisionManager::SolveFaceToFaceDeadLock(
 
         // 企图向左让位
         if (ch[next_points[save_point].x - 1][next_points[save_point].y] ==
-            '*') {
+                '.' ||
+            ch[next_points[save_point].x - 1][next_points[save_point].y] ==
+                'A' ||
+            ch[next_points[save_point].x - 1][next_points[save_point].y] ==
+                'B') {
           bool can_leave = true;
           for (int k = 0; k < size; ++k) {
             if (next_points[save_point].x - 1 == next_points[k].x) {
@@ -182,7 +190,11 @@ void DecisionManager::SolveFaceToFaceDeadLock(
 
         // 企图向上让位
         if (ch[next_points[save_point].x][next_points[save_point].y + 1] ==
-            '*') {
+                '.' ||
+            ch[next_points[save_point].x][next_points[save_point].y + 1] ==
+                'A' ||
+            ch[next_points[save_point].x][next_points[save_point].y + 1] ==
+                'B') {
           bool can_leave = true;
           for (int k = 0; k < size; ++k) {
             if (next_points[save_point].y + 1 == next_points[k].y) {
@@ -211,7 +223,11 @@ void DecisionManager::SolveFaceToFaceDeadLock(
 
         // 企图向下让位
         if (ch[next_points[save_point].x][next_points[save_point].y - 1] ==
-            '*') {
+                '.' ||
+            ch[next_points[save_point].x][next_points[save_point].y - 1] ==
+                'A' ||
+            ch[next_points[save_point].x][next_points[save_point].y - 1] ==
+                'B') {
           bool can_leave = true;
           for (int k = 0; k < size; ++k) {
             if (next_points[save_point].y - 1 == next_points[k].y) {
@@ -263,8 +279,9 @@ void DecisionManager::DecisionRobot() {
   std::vector<NextPoint> next_points;
   for (int i = 0; i < 10; ++i) {
     // --------- 移动前动作 ---------
-    if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B' &&
-        !berth[robot[i].berth_id].q_boat.empty()) {
+    // if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B' &&
+    //     !berth[robot[i].berth_id].q_boat.empty()) {
+    if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B') {
 #ifdef DEBUG
       std::cerr << "robot " << i << " 卸货：(" << robot[i].x << ","
                 << robot[i].y << ")" << std::endl;
@@ -281,6 +298,10 @@ void DecisionManager::DecisionRobot() {
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif
       robot[i].UpdateTargetGoods();
+#ifdef DEBUG
+      std::cerr << "robot " << i << " finished UpdateTargetGoods after pull"
+                << std::endl;
+#endif
       if (!robot[i].path.empty()) {
         // 有新的目标货物
         robot[i].target_goods->robot_id = i;
