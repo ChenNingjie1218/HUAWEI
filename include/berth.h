@@ -15,6 +15,9 @@ struct Berth {
   // 权重
   int weight;
 
+  // 货物数量
+  int goods_num;
+
   //到泊位的船队列
   std::queue<int> q_boat;
   Berth() {}
