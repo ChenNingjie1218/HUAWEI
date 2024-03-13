@@ -160,6 +160,9 @@ void Robot::FindBerth() {
 
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
+    if (berth[j].q_boat.empty()) {
+      continue;
+    }
     // Robot::ClearPath(route);  // 清空上一次计算的路径
     Astar astar(x, y, berth[j].x + 1, berth[j].y + 1);
     if (astar.AstarSearch(route, true)) {

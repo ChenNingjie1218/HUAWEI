@@ -86,7 +86,24 @@ void InputController::Input() {
           "-----------------------------INPUT--------------------------\n");
 #endif
   // if (scanf("%d%d", &id, &money) != EOF) {
-  scanf("%d%d", &id, &money);
+  int temp_id = 0;
+  scanf("%d%d", &temp_id, &money);
+
+  // 计算往船上装了多少货物
+  int dis_id = temp_id - id;
+  for (int i = 0; i < 10; i++) {
+    if (!berth[i].q_boat.empty() && berth[i].goods_num > 0) {
+      int load_num = berth[i].loading_speed * dis_id;
+      if (load_num >= berth[i].goods_num) {
+        boat[berth[i].q_boat.front()].num += berth[i].goods_num;
+        berth[i].goods_num = 0;
+      } else {
+        boat[berth[i].q_boat.front()].num += load_num;
+        berth[i].goods_num -= load_num;
+      }
+    }
+  }
+  id = temp_id;
 #ifdef DEBUG
   fprintf(debug_command_file, "id = %d, money = %d\n", id, money);
 #endif
@@ -122,9 +139,10 @@ void InputController::Input() {
             "robot %d info: goods = %d, x = %d, y = %d, status = %d\n", i,
             temp_goods, robot[i].x, robot[i].y, robot[i].status);
 #endif
-    //放置成功船上货物加一
+    // 放置成功港口货物加一
     if (robot[i].goods - temp_goods == 1) {
-      boat[berth[robot[i].berth_id].q_boat.front()].num++;
+      berth[robot[i].berth_id].goods_num++;
+      // boat[berth[robot[i].berth_id].q_boat.front()].num++;
     }
     robot[i].goods = temp_goods;
   }
@@ -135,7 +153,8 @@ void InputController::Input() {
     scanf("%d%d\n", &temp_status, &boat[i].pos);
 
     // 到达泊位入队
-    if (temp_status != boat[i].status && boat[i].pos != -1) {
+    if (temp_status != boat[i].status && temp_status == 0 &&
+        boat[i].pos != -1) {
       berth[boat[i].pos].q_boat.push(i);
     }
 
