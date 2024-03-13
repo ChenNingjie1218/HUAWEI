@@ -1,6 +1,7 @@
 #include "input_controller.h"
 
 #include <cstdio>
+#include <iostream>
 
 #include "berth.h"
 #include "boat.h"
@@ -105,6 +106,9 @@ void InputController::Input() {
   }
   id = temp_id;
 #ifdef DEBUG
+  std::cerr << "帧数：" << id << std::endl;
+#endif
+#ifdef DEBUG
   fprintf(debug_command_file, "id = %d, money = %d\n", id, money);
 #endif
   // 新增货物
@@ -138,6 +142,9 @@ void InputController::Input() {
     fprintf(debug_command_file,
             "robot %d info: goods = %d, x = %d, y = %d, status = %d\n", i,
             temp_goods, robot[i].x, robot[i].y, robot[i].status);
+    if (!robot[i].status) {
+      fprintf(debug_command_file, "碰撞\n");
+    }
 #endif
     // 放置成功港口货物加一
     if (robot[i].goods - temp_goods == 1) {
