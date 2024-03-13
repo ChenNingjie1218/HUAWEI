@@ -86,25 +86,17 @@ void DecisionManager::DecisionBoat() {
 void DecisionManager::SolveFaceToFaceDeadLock(
     std::vector<NextPoint> &next_points) {
   int size = next_points.size();
+  int origin_size = size;
   // 判断对碰死锁，更新next_points
   for (int i = 0; i < size; ++i) {
-    for (int j = i + 1; j < size; ++j) {
+    for (int j = (i >= origin_size ? 0 : (i + 1)); j < size; ++j) {
+      // origin_size之后的落点为新添加的落点，需要与以前的落点比较是否碰撞
       if (next_points[i].count && next_points[j].count &&
           next_points[i].x == robot[next_points[j].list_robot[0]].x &&
           next_points[i].y == robot[next_points[j].list_robot[0]].y &&
           robot[next_points[i].list_robot[0]].x == next_points[j].x &&
           robot[next_points[i].list_robot[0]].y && next_points[j].y) {
         // 给优先级高的机器人让位
-        /*
-         * 判断让位机器人能不能让位
-         * @param leave 让位标志
-         * - 0 无法让位
-         * - 1 向右让位
-         * - 2 向左让位
-         * - 3 向上让位
-         * - 4 向下让位
-         */
-        int leave = 0;
         int give_up_point;
         int save_point;
         if (Robot::JudgePriority(&robot[next_points[i].list_robot[0]],
@@ -138,7 +130,6 @@ void DecisionManager::SolveFaceToFaceDeadLock(
             }
           }
           if (can_leave) {
-            leave = 1;
             // 增加新落点
             NextPoint add_next_point = NextPoint(
                 next_points[save_point].x + 1, next_points[save_point].y,
@@ -171,7 +162,6 @@ void DecisionManager::SolveFaceToFaceDeadLock(
             }
           }
           if (can_leave) {
-            leave = 2;
             // 增加新落点
             NextPoint add_next_point = NextPoint(
                 next_points[save_point].x - 1, next_points[save_point].y,
@@ -204,7 +194,6 @@ void DecisionManager::SolveFaceToFaceDeadLock(
             }
           }
           if (can_leave) {
-            leave = 3;
             // 增加新落点
             NextPoint add_next_point = NextPoint(
                 next_points[save_point].x, next_points[save_point].y + 1,
@@ -237,7 +226,6 @@ void DecisionManager::SolveFaceToFaceDeadLock(
             }
           }
           if (can_leave) {
-            leave = 4;
             // 增加新落点
             NextPoint add_next_point = NextPoint(
                 next_points[save_point].x, next_points[save_point].y - 1,
@@ -293,6 +281,8 @@ void DecisionManager::DecisionRobot() {
       // 增加泊位权重
       ++berth[robot->berth_id].weight;
       robot[i].berth_id = -1;
+      // 下货的位置可能不是计算的位置，path里面还有内容
+      robot[i].path.clear();
       // 决策，更新目标货物, 当前不持有货物
 #ifdef DEBUG
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
@@ -303,7 +293,10 @@ void DecisionManager::DecisionRobot() {
                 << std::endl;
 #endif
       if (!robot[i].path.empty()) {
-        // 有新的目标货物
+// 有新的目标货物
+#ifdef DEBUG
+        std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
+#endif
         robot[i].target_goods->robot_id = i;
       }
       robot[i].goods = false;
@@ -335,7 +328,10 @@ void DecisionManager::DecisionRobot() {
 #endif
       robot[i].UpdateTargetGoods();
       if (!robot[i].path.empty()) {
-        // 有新的目标货物
+// 有新的目标货物
+#ifdef DEBUG
+        std::cerr << "robot " << i << " 更新新的目标货物" << std::endl;
+#endif
         robot[i].target_goods->robot_id = i;
       }
     }

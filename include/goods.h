@@ -34,7 +34,7 @@ struct GoodsManager {
   void PushGoods(Goods *new_goods);
 
   // 删除货物
-  void DeleteGoods(Goods *&goods);
+  void DeleteGoods(Goods *&goods, bool is_timeout = false);
 
   // 刷新货物链表
   void FreshGoodsLists();
