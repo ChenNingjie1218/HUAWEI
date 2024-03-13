@@ -323,6 +323,7 @@ void DecisionManager::DecisionRobot() {
     }
     // if (!robot[i].goods) {
     if (!robot[i].target_goods && !robot[i].goods) {
+      robot[i].path.clear();
 #ifdef DEBUG
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif

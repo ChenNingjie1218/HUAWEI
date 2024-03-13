@@ -40,7 +40,7 @@ void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
   goods->next->pre = goods->pre;
   if (is_timeout && goods->robot_id) {
     robot[goods->robot_id].target_goods = nullptr;
-    robot[goods->robot_id].path.clear();
+    // robot[goods->robot_id].path.clear();
   }
   delete goods;
   goods = nullptr;
