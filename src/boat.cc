@@ -8,7 +8,10 @@ extern int boat_capacity;
 int Boat::boat_capacity = 0;
 extern int id;
 
-Boat::Boat() { num = 0; }
+Boat::Boat() {
+  num = 0;
+  final_count = 0;
+}
 
 /*
  * 船在虚拟点选择泊位
@@ -37,6 +40,9 @@ void Boat::ChooseBerth(int &rand_berth) {
  * 3 正在前往该泊位的机器人数量 ？
  */
 bool Boat::LeaveCond() {
+  if (id > 13000) {
+    final_count++;
+  }
   // 容量达到80%就走
-  return num >= boat_capacity * 0.8 || id > 13000;
+  return num >= boat_capacity * 0.8 || final_count == 100;
 }

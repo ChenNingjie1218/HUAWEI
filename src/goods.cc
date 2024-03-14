@@ -50,7 +50,7 @@ void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
 void GoodsManager::FreshGoodsLists() {
   Goods *cur = head_goods->next;
   while (cur != head_goods) {
-    if (id - cur->birth == LIFETIME) {
+    if (id - cur->birth >= LIFETIME) {
       Goods *temp = cur->next;
       DeleteGoods(cur, true);
       cur = temp;

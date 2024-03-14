@@ -87,9 +87,11 @@ void InputController::Input() {
           "-----------------------------INPUT--------------------------\n");
 #endif
   // if (scanf("%d%d", &id, &money) != EOF) {
+  // }
   int temp_id = 0;
-  scanf("%d%d", &temp_id, &money);
-
+  if (scanf("%d%d", &temp_id, &money) == EOF) {
+    exit(0);
+  }
   // 计算往船上装了多少货物
   int dis_id = temp_id - id;
   for (int i = 0; i < 10; i++) {
@@ -106,9 +108,8 @@ void InputController::Input() {
   }
   id = temp_id;
 #ifdef DEBUG
-  std::cerr << "帧数：" << id << std::endl;
-#endif
-#ifdef DEBUG
+  std::cerr << "------------------id: " << id << "------------------"
+            << std::endl;
   fprintf(debug_command_file, "id = %d, money = %d\n", id, money);
 #endif
   // 新增货物

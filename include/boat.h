@@ -18,6 +18,10 @@ struct Boat {
    * - 2 泊位外等待
    */
   int status;
+
+  //大于13000帧后用该变量保证船再捡一会货物
+  int final_count;
+
   Boat();
 
   //虚拟点选择泊位
