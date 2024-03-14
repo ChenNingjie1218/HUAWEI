@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-// #define DEBUG
+#define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;
@@ -30,4 +30,7 @@ const int N = 210;
 
 // A*算法深度
 #define DEFAULT_A_STAR_DEEP 150
+
+// 船最后走可容忍时间的
+#define TOLERANT_LEAVE_TIME 100
 #endif

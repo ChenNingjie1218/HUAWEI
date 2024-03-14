@@ -4,7 +4,6 @@
 #include "param.h"
 Boat boat[10];
 extern Berth berth[berth_num + 10];
-extern int boat_capacity;
 int Boat::boat_capacity = 0;
 extern int id;
 
@@ -40,8 +39,9 @@ void Boat::ChooseBerth(int &rand_berth) {
  * 3 正在前往该泊位的机器人数量 ？
  */
 bool Boat::LeaveCond() {
-  if (id > 13000) {
-    final_count++;
+  if (pos != -1 &&
+      id > 15000 - berth[pos].transport_time - TOLERANT_LEAVE_TIME) {
+    return true;
   }
   // 容量达到80%就走
   return num >= boat_capacity * 0.8 || final_count == 100;

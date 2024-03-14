@@ -527,9 +527,6 @@ void DecisionManager::DecisionRobot() {
   for (int i = 0; i < size; ++i) {
     next_points[i].OutPut();
   }
-
-  // 如果移动决策移动后动作
-  // --------- 移动后动作 ---------
 }
 
 NextPoint::NextPoint(int x, int y, int robot_id) {
@@ -599,6 +596,41 @@ void NextPoint::OutPut() {
     std::vector<Location>::const_iterator iter = robot[robot_id].path.begin();
     if (this->x == iter->x && this->y == iter->y) {
       robot[robot_id].RemoveFirst();
+    }
+
+    // 如果移动决策移动后动作
+    // --------- 移动后动作 ---------
+    if (robot[robot_id].goods && ch[x][y] == 'B') {
+#ifdef DEBUG
+      std::cerr << "robot " << robot_id << " 移动后卸货：(" << x << "," << y
+                << ")" << std::endl;
+#endif
+      // 卸货
+      Decision decision(DECISION_TYPE_ROBOT_PULL, robot_id, -1);
+      DecisionManager::GetInstance()->q_decision.push(decision);
+      // 增加泊位权重
+      ++berth[robot->berth_id].weight;
+      robot[robot_id].berth_id = -1;
+    } else if (!robot[robot_id].goods && robot[robot_id].target_goods &&
+               robot[robot_id].target_goods->x == robot[robot_id].x &&
+               robot[robot_id].target_goods->y == robot[robot_id].y) {
+#ifdef DEBUG
+      std::cerr << "robot " << robot_id << " 移动后装货：(" << x << "," << y
+                << ")" << std::endl;
+#endif
+      // 装货
+      Decision decision(DECISION_TYPE_ROBOT_GET, robot_id, -1);
+      DecisionManager::GetInstance()->q_decision.push(decision);
+
+      // 捡到货物将其从链表删除
+      GoodsManager::GetInstance()->DeleteGoods(robot[robot_id].target_goods);
+
+      // 决策更新目标泊位和泊位权重
+      robot[robot_id].FindBerth();
+      // berth_weight[robot[i].berth_id]++;
+
+      //当前持有货物
+      robot[robot_id].goods = true;
     }
   }
 }
