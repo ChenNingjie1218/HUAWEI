@@ -62,7 +62,8 @@ Astar::Astar(int start_x, int start_y, int end_x, int end_y)
 //   end.y = end_y;
 // }
 
-bool Astar::AstarSearch(std::vector<Location> &path, bool is_berth) {
+bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
+                        bool is_berth) {
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
   std::unordered_map<Location, double> cost_so_far;
@@ -72,11 +73,17 @@ bool Astar::AstarSearch(std::vector<Location> &path, bool is_berth) {
 
   while (!frontier.empty()) {
     Location current = frontier.get();
-    if (cost_so_far[current] > A_STAR_DEEP && !is_berth) {
+    if (cost_so_far[current] > astar_deep && !is_berth) {
+      if (astar_deep < LIFETIME) {
+        astar_deep += 50;
+      }
       return false;
     }
     if (current == end) {
       // 可达
+      if (astar_deep > DEFAULT_A_STAR_DEEP) {
+        astar_deep -= 50;
+      }
       Location temp = end;
       path.clear();
       // int count = 0;

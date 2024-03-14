@@ -3,9 +3,10 @@
 #include <iostream>
 
 #include "berth.h"
+#include "param.h"
 Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
-
+extern int id;
 Robot::Robot(int startX, int startY) {
   x = startX;
   y = startY;
@@ -117,24 +118,31 @@ void Robot::UpdateTargetGoods() {
 #endif
     Astar astar(x, y, p_goods->x, p_goods->y);
     // Astar astar(36, 173, 137, 117);
-    if (!astar.AstarSearch(route)) {
+    int size = route.size();
+    if (!astar.AstarSearch(route, astar_deep)) {
 #ifdef DEBUG
       std::cerr << "route empty" << std::endl;
 #endif
       p_goods = p_goods->next;
       continue;
+    } else if (size + id - p_goods->birth > LIFETIME) {
+#ifdef DEBUG
+      std::cerr << "can not get this good" << std::endl;
+#endif
+      p_goods = p_goods->next;
+      continue;
     }
-    auto size = route.size();
+
 #ifdef DEBUG
     std::cerr << "------- astar finished ------- route size:" << size
               << std::endl
               << std::endl;
-    std::vector<Location>::iterator it = route.begin();
-    for (int i = 0; i < size; ++i) {
-      std::cerr << "(" << it->x << "," << it->y << ") -> ";
-      ++it;
-    }
-    std::cerr << std::endl;
+    // std::vector<Location>::iterator it = route.begin();
+    // for (int i = 0; i < size; ++i) {
+    //   std::cerr << "(" << it->x << "," << it->y << ") -> ";
+    //   ++it;
+    // }
+    // std::cerr << std::endl;
 #endif
     cur_weight =
         0.5 * (p_goods->money - 1) / 999 - 0.5 * (size - 1) / 399.0 + 1;
@@ -165,7 +173,7 @@ void Robot::FindBerth() {
     }
     // Robot::ClearPath(route);  // 清空上一次计算的路径
     Astar astar(x, y, berth[j].x + 1, berth[j].y + 1);
-    if (astar.AstarSearch(route, true)) {
+    if (astar.AstarSearch(route, astar_deep, true)) {
       length = route.size();
       if (length < fin_length) {
         fin_length = length;

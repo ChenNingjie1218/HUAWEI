@@ -1,6 +1,7 @@
 #ifndef DECISION_H_
 #define DECISION_H_
 #include <queue>
+#include <vector>
 // 决策
 struct Decision {
   /*
@@ -37,7 +38,7 @@ struct NextPoint {
    *
    * - 插入算法：插入排序
    */
-  void PushRobot(int robot_id);
+  void PushRobot(int robot_id, std::vector<int>& not_move_id);
 
   // 做决策
   void OutPut();
@@ -69,8 +70,17 @@ struct DecisionManager {
    */
   void DecisionRobot();
 
-  // 解决面对面死锁
-  void SolveFaceToFaceDeadLock(std::vector<NextPoint>& next_points);
+  /*
+   * 机器人是否拦路
+   * @ret next_points的下标
+   */
+  int IsBlock(int robot_id, std::vector<NextPoint>& next_points);
+
+  // 让路
+  bool GetAway(int robot_id, std::vector<NextPoint>& next_points, int ignore_id,
+               std::vector<int>& not_move_id);
+  // 检测是否存在死锁
+  bool IsDeadLock(NextPoint& first_point, NextPoint& second_point);
 
   // 决策队列
   std::queue<Decision> q_decision;

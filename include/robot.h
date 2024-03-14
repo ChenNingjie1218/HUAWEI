@@ -16,6 +16,8 @@ struct Robot {
   // 是否是正常运行状态
   int status;
   int mbx, mby;  //什么意思？
+  // A*的深度
+  int astar_deep = 150;
 
   // 目标港口
   int berth_id;
