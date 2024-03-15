@@ -67,7 +67,7 @@ void DecisionManager::DecisionBoat() {
 
 // 决策是否驶离
 #ifdef DEBUG
-        std::cerr << "boat " << i << " leave" << boat[i].pos << std::endl;
+        std::cerr << "boat " << i << " leave " << boat[i].pos << std::endl;
 #endif
         Decision decision(DECISION_TYPE_BOAT_GO, i, -1);
         q_decision.push(decision);
@@ -341,7 +341,7 @@ void DecisionManager::DecisionRobot() {
 
       // 增加泊位权重
       ++berth[robot->berth_id].weight;
-      robot[i].berth_id = -1;
+      // robot[i].berth_id = -1;
       // 下货的位置可能不是计算的位置，path里面还有内容
       robot[i].path.clear();
       // 决策，更新目标货物, 当前不持有货物
@@ -497,11 +497,11 @@ void DecisionManager::DecisionRobot() {
             next_points[giveup_id].count = 0;
 
             // 处理连锁反应
-            not_move_id.clear();
+            // not_move_id.clear();
             not_move_id.push_back(getaway_id);
             not_move_id.push_back(ignore_id);
             int not_move_size = not_move_id.size();
-            for (int i = 0; i < not_move_size; ++i) {
+            for (int i = not_move_size - 2; i < not_move_size; ++i) {
               int block_id = -1;
               if ((block_id = IsBlock(not_move_id[i], next_points)) > -1) {
 #ifdef DEBUG
@@ -610,7 +610,7 @@ void NextPoint::OutPut() {
       DecisionManager::GetInstance()->q_decision.push(decision);
       // 增加泊位权重
       ++berth[robot->berth_id].weight;
-      robot[robot_id].berth_id = -1;
+      // robot[robot_id].berth_id = -1;
     } else if (!robot[robot_id].goods && robot[robot_id].target_goods &&
                robot[robot_id].target_goods->x == robot[robot_id].x &&
                robot[robot_id].target_goods->y == robot[robot_id].y) {

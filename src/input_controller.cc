@@ -31,7 +31,6 @@ InputController*& InputController::GetInstance() {
  * - B 大小为4*4，标识泊位的位置
  */
 char ch[N][N];
-bool gds[N][N] = {false};  // 该点是否有货物
 int money;
 int id;  // 帧号
 
@@ -150,6 +149,7 @@ void InputController::Input() {
     // 放置成功港口货物加一
     if (robot[i].goods - temp_goods == 1) {
       berth[robot[i].berth_id].goods_num++;
+      robot[i].berth_id = -1;
       // boat[berth[robot[i].berth_id].q_boat.front()].num++;
     }
     robot[i].goods = temp_goods;

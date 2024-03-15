@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "berth.h"
+#include "goods.h"
 #include "param.h"
 Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
@@ -99,8 +100,9 @@ int Robot::JudgePriority(Robot *first, Robot *second) {
 void Robot::UpdateTargetGoods() {
   double goods_weight = 0, cur_weight = 0;
   Goods *head_goods = GoodsManager::GetInstance()->head_goods;
-  Goods *p_goods = head_goods->next;
+  Goods *p_goods = GoodsManager::GetInstance()->first_free_goods;
   std::vector<Location> route;
+  bool need_change_first_free_goods = true;
   // 遍历货物链表
   while (p_goods != head_goods) {
     if (p_goods->robot_id > -1) {
@@ -119,20 +121,23 @@ void Robot::UpdateTargetGoods() {
     Astar astar(x, y, p_goods->x, p_goods->y);
     // Astar astar(36, 173, 137, 117);
     int size = route.size();
-    if (!astar.AstarSearch(route, astar_deep)) {
+    Goods *find_goods = p_goods;
+    if (!astar.AstarSearch(route, astar_deep, find_goods)) {
 #ifdef DEBUG
       std::cerr << "route empty" << std::endl;
 #endif
       p_goods = p_goods->next;
+      need_change_first_free_goods = false;
       continue;
     } else if (size + id - p_goods->birth > LIFETIME) {
 #ifdef DEBUG
       std::cerr << "can not get this good" << std::endl;
 #endif
       p_goods = p_goods->next;
+      need_change_first_free_goods = false;
       continue;
     }
-
+    size = route.size();
 #ifdef DEBUG
     std::cerr << "------- astar finished ------- route size:" << size
               << std::endl
@@ -147,18 +152,29 @@ void Robot::UpdateTargetGoods() {
     cur_weight =
         0.5 * (p_goods->money - 1) / 999 - 0.5 * (size - 1) / 399.0 + 1;
     if (cur_weight > goods_weight) {
+      if (p_goods == find_goods) {
+        // 如果找到的货物与该货物是同一个货物
 #ifdef DEBUG
-      std::cerr << "update path" << std::endl;
+        std::cerr << "same goods update path" << std::endl;
 #endif
-      target_goods = p_goods;
+        target_goods = p_goods;
+      } else {
+#ifdef DEBUG
+        std::cerr << "better goods update path" << std::endl;
+#endif
+        target_goods = find_goods;
+        need_change_first_free_goods = false;
+      }
       goods_weight = cur_weight;
-      // robot[i].ClearPath();  // 清空上一次计算的路径
       path = route;
       break;
-    } else {
-      // Robot::ClearPath(route);
     }
     p_goods = p_goods->next;
+  }
+  if (need_change_first_free_goods &&
+      GoodsManager::GetInstance()->first_free_goods->next != head_goods) {
+    GoodsManager::GetInstance()->first_free_goods =
+        GoodsManager::GetInstance()->first_free_goods->next;
   }
 }
 
@@ -173,7 +189,8 @@ void Robot::FindBerth() {
     }
     // Robot::ClearPath(route);  // 清空上一次计算的路径
     Astar astar(x, y, berth[j].x + 1, berth[j].y + 1);
-    if (astar.AstarSearch(route, astar_deep, true)) {
+    Goods *find_goods = nullptr;
+    if (astar.AstarSearch(route, astar_deep, find_goods)) {
       length = route.size();
       if (length < fin_length) {
         fin_length = length;

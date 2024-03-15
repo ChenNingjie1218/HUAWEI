@@ -39,6 +39,11 @@ struct GoodsManager {
   // 刷新货物链表
   void FreshGoodsLists();
 
+  // 货物链表头节点
   Goods *head_goods = new Goods();
+
+  // 货物链表起始节点
+  // 每次找路径从该节点开始
+  Goods *first_free_goods = head_goods;
 };
 #endif

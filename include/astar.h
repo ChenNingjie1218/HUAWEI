@@ -5,6 +5,8 @@
 #include <queue>
 #include <vector>
 
+#include "goods.h"
+
 struct Location {
   int x, y;
   Location() = default;
@@ -59,8 +61,9 @@ struct Astar {
   Location end;    // 终点坐标
   // Astar() = default;
   Astar(int start_x, int start_y, int end_x, int end_y);
-  // void ReUse(int start_x, int start_y, int end_x, int end_y);
+
+  // 如果目标是泊位，target_goods传一个空指针的变量
   bool AstarSearch(std::vector<Location> &path, int &astar_deep,
-                   bool is_berth = 0);
+                   Goods *&find_goods);
 };
 #endif

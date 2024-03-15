@@ -6,7 +6,7 @@
 
 #include "param.h"
 extern char ch[N][N];
-
+extern Goods *gds[N][N];
 // 方向数组
 std::array<Location, 4> DIRS = {Location(1, 0), Location(-1, 0), Location(0, 1),
                                 Location(0, -1)};
@@ -63,7 +63,7 @@ Astar::Astar(int start_x, int start_y, int end_x, int end_y)
 // }
 
 bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
-                        bool is_berth) {
+                        Goods *&find_goods) {
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
   std::unordered_map<Location, double> cost_so_far;
@@ -73,14 +73,38 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 
   while (!frontier.empty()) {
     Location current = frontier.get();
-    if (cost_so_far[current] > astar_deep && !is_berth) {
+    // 超过深度剪枝
+    if (cost_so_far[current] > astar_deep && find_goods) {
       if (astar_deep < LIFETIME) {
         astar_deep += 50;
       }
       return false;
     }
+
+    // 如果是找货物
+    if (find_goods && gds[current.x][current.y] &&
+        gds[current.x][current.y]->robot_id == -1) {
+      find_goods = gds[current.x][current.y];
+
+      // 货物可达
+      if (astar_deep > DEFAULT_A_STAR_DEEP) {
+        astar_deep -= 50;
+      }
+      Location temp = current;
+      path.clear();
+      // int count = 0;
+      while (temp != start) {
+        path.push_back(temp);
+        // std::cerr << "(" << temp.x << "," << temp.y << ")" << std::endl;
+        temp = came_from[temp];
+        // ++count;
+      }
+      // std::cerr << count << std::endl;
+      std::reverse(path.begin(), path.end());
+      return true;
+    }
     if (current == end) {
-      // 可达
+      // 船舶可达
       if (astar_deep > DEFAULT_A_STAR_DEEP) {
         astar_deep -= 50;
       }
@@ -97,6 +121,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
       std::reverse(path.begin(), path.end());
       return true;
     }
+
     for (auto next : Point(current).neighbors) {
       double new_cost = cost_so_far[current] + 1;
       if (cost_so_far.find(next) == cost_so_far.end() ||
