@@ -73,23 +73,27 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 
   while (!frontier.empty()) {
     Location current = frontier.get();
-    // 超过深度剪枝
+// 超过深度剪枝
+#ifdef CUT_A_STAR
     if (cost_so_far[current] > astar_deep && find_goods) {
       if (astar_deep < LIFETIME) {
         astar_deep += 50;
       }
       return false;
     }
+#endif
 
     // 如果是找货物
     if (find_goods && gds[current.x][current.y] &&
         gds[current.x][current.y]->robot_id == -1) {
       find_goods = gds[current.x][current.y];
 
-      // 货物可达
+// 货物可达
+#ifdef CUT_A_STAR
       if (astar_deep > DEFAULT_A_STAR_DEEP) {
         astar_deep -= 50;
       }
+#endif
       Location temp = current;
       path.clear();
       // int count = 0;
@@ -104,10 +108,12 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
       return true;
     }
     if (current == end) {
-      // 船舶可达
+//
+#ifdef CUT_A_STAR
       if (astar_deep > DEFAULT_A_STAR_DEEP) {
         astar_deep -= 50;
       }
+#endif
       Location temp = end;
       path.clear();
       // int count = 0;
