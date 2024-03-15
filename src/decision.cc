@@ -4,6 +4,7 @@
 #include <queue>
 #include <vector>
 
+#include "astar.h"
 #include "berth.h"
 #include "boat.h"
 #include "param.h"
@@ -12,6 +13,7 @@ extern Boat boat[10];
 extern Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
 extern char ch[N][N];
+extern std::array<Location, 4> DIRS;
 DecisionManager *DecisionManager::instance_ = nullptr;
 
 Decision::Decision(int type, int id, int param) {
@@ -100,151 +102,58 @@ bool DecisionManager::GetAway(int robot_id, std::vector<NextPoint> &next_points,
   // std::set<int>::iterator getaway_it = not_move_id.end();
 
   // 1.看周围有没有不被占用的空位
-  // 下
-  if ((x + 1 != ignore_x) &&
-      (ch[x + 1][y] == '.' || ch[x + 1][y] == 'A' || ch[x + 1][y] == 'B')) {
-    bool can_leave = true;
-    for (int k = 0; k < size; ++k) {
-      if (x + 1 == next_points[k].x && y == next_points[k].y) {
-        // 下边位置即将被某个机器人占用
-        can_leave = false;
-        // occupy_point_id = -1;
-        break;
-      }
-    }
-    if (can_leave) {
-      // 检测是否被占用
-      for (std::vector<int>::iterator it = not_move_id.begin();
-           it != not_move_id.end(); ++it) {
-        if (robot[*it].x == x + 1 && robot[*it].y == y) {
-          can_leave = false;
-          // getaway_it = it;
-          break;
-        }
-      }
-      if (can_leave) {
-        // 下边有空位的情况
-#ifdef DEBUG
-        std::cerr << "向下让位" << std::endl;
-#endif
-        // 增加新落点
-        NextPoint add_next_point = NextPoint(x + 1, y, robot_id);
-        next_points.push_back(add_next_point);
-        // 将让的位加入让位机器的人path
-        robot[robot_id].AddFirst(x, y);
-        return true;
-      }
+  int first_dir;
+  for (first_dir = 0; first_dir < 4; ++first_dir) {
+    if (ignore_x + DIRS[first_dir].x == x &&
+        ignore_y + DIRS[first_dir].y == y) {
+      break;
     }
   }
 
-  // 上
-  if ((x - 1 != ignore_x) &&
-      (ch[x - 1][y] == '.' || ch[x - 1][y] == 'A' || ch[x - 1][y] == 'B')) {
-    bool can_leave = true;
-    for (int k = 0; k < size; ++k) {
-      if (x - 1 == next_points[k].x && y == next_points[k].y) {
-        // 上边位置即将被某个机器人占用
-        can_leave = false;
-        // occupy_point_id = k;
-        break;
-      }
+#ifdef DEBUG
+  std::vector<std::string> dir_string = {"下", "上", "右", "左"};
+#endif
+  for (int i = 1; i <= 4; ++i) {
+    int index = (first_dir + i) % 4;
+    if (x + DIRS[index].x == ignore_x && y + DIRS[index].y == ignore_y) {
+      // 放弃ignore方向移动
+      continue;
     }
-    if (can_leave) {
-      // 检测是否被占用
-      for (std::vector<int>::iterator it = not_move_id.begin();
-           it != not_move_id.end(); ++it) {
-        if (robot[*it].x == x - 1 && robot[*it].y == y) {
+    if (ch[x + DIRS[index].x][y + DIRS[index].y] == '.' ||
+        ch[x + DIRS[index].x][y + DIRS[index].y] == 'A' ||
+        ch[x + DIRS[index].x][y + DIRS[index].y] == 'B') {
+      bool can_leave = true;
+      for (int k = 0; k < size; ++k) {
+        if (x + DIRS[index].x == next_points[k].x &&
+            y + DIRS[index].y == next_points[k].y) {
+          // 位置即将被某个机器人占用
           can_leave = false;
-          // getaway_it = it;
           break;
         }
       }
       if (can_leave) {
-        // 上边有空位的情况
-#ifdef DEBUG
-        std::cerr << "向上让位" << std::endl;
-#endif
-        // 增加新落点
-        NextPoint add_next_point = NextPoint(x - 1, y, robot_id);
-        next_points.push_back(add_next_point);
-        // 将让的位加入让位机器的人path
-        robot[robot_id].AddFirst(x, y);
-        return true;
-      }
-    }
-  }
-
-  // 右
-  if ((y + 1 != ignore_y) &&
-      (ch[x][y + 1] == '.' || ch[x][y + 1] == 'A' || ch[x][y + 1] == 'B')) {
-    bool can_leave = true;
-    for (int k = 0; k < size; ++k) {
-      if (x == next_points[k].x && y + 1 == next_points[k].y) {
-        // 右边位置即将被某个机器人占用
-        can_leave = false;
-        // occupy_point_id = k;
-        break;
-      }
-    }
-    if (can_leave) {
-      // 检测是否被占用
-      std::vector<int>::iterator it;
-      for (std::vector<int>::iterator it = not_move_id.begin();
-           it != not_move_id.end(); ++it) {
-        if (robot[*it].x == x && robot[*it].y == y + 1) {
-          can_leave = false;
-          // getaway_it = it;
-          break;
+        // 检测是否被占用
+        for (std::vector<int>::iterator it = not_move_id.begin();
+             it != not_move_id.end(); ++it) {
+          if (robot[*it].x == x + DIRS[index].x &&
+              robot[*it].y == y + DIRS[index].y) {
+            can_leave = false;
+            break;
+          }
         }
-      }
-      if (can_leave) {
-        // 右边有空位的情况
+        if (can_leave) {
+          // 有空位的情况
 #ifdef DEBUG
-        std::cerr << "向右让位" << std::endl;
+          std::cerr << "向" << dir_string[index] << "让位" << std::endl;
 #endif
-        // 增加新落点
-        NextPoint add_next_point = NextPoint(x, y + 1, robot_id);
-        next_points.push_back(add_next_point);
-        // 将让的位加入让位机器的人path
-        robot[robot_id].AddFirst(x, y);
-        return true;
-      }
-    }
-  }
-
-  // 左
-  if ((y - 1 != ignore_id) &&
-      (ch[x][y - 1] == '.' || ch[x][y - 1] == 'A' || ch[x][y - 1] == 'B')) {
-    bool can_leave = true;
-    for (int k = 0; k < size; ++k) {
-      if (x == next_points[k].x && y - 1 == next_points[k].y) {
-        // 左边位置即将被某个机器人占用
-        can_leave = false;
-        // occupy_point_id = k;
-        break;
-      }
-    }
-    if (can_leave) {
-      // 检测是否被占用
-      std::vector<int>::iterator it;
-      for (std::vector<int>::iterator it = not_move_id.begin();
-           it != not_move_id.end(); ++it) {
-        if (robot[*it].x == x && robot[*it].y == y - 1) {
-          can_leave = false;
-          // getaway_it = it;
-          break;
+          // 增加新落点
+          NextPoint add_next_point =
+              NextPoint(x + DIRS[index].x, y + DIRS[index].y, robot_id);
+          next_points.push_back(add_next_point);
+          // 将让的位加入让位机器的人path
+          robot[robot_id].AddFirst(x, y);
+          return true;
         }
-      }
-      if (can_leave) {
-#ifdef DEBUG
-        std::cerr << "向左让位" << std::endl;
-#endif
-        // 增加新落点
-        NextPoint add_next_point = NextPoint(x, y - 1, robot_id);
-        next_points.push_back(add_next_point);
-        // 将让的位加入让位机器的人path
-        robot[robot_id].AddFirst(x, y);
-        return true;
       }
     }
   }
