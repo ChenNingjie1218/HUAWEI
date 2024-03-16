@@ -74,39 +74,17 @@ void DecisionManager::DecisionBoat() {
 #endif
         Decision decision(DECISION_TYPE_BOAT_GO, i, -1);
         q_decision.push(decision);
-        boat[i].num = 0;  // 清空船中货物
+        boat[i].num = 0;                     // 清空船中货物
+      } else if (boat[i].ChangeBerth3(i)) {  // 更换港口
+        // 出队
+        if (!berth[boat[i].pos].q_boat.empty()) {
+          berth[boat[i].pos].q_boat.pop();
+        }
+        // 更换港口
+        Decision decision(DECISION_TYPE_BOAT_SHIP, i, boat[i].pos);
+        q_decision.push(decision);  // 决策入队
       }
-      //  以下为船在泊位间移动捡取货物的算法
-      //       else {
-      //         boat[i].waiting_time++;
-      //         // waiting_time时间待优化
-      //         if (boat[i].waiting_time == TOLERANT_WAIT_TIME || id >= 12900)
-      //         {
-      //           if (boat[i].LeaveCond()) {  // 装满驶离
-      //             if (!berth[boat[i].pos].q_boat.empty()) {
-      //               berth[boat[i].pos].q_boat.pop();
-      //             }
-      // // 决策是否驶离
-      // #ifdef DEBUG
-      //             std::cerr << "boat " << i << " leave " << boat[i].pos <<
-      //             std::endl;
-      // #endif
-      //             Decision decision(DECISION_TYPE_BOAT_GO, i, -1);
-      //             q_decision.push(decision);
-      //           } else {  // 没满找别的港口的货
-      //             // 决策去哪个泊位
-      //             boat[i].ChooseBerth(rand_berth);
-      // #ifdef DEBUG
-      //             std::cerr << "boat " << i << " choose berth:" <<
-      //             boat[i].pos
-      //                       << std::endl;
-      // #endif
-      //             Decision decision(DECISION_TYPE_BOAT_SHIP, i, boat[i].pos);
-      //             q_decision.push(decision);  // 决策入队
-      //             boat[i].waiting_time = 0;   // 等待时间清0
-      //           }
-      //         }
-      //       }
+
     } else if (boat[i].status == 2) {
 // 在等待
 // 可以决策是否换船舶，换哪个船舶

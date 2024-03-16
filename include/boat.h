@@ -36,6 +36,9 @@ struct Boat {
 
   // 离开港口的条件
   bool LeaveCond();
+
+  // 判断是否更换港口
+  bool ChangeBerth3(int i);
 };
 
 #endif

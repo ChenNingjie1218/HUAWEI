@@ -91,7 +91,7 @@ void Boat::ChooseBerth3(int i) {
  * 船在泊位何时离开
  * 决策依据：
  * 1 船的容量和当前装载量
- * 2 船在泊位停留的时间 ？
+ * 2 船在泊位停留的时间
  * 3 正在前往该泊位的机器人数量 ？
  */
 bool Boat::LeaveCond() {
@@ -100,5 +100,25 @@ bool Boat::LeaveCond() {
     return true;
   }
   // 容量达到80%就走
-  return num >= boat_capacity * 0.75;
+  return num >= boat_capacity * 0.9;
+}
+
+/*
+ * 船何时更换泊位
+ * 决策依据：
+ * 1 船的容量和当前装载量
+ * 2 船在泊位停留的时间
+ * 3 另一个泊位的货物数量
+ */
+bool Boat::ChangeBerth3(int i) {
+  int target_berth = i * 2;  // 负责的第一个泊位
+  int other_berth = (pos == target_berth) ? target_berth + 1
+                                          : target_berth;  // 船负责的另一个泊位
+  // 船还有很多容量且隔壁有很多货物
+  if (boat[i].num < (boat_capacity * 0.3) &&
+      berth[other_berth].goods_num > (boat_capacity * 0.8)) {
+    pos = other_berth;  // 更新目标泊位
+    return true;
+  }
+  return false;
 }
