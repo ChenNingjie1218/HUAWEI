@@ -3,10 +3,12 @@
 #include <algorithm>
 #include <iostream>
 
+#include "berth.h"
 #include "input_controller.h"
 #include "param.h"
 extern char ch[N][N];
 extern Goods *gds[N][N];
+extern Berth berth[berth_num + 10];
 // 方向数组
 std::array<Location, 4> DIRS = {Location(1, 0), Location(-1, 0), Location(0, 1),
                                 Location(0, -1)};
@@ -79,9 +81,10 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 
     // 如果是找货物
     if (find_goods && gds[current.x][current.y] &&
-        gds[current.x][current.y]->robot_id == -1) {
+        gds[current.x][current.y]->robot_id == -1 &&
+        gds[current.x][current.y]->money >= find_goods->money) {
       find_goods = gds[current.x][current.y];
-
+      // 只换更值钱的货物
       // 货物可达
 #ifdef CUT_A_STAR
       if (astar_deep > DEFAULT_A_STAR_DEEP) {
@@ -117,7 +120,8 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 }
 
 // 找泊位A*
-bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id) {
+bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
+                        int is_urgent) {
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
   std::unordered_map<Location, double> cost_so_far;
@@ -127,26 +131,31 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id) {
 
   while (!frontier.empty()) {
     Location current = frontier.get();
-    if (ch[current.x][current.y] == 'B' &&
-        InputController::GetInstance()->location_to_berth_id.find(current) !=
-            InputController::GetInstance()->location_to_berth_id.end()) {
-      // 提前找到一个更近的泊位
-      berth_id = InputController::GetInstance()->location_to_berth_id[current];
-#ifdef DEBUG
-      std::cerr << "提前找到一个更近的泊位: " << berth_id << std::endl;
-#endif
-      Location temp = current;
-      path.clear();
-      // int count = 0;
-      while (temp != start) {
-        path.push_back(temp);
-        // std::cerr << "(" << temp.x << "," << temp.y << ")" << std::endl;
-        temp = came_from[temp];
-        // ++count;
+    if (ch[current.x][current.y] == 'B') {
+      // 不紧急 找到更近的泊位可结束
+      // 紧急   需要该泊位有船
+      bool can_finish =
+          !is_urgent ||
+          (is_urgent &&
+           !berth[InputController::GetInstance()->location_to_berth_id[current]]
+                .q_boat.empty());
+
+      if (can_finish) {
+        berth_id =
+            InputController::GetInstance()->location_to_berth_id[current];
+        Location temp = current;
+        path.clear();
+        // int count = 0;
+        while (temp != start) {
+          path.push_back(temp);
+          // std::cerr << "(" << temp.x << "," << temp.y << ")" << std::endl;
+          temp = came_from[temp];
+          // ++count;
+        }
+        // std::cerr << count << std::endl;
+        std::reverse(path.begin(), path.end());
+        return true;
       }
-      // std::cerr << count << std::endl;
-      std::reverse(path.begin(), path.end());
-      return true;
     }
 
     for (auto next : Point(current).neighbors) {

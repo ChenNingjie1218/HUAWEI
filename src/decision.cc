@@ -543,12 +543,12 @@ void NextPoint::OutPut() {
       Decision decision(DECISION_TYPE_ROBOT_GET, robot_id, -1);
       DecisionManager::GetInstance()->q_decision.push(decision);
 
-      // 捡到货物将其从链表删除
-      GoodsManager::GetInstance()->DeleteGoods(robot[robot_id].target_goods);
-
       // 决策更新目标泊位和泊位权重
       robot[robot_id].FindBerth();
       // berth_weight[robot[i].berth_id]++;
+
+      // 捡到货物将其从链表删除
+      GoodsManager::GetInstance()->DeleteGoods(robot[robot_id].target_goods);
 
       //当前持有货物
       robot[robot_id].goods = true;

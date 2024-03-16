@@ -71,7 +71,7 @@ struct Astar {
   bool AstarSearch(std::vector<Location> &path, int &astar_deep,
                    Goods *&find_goods);
   // 找泊位A*
-  bool AstarSearch(std::vector<Location> &path, int &berth_id);
+  bool AstarSearch(std::vector<Location> &path, int &berth_id, int is_urgent);
 };
 
 #endif

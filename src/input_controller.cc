@@ -62,6 +62,9 @@ void InputController::Init() {
         id, berth[id].x, berth[id].y, berth[id].transport_time,
         berth[id].loading_speed);
 #endif
+    if (berth[id].transport_time > max_transport_time) {
+      max_transport_time = berth[id].transport_time;
+    }
   }
   // 船容积
   scanf("%d", &Boat::boat_capacity);

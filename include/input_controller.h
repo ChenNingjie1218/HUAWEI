@@ -22,5 +22,8 @@ struct InputController {
 
   // 坐标映射到泊位id
   std::map<Location, int> location_to_berth_id;
+
+  // 船到虚拟点的最大耗时
+  int max_transport_time = 0;
 };
 #endif

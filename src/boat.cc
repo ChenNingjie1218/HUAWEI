@@ -7,7 +7,7 @@ extern Berth berth[berth_num + 10];
 int Boat::boat_capacity = 0;
 extern int id;
 // 随机泊位
-int rand_berth;
+int rand_berth = 0;
 
 Boat::Boat() {
   num = 0;
@@ -114,8 +114,15 @@ bool Boat::ChangeBerth3(int i) {
   int target_berth = i * 2;  // 负责的第一个泊位
   int other_berth = (pos == target_berth) ? target_berth + 1
                                           : target_berth;  // 船负责的另一个泊位
+  if (id > 15000 - berth[target_berth].transport_time - CHANGE_BERTH_TIME -
+               TOLERANT_LEAVE_TIME) {
+    // 防止船换泊位后，不能回虚拟点了
+    return false;
+  }
+  // 该船舶没货物了
   // 船还有很多容量且隔壁有很多货物
-  if (boat[i].num < (boat_capacity * 0.3) &&
+  if (berth[target_berth].goods_num < berth[target_berth].loading_speed &&
+      boat[i].num < (boat_capacity * 0.3) &&
       berth[other_berth].goods_num > (boat_capacity * 0.8)) {
     pos = other_berth;  // 更新目标泊位
     return true;

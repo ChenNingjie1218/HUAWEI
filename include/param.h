@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-// #define DEBUG
+#define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;
@@ -14,6 +14,9 @@ const int n = 200;
 const int robot_num = 10;
 const int berth_num = 10;
 const int N = 210;
+
+// 船换泊位耗时
+#define CHANGE_BERTH_TIME 500
 
 // 决策类型
 #define DECISION_TYPE_ROBOT_MOVE 1
@@ -33,7 +36,7 @@ const int N = 210;
 #define DEFAULT_A_STAR_DEEP 150
 
 // 船最后走可容忍时间的
-#define TOLERANT_LEAVE_TIME 100
+#define TOLERANT_LEAVE_TIME 10
 
 // 船在港口停留时间
 #define TOLERANT_WAIT_TIME 1000
@@ -43,4 +46,7 @@ const int N = 210;
 
 // 贵重货物域值
 #define VALUEABLE_GOODS_VALVE 150
+
+// 最后冲刺阶段的容忍时间
+#define FINAL_TOLERANT_TIME 200
 #endif

@@ -5,6 +5,7 @@
 
 #include "berth.h"
 #include "goods.h"
+#include "input_controller.h"
 #include "param.h"
 Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
@@ -190,10 +191,16 @@ void Robot::FindBerth() {
   double min_man = 99999, cal_man;  // 曼哈顿距离
   bool is_valuable_goods =
       target_goods->money > VALUEABLE_GOODS_VALVE ? true : false;
+  bool is_final_sprint =
+      id > 15000 - InputController::GetInstance()->max_transport_time -
+               FINAL_TOLERANT_TIME;
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
     if (is_valuable_goods && berth[j].q_boat.empty()) {
       // 贵重货物往有船的地方送
+      continue;
+    } else if (is_final_sprint && berth[j].q_boat.empty()) {
+      // 最后冲刺选有船的泊位
       continue;
     }
     cal_man = std::fabs(x - berth[j].x - 1.5) + std::fabs(y - berth[j].y - 1.5);
@@ -207,5 +214,5 @@ void Robot::FindBerth() {
             << "min_man_id:" << min_man_id << std::endl;
 #endif
   Astar astar(x, y, berth[min_man_id].x + 1, berth[min_man_id].y + 1);
-  astar.AstarSearch(path, berth_id);
+  astar.AstarSearch(path, berth_id, is_valuable_goods || is_final_sprint);
 }
