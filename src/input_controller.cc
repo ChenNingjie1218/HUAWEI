@@ -54,6 +54,7 @@ void InputController::Init() {
           &berth[id].loading_speed);
     ++berth[id].x;
     ++berth[id].y;
+    InitBerthMap(id, berth[id].x, berth[id].y);
 #ifdef DEBUG
     fprintf(
         debug_map_file,
@@ -184,4 +185,13 @@ void InputController::Input() {
 #ifdef DEBUG
   fprintf(debug_command_file, "%s\n", okk);
 #endif
+}
+
+// 初始化坐标映射到泊位id的map
+void InputController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4; ++j) {
+      location_to_berth_id[Location(berth_x + i, berth_y + j)] = berth_id;
+    }
+  }
 }

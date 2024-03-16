@@ -1,7 +1,6 @@
 #ifndef ASTAR_H_
 #define ASTAR_H_
 #include <array>
-#include <list>
 #include <queue>
 #include <vector>
 
@@ -11,6 +10,9 @@ struct Location {
   int x, y;
   Location() = default;
   Location(int x, int y);
+  friend bool operator==(const Location &a, const Location &b);
+  friend bool operator!=(const Location &a, const Location &b);
+  friend bool operator<(Location a, Location b);
 };
 
 namespace std {
@@ -34,6 +36,7 @@ struct Point {
   ~Point() = default;
   // 该点是否可以走动
   bool CanReach();
+  friend bool operator==(const Point &a, const Point &b);
 };
 
 template <typename T, typename priority_t>
@@ -64,6 +67,7 @@ struct Astar {
 
   // 如果目标是泊位，target_goods传一个空指针的变量
   bool AstarSearch(std::vector<Location> &path, int &astar_deep,
-                   Goods *&find_goods);
+                   Goods *&find_goods, int berth_id = -1);
 };
+
 #endif

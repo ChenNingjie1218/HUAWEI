@@ -2,8 +2,8 @@
 
 #include <algorithm>
 #include <iostream>
-#include <unordered_map>
 
+#include "input_controller.h"
 #include "param.h"
 extern char ch[N][N];
 extern Goods *gds[N][N];
@@ -55,15 +55,8 @@ inline double heuristic(Location a, Location b) {
 Astar::Astar(int start_x, int start_y, int end_x, int end_y)
     : start(start_x, start_y), end(end_x, end_y) {}
 
-// void Astar::ReUse(int start_x, int start_y, int end_x, int end_y) {
-//   start.x = start_x;
-//   start.y = start_y;
-//   end.x = end_x;
-//   end.y = end_y;
-// }
-
 bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
-                        Goods *&find_goods) {
+                        Goods *&find_goods, int berth_id) {
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
   std::unordered_map<Location, double> cost_so_far;
@@ -75,7 +68,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
     Location current = frontier.get();
 // 超过深度剪枝
 #ifdef CUT_A_STAR
-    if (cost_so_far[current] > astar_deep && find_goods) {
+    if (find_goods && cost_so_far[current] > astar_deep) {
       if (astar_deep < LIFETIME) {
         astar_deep += 50;
       }
@@ -93,6 +86,28 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
       if (astar_deep > DEFAULT_A_STAR_DEEP) {
         astar_deep -= 50;
       }
+#endif
+      Location temp = current;
+      path.clear();
+      // int count = 0;
+      while (temp != start) {
+        path.push_back(temp);
+        // std::cerr << "(" << temp.x << "," << temp.y << ")" << std::endl;
+        temp = came_from[temp];
+        // ++count;
+      }
+      // std::cerr << count << std::endl;
+      std::reverse(path.begin(), path.end());
+      return true;
+    }
+
+    if (berth_id > -1 &&
+        InputController::GetInstance()->location_to_berth_id.find(current) !=
+            InputController::GetInstance()->location_to_berth_id.end()) {
+      // 提前找到一个更近的泊位
+      berth_id = InputController::GetInstance()->location_to_berth_id[current];
+#ifdef DEBUG
+      std::cerr << "提前找到一个更近的泊位: " << berth_id << std::endl;
 #endif
       Location temp = current;
       path.clear();
