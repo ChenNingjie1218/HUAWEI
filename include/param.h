@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-#define DEBUG
+// #define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;
@@ -37,4 +37,10 @@ const int N = 210;
 
 // 船在港口停留时间
 #define TOLERANT_WAIT_TIME 1000
+
+// 货物筛选域值
+#define GOODS_VALUE_VALVE 20
+
+// 贵重货物域值
+#define VALUEABLE_GOODS_VALVE 150
 #endif

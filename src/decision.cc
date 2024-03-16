@@ -281,7 +281,7 @@ void DecisionManager::DecisionRobot() {
         robot[i].target_goods->robot_id = i;
       }
       robot[i].goods = false;
-    } else if (!robot[i].goods && robot[i].target_goods &&
+    } else if (!robot[i].goods && robot[i].target_goods != nullptr &&
                robot[i].target_goods->x == robot[i].x &&
                robot[i].target_goods->y == robot[i].y) {
 #ifdef DEBUG
@@ -292,12 +292,12 @@ void DecisionManager::DecisionRobot() {
       Decision decision(DECISION_TYPE_ROBOT_GET, i, -1);
       q_decision.push(decision);
 
-      // 捡到货物将其从链表删除
-      GoodsManager::GetInstance()->DeleteGoods(robot[i].target_goods);
-
       // 决策更新目标泊位和泊位权重
       robot[i].FindBerth();
       // berth_weight[robot[i].berth_id]++;
+
+      // 捡到货物将其从链表删除
+      GoodsManager::GetInstance()->DeleteGoods(robot[i].target_goods);
 
       //当前持有货物
       robot[i].goods = true;

@@ -108,9 +108,9 @@ void InputController::Input() {
   }
   id = temp_id;
 #ifdef DEBUG
-  std::cerr << "------------------id: " << id << "------------------"
+  std::cerr << "------------------帧数id: " << id << "------------------"
             << std::endl;
-  fprintf(debug_command_file, "id = %d, money = %d\n", id, money);
+  fprintf(debug_command_file, "帧数 id = %d, 分数 money = %d\n", id, money);
 #endif
   // 新增货物
   int num;
@@ -128,6 +128,13 @@ void InputController::Input() {
             i, x, y, val);
 #endif
     if (ch[x][y] == '.' || ch[x][y] == 'A' || ch[x][y] == 'B') {
+      if (val < GOODS_VALUE_VALVE) {
+#ifdef DEBUG
+        std::cerr << "货物价值过低被抛弃: " << val << std::endl;
+#endif
+        // 忽略不值钱的货物
+        continue;
+      }
       Goods* new_goods = new Goods(x, y, val, id);
       GoodsManager::GetInstance()->PushGoods(new_goods);
     }

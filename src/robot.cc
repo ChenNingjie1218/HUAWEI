@@ -121,7 +121,7 @@ void Robot::UpdateTargetGoods() {
 #endif
     Astar astar(x, y, p_goods->x, p_goods->y);
     // Astar astar(36, 173, 137, 117);
-    int size = route.size();
+
     Goods *find_goods = p_goods;
     if (!astar.AstarSearch(route, astar_deep, find_goods)) {
 #ifdef DEBUG
@@ -130,7 +130,11 @@ void Robot::UpdateTargetGoods() {
       p_goods = p_goods->next;
       need_change_first_free_goods = false;
       continue;
-    } else if (size + id - p_goods->birth > LIFETIME) {
+    }
+
+    int size = route.size();
+    if (size + id - p_goods->birth > LIFETIME) {
+      // 过去捡会超过生命周期
 #ifdef DEBUG
       std::cerr << "can not get this good" << std::endl;
 #endif
@@ -138,7 +142,6 @@ void Robot::UpdateTargetGoods() {
       need_change_first_free_goods = false;
       continue;
     }
-    size = route.size();
 #ifdef DEBUG
     std::cerr << "------- astar finished ------- route size:" << size
               << std::endl
@@ -185,16 +188,24 @@ void Robot::FindBerth() {
   int min_man_id = 0;  // 曼哈顿最小距离泊位id
   std::vector<Location> route;
   double min_man = 99999, cal_man;  // 曼哈顿距离
-
+  bool is_valuable_goods =
+      target_goods->money > VALUEABLE_GOODS_VALVE ? true : false;
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
+    if (is_valuable_goods && berth[j].q_boat.empty()) {
+      // 贵重货物往有船的地方送
+      continue;
+    }
     cal_man = std::fabs(x - berth[j].x - 1.5) + std::fabs(y - berth[j].y - 1.5);
     if (min_man > cal_man) {
       min_man_id = j;
       min_man = cal_man;
     }
   }
-
+#ifdef DEBUG
+  std::cerr << (is_valuable_goods ? "是贵重物品" : "不是贵重物品")
+            << "min_man_id:" << min_man_id << std::endl;
+#endif
   Astar astar(x, y, berth[min_man_id].x + 1, berth[min_man_id].y + 1);
   astar.AstarSearch(path, berth_id);
 }
