@@ -148,12 +148,14 @@ void InputController::Input() {
     }
 #endif
     // 放置成功港口货物加一
-    if (robot[i].goods - temp_goods == 1) {
+    if (robot[i].pre_goods - temp_goods == 1) {
       berth[robot[i].berth_id].goods_num++;
+      berth[robot[i].berth_id].weight++;
       robot[i].berth_id = -1;
       // boat[berth[robot[i].berth_id].q_boat.front()].num++;
     }
     robot[i].goods = temp_goods;
+    robot[i].pre_goods = temp_goods;
   }
 
   // 船的实时数据

@@ -10,6 +10,10 @@ struct Robot {
 
   // 是否携带货物
   int goods;
+
+  //保存上一刻的货物状态
+  int pre_goods;
+
   // 手里拿的物品的价值
   int goods_money;
 

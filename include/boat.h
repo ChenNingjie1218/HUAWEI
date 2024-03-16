@@ -10,6 +10,10 @@ struct Boat {
 
   // 船的最大容量
   static int boat_capacity;
+
+  // 船舶停留时间 v2.0
+  int waiting_time;
+
   /*
    * 状态
    * 可能值：
@@ -24,10 +28,13 @@ struct Boat {
 
   Boat();
 
-  //虚拟点选择泊位
-  void ChooseBerth(int &rand_berth);
+  // 虚拟点选择泊位
+  void ChooseBerth();
 
-  //离开港口的条件
+  // version:3.0: 选择固定的两个泊位
+  void ChooseBerth3(int i);
+
+  // 离开港口的条件
   bool LeaveCond();
 };
 

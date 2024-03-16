@@ -1,5 +1,6 @@
 #include "robot.h"
 
+#include <cmath>
 #include <iostream>
 
 #include "berth.h"
@@ -181,25 +182,22 @@ void Robot::UpdateTargetGoods() {
 }
 
 void Robot::FindBerth() {
-  int length = 0, fin_length = 50000, fin_j = 0;
+  int min_man_id = 0;  // 曼哈顿最小距离泊位id
   std::vector<Location> route;
+  double min_man = 99999, cal_man;  // 曼哈顿距离
 
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
-    if (berth[j].q_boat.empty()) {
-      continue;
-    }
-    // Robot::ClearPath(route);  // 清空上一次计算的路径
-    Astar astar(x, y, berth[j].x + 1, berth[j].y + 1);
-    Goods *find_goods = nullptr;
-    if (astar.AstarSearch(route, astar_deep, find_goods)) {
-      length = route.size();
-      if (length < fin_length) {
-        fin_length = length;
-        path = route;  //更新机器人的行动路径
-        fin_j = j;
-      }
+    cal_man = std::fabs(x - berth[j].x - 1.5) + std::fabs(y - berth[j].y - 1.5);
+    if (min_man > cal_man) {
+      min_man_id = j;
+      min_man = cal_man;
     }
   }
-  berth_id = fin_j;
+
+  Astar astar(x, y, berth[min_man_id].x + 1, berth[min_man_id].y + 1);
+  Goods *find_goods = nullptr;
+  // astar.AstarSearch(path, astar_deep, find_goods, berth_id);
+  astar.AstarSearch(path, astar_deep, find_goods);
+  berth_id = min_man_id;
 }

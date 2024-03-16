@@ -1,7 +1,9 @@
 #ifndef ASTAR_H_
 #define ASTAR_H_
 #include <array>
+#include <map>
 #include <queue>
+#include <unordered_map>
 #include <vector>
 
 #include "goods.h"
