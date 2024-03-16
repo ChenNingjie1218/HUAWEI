@@ -171,10 +171,12 @@ void Robot::UpdateTargetGoods() {
     }
     p_goods = p_goods->next;
   }
-  if (need_change_first_free_goods &&
-      GoodsManager::GetInstance()->first_free_goods->next != head_goods) {
-    GoodsManager::GetInstance()->first_free_goods =
-        GoodsManager::GetInstance()->first_free_goods->next;
+  if (need_change_first_free_goods) {
+    while (GoodsManager::GetInstance()->first_free_goods->next != head_goods &&
+           GoodsManager::GetInstance()->first_free_goods->robot_id > -1) {
+      GoodsManager::GetInstance()->first_free_goods =
+          GoodsManager::GetInstance()->first_free_goods->next;
+    }
   }
 }
 
