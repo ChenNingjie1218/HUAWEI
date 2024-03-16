@@ -1,7 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-// #define DEBUG
-// #define DEBUG
+#define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;

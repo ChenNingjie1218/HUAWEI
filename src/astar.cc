@@ -101,7 +101,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
       return true;
     }
 
-    if (berth_id > -1 &&
+    if (berth_id > -1 && ch[current.x][current.y] == 'B' &&
         InputController::GetInstance()->location_to_berth_id.find(current) !=
             InputController::GetInstance()->location_to_berth_id.end()) {
       // 提前找到一个更近的泊位
