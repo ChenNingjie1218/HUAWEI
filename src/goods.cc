@@ -1,5 +1,7 @@
 #include "goods.h"
 
+#include <iostream>
+
 #include "robot.h"
 
 Goods *gds[N][N] = {nullptr};
@@ -39,9 +41,12 @@ void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
   gds[goods->x][goods->y] = nullptr;
   goods->pre->next = goods->next;
   goods->next->pre = goods->pre;
-  if (is_timeout && goods->robot_id) {
+  if (is_timeout && goods->robot_id > -1) {
+#ifdef DEBUG
+    std::cerr << "货物失效 robot " << goods->robot_id << "失去目标"
+              << std::endl;
+#endif
     robot[goods->robot_id].target_goods = nullptr;
-    // robot[goods->robot_id].path.clear();
   }
   delete goods;
   if (goods == first_free_goods) {

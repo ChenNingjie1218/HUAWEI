@@ -141,6 +141,17 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
                 .q_boat.empty());
 
       if (can_finish) {
+#ifdef DEBUG
+        if (berth_id ==
+            InputController::GetInstance()->location_to_berth_id[current]) {
+          std::cerr << "A*没有换新的目标泊位" << std::endl;
+        } else {
+          std::cerr
+              << "A*换了新的目标泊位 " << berth_id << " to "
+              << InputController::GetInstance()->location_to_berth_id[current]
+              << std::endl;
+        }
+#endif
         berth_id =
             InputController::GetInstance()->location_to_berth_id[current];
         Location temp = current;

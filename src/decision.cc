@@ -295,7 +295,9 @@ void DecisionManager::DecisionRobot() {
       // 决策更新目标泊位和泊位权重
       robot[i].FindBerth();
       // berth_weight[robot[i].berth_id]++;
-
+#ifdef DEBUG
+      std::cerr << "成功更新目标泊位" << std::endl;
+#endif
       // 捡到货物将其从链表删除
       GoodsManager::GetInstance()->DeleteGoods(robot[i].target_goods);
 
@@ -546,7 +548,9 @@ void NextPoint::OutPut() {
       // 决策更新目标泊位和泊位权重
       robot[robot_id].FindBerth();
       // berth_weight[robot[i].berth_id]++;
-
+#ifdef DEBUG
+      std::cerr << "成功更新目标泊位" << std::endl;
+#endif
       // 捡到货物将其从链表删除
       GoodsManager::GetInstance()->DeleteGoods(robot[robot_id].target_goods);
 
