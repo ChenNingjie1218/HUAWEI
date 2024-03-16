@@ -24,7 +24,7 @@ struct Robot {
   int astar_deep = 150;
 
   // 目标港口
-  int berth_id;
+  int berth_id = -1;
   Robot() = default;
   Robot(int startX, int startY);
 

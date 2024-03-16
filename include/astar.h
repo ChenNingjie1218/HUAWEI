@@ -67,9 +67,11 @@ struct Astar {
   // Astar() = default;
   Astar(int start_x, int start_y, int end_x, int end_y);
 
-  // 如果目标是泊位，target_goods传一个空指针的变量
+  // 找货物A*
   bool AstarSearch(std::vector<Location> &path, int &astar_deep,
-                   Goods *&find_goods, int berth_id = -1);
+                   Goods *&find_goods);
+  // 找泊位A*
+  bool AstarSearch(std::vector<Location> &path, int &berth_id);
 };
 
 #endif

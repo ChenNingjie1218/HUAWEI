@@ -55,8 +55,9 @@ inline double heuristic(Location a, Location b) {
 Astar::Astar(int start_x, int start_y, int end_x, int end_y)
     : start(start_x, start_y), end(end_x, end_y) {}
 
+// 找货物A*
 bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
-                        Goods *&find_goods, int berth_id) {
+                        Goods *&find_goods) {
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
   std::unordered_map<Location, double> cost_so_far;
@@ -81,7 +82,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
         gds[current.x][current.y]->robot_id == -1) {
       find_goods = gds[current.x][current.y];
 
-// 货物可达
+      // 货物可达
 #ifdef CUT_A_STAR
       if (astar_deep > DEFAULT_A_STAR_DEEP) {
         astar_deep -= 50;
@@ -101,7 +102,32 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
       return true;
     }
 
-    if (berth_id > -1 && ch[current.x][current.y] == 'B' &&
+    for (auto next : Point(current).neighbors) {
+      double new_cost = cost_so_far[current] + 1;
+      if (cost_so_far.find(next) == cost_so_far.end() ||
+          new_cost < cost_so_far[next]) {
+        cost_so_far[next] = new_cost;
+        double priority = new_cost + heuristic(next, end);
+        frontier.put(next, priority);
+        came_from[next] = current;
+      }
+    }
+  }
+  return false;
+}
+
+// 找泊位A*
+bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id) {
+  PriorityQueue<Location, double> frontier;
+  std::unordered_map<Location, Location> came_from;
+  std::unordered_map<Location, double> cost_so_far;
+  frontier.put(start, 0);
+  came_from[start] = start;
+  cost_so_far[start] = 0;
+
+  while (!frontier.empty()) {
+    Location current = frontier.get();
+    if (ch[current.x][current.y] == 'B' &&
         InputController::GetInstance()->location_to_berth_id.find(current) !=
             InputController::GetInstance()->location_to_berth_id.end()) {
       // 提前找到一个更近的泊位
@@ -110,26 +136,6 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
       std::cerr << "提前找到一个更近的泊位: " << berth_id << std::endl;
 #endif
       Location temp = current;
-      path.clear();
-      // int count = 0;
-      while (temp != start) {
-        path.push_back(temp);
-        // std::cerr << "(" << temp.x << "," << temp.y << ")" << std::endl;
-        temp = came_from[temp];
-        // ++count;
-      }
-      // std::cerr << count << std::endl;
-      std::reverse(path.begin(), path.end());
-      return true;
-    }
-    if (current == end) {
-//
-#ifdef CUT_A_STAR
-      if (astar_deep > DEFAULT_A_STAR_DEEP) {
-        astar_deep -= 50;
-      }
-#endif
-      Location temp = end;
       path.clear();
       // int count = 0;
       while (temp != start) {

@@ -196,8 +196,5 @@ void Robot::FindBerth() {
   }
 
   Astar astar(x, y, berth[min_man_id].x + 1, berth[min_man_id].y + 1);
-  Goods *find_goods = nullptr;
-  // astar.AstarSearch(path, astar_deep, find_goods, berth_id);
-  astar.AstarSearch(path, astar_deep, find_goods);
-  berth_id = min_man_id;
+  astar.AstarSearch(path, berth_id);
 }
