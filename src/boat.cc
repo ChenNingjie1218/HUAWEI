@@ -121,7 +121,7 @@ bool Boat::ChangeBerth3(int i) {
   }
   // 该船舶没货物了
   // 船还有很多容量且隔壁有很多货物
-  if (berth[target_berth].goods_num < berth[target_berth].loading_speed &&
+  if (berth[pos].goods_num < berth[pos].loading_speed &&
       boat[i].num < (boat_capacity * 0.3) &&
       berth[other_berth].goods_num > (boat_capacity * 0.8)) {
     pos = other_berth;  // 更新目标泊位
