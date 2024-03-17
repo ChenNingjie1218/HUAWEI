@@ -8,6 +8,7 @@
 #include "param.h"
 extern char ch[N][N];
 extern Goods *gds[N][N];
+extern int id;
 extern Berth berth[berth_num + 10];
 // 方向数组
 std::array<Location, 4> DIRS = {Location(1, 0), Location(-1, 0), Location(0, 1),
@@ -71,7 +72,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
     Location current = frontier.get();
 // 超过深度剪枝
 #ifdef CUT_A_STAR
-    if (find_goods && cost_so_far[current] > astar_deep) {
+    if (cost_so_far[current] > astar_deep) {
       if (astar_deep < LIFETIME - 50) {
         astar_deep += 50;
       }
@@ -81,7 +82,9 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 
     // 如果是找货物
     if (gds[current.x][current.y] &&
-        gds[current.x][current.y]->robot_id == -1) {
+        gds[current.x][current.y]->robot_id == -1 &&
+        cost_so_far[current] <
+            LIFETIME - id + gds[current.x][current.y]->birth - TOLERANT_TIME) {
       // if (find_goods->money < VALUEABLE_GOODS_VALVE &&
       //     gds[current.x][current.y]->money > find_goods->money) {
       if (gds[current.x][current.y]->money > find_goods->money) {

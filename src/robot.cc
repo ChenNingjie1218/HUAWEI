@@ -116,7 +116,9 @@ void Robot::UpdateTargetGoods() {
     }
 
     // 用曼哈顿距离初筛
-    if (std::abs(x - p_goods->x) + std::abs(y - p_goods->y) > astar_deep) {
+    int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
+    if (cal_man > astar_deep ||
+        cal_man > LIFETIME - id + p_goods->birth - TOLERANT_TIME) {
       p_goods = p_goods->next;
       need_change_first_free_goods = false;
       continue;
@@ -143,15 +145,6 @@ void Robot::UpdateTargetGoods() {
     }
 
     int size = route.size();
-    if (size + id - p_goods->birth > LIFETIME + TOLERANT_TIME) {
-      // 过去捡会超过生命周期
-#ifdef DEBUG
-      std::cerr << "can not get this good" << std::endl;
-#endif
-      p_goods = p_goods->next;
-      need_change_first_free_goods = false;
-      continue;
-    }
 #ifdef DEBUG
     std::cerr << "------- astar finished ------- route size:" << size
               << std::endl

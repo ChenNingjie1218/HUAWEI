@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-#define DEBUG
+// #define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;
@@ -36,7 +36,7 @@ const int N = 210;
 #define DEFAULT_A_STAR_DEEP 150
 
 // 机器人找货物容忍步数
-#define TOLERANT_TIME 40
+#define TOLERANT_TIME 30
 
 // 船最后走可容忍时间的
 #define TOLERANT_LEAVE_TIME 10
@@ -51,5 +51,5 @@ const int N = 210;
 #define VALUEABLE_GOODS_VALVE 150
 
 // 最后冲刺阶段的容忍时间
-#define FINAL_TOLERANT_TIME 200
+#define FINAL_TOLERANT_TIME 100
 #endif
