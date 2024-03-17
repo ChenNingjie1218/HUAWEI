@@ -4,12 +4,14 @@
 #include <iostream>
 
 #include "berth.h"
+#include "boat.h"
 #include "goods.h"
 #include "input_controller.h"
 #include "param.h"
 Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
 extern int id;
+extern Boat boat[10];
 Robot::Robot(int startX, int startY) {
   x = startX;
   y = startY;
@@ -100,89 +102,51 @@ int Robot::JudgePriority(Robot *first, Robot *second) {
  */
 
 void Robot::UpdateTargetGoods() {
-  double goods_weight = 0, cur_weight = 0;
   Goods *head_goods = GoodsManager::GetInstance()->head_goods;
   Goods *p_goods = GoodsManager::GetInstance()->first_free_goods;
   std::vector<Location> route;
   bool need_change_first_free_goods = true;
-  // 遍历货物链表
-  while (p_goods != head_goods) {
+  Goods *find_goods = p_goods;
+  int min_man = 99999;
+
+  while (p_goods->next != head_goods) {
     if (p_goods->robot_id > -1) {
-      // 该货物被选过了 可以改进弄一个全局指针
-      // 但是有可能表前面的没有被选择，待定
+      // 该货物被选过了
       p_goods = p_goods->next;
-      need_change_first_free_goods = false;
       continue;
     }
-
-    // 用曼哈顿距离初筛
     int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
-    if (cal_man > astar_deep ||
-        cal_man > LIFETIME - id + p_goods->birth - TOLERANT_TIME) {
-      p_goods = p_goods->next;
-      need_change_first_free_goods = false;
-      continue;
+    if (min_man > cal_man &&
+        cal_man < LIFETIME - id + p_goods->birth - TOLERANT_TIME) {
+      min_man = cal_man;
+      find_goods = p_goods;
     }
-
-// 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
-// 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
+    p_goods = p_goods->next;
+  }
+  if (find_goods->robot_id == -1) {
 #ifdef DEBUG
     std::cerr << "------- start astar -------" << std::endl;
-    std::cerr << "(" << x << "," << y << ")---->(" << p_goods->x << ","
-              << p_goods->y << ")" << std::endl;
+    std::cerr << "(" << x << "," << y << ")---->(" << find_goods->x << ","
+              << find_goods->y << ")" << std::endl;
 #endif
-    Astar astar(x, y, p_goods->x, p_goods->y);
-    // Astar astar(36, 173, 137, 117);
-
-    Goods *find_goods = p_goods;
+    Astar astar(x, y, find_goods->x, find_goods->y);
     if (!astar.AstarSearch(route, astar_deep, find_goods)) {
 #ifdef DEBUG
       std::cerr << "route empty" << std::endl;
 #endif
-      p_goods = p_goods->next;
-      need_change_first_free_goods = false;
-      continue;
-    }
-
-    int size = route.size();
-#ifdef DEBUG
-    std::cerr << "------- astar finished ------- route size:" << size
-              << std::endl
-              << std::endl;
-    // std::vector<Location>::iterator it = route.begin();
-    // for (int i = 0; i < size; ++i) {
-    //   std::cerr << "(" << it->x << "," << it->y << ") -> ";
-    //   ++it;
-    // }
-    // std::cerr << std::endl;
-#endif
-    cur_weight =
-        0.5 * (p_goods->money - 1) / 999 - 0.5 * (size - 1) / 399.0 + 1;
-    if (cur_weight > goods_weight) {
-      if (p_goods == find_goods) {
-        // 如果找到的货物与该货物是同一个货物
-#ifdef DEBUG
-        std::cerr << "same goods update path" << std::endl;
-#endif
-        target_goods = p_goods;
-      } else {
-#ifdef DEBUG
-        std::cerr << "better goods update path" << std::endl;
-#endif
-        target_goods = find_goods;
-        need_change_first_free_goods = false;
-      }
-      goods_weight = cur_weight;
+    } else {
+      target_goods = find_goods;
       path = route;
-      break;
-    }
-    p_goods = p_goods->next;
-  }
-  if (need_change_first_free_goods) {
-    while (GoodsManager::GetInstance()->first_free_goods->next != head_goods &&
-           GoodsManager::GetInstance()->first_free_goods->robot_id > -1) {
-      GoodsManager::GetInstance()->first_free_goods =
-          GoodsManager::GetInstance()->first_free_goods->next;
+      need_change_first_free_goods =
+          find_goods == GoodsManager::GetInstance()->first_free_goods;
+      if (need_change_first_free_goods) {
+        while (GoodsManager::GetInstance()->first_free_goods->next !=
+                   head_goods &&
+               GoodsManager::GetInstance()->first_free_goods->robot_id > -1) {
+          GoodsManager::GetInstance()->first_free_goods =
+              GoodsManager::GetInstance()->first_free_goods->next;
+        }
+      }
     }
   }
 }
@@ -193,15 +157,20 @@ void Robot::FindBerth() {
   double min_man = 99999, cal_man;  // 曼哈顿距离
   bool is_valuable_goods =
       target_goods->money > VALUEABLE_GOODS_VALVE ? true : false;
+  is_valuable_goods = false;
   bool is_final_sprint =
       id > 15000 - InputController::GetInstance()->max_transport_time -
-               FINAL_TOLERANT_TIME;
+               CHANGE_BERTH_TIME - FINAL_TOLERANT_TIME;
   // 寻找最近的泊位
   for (int j = 0; j < 10; j++) {
-    if (is_valuable_goods && berth[j].q_boat.empty()) {
+    if (is_valuable_goods && berth[j].q_boat.empty() &&
+        berth[j].goods_num <
+            Boat::boat_capacity - boat[berth[j].q_boat.front()].num) {
       // 贵重货物往有船的地方送
       continue;
-    } else if (is_final_sprint && berth[j].q_boat.empty()) {
+    } else if (is_final_sprint && berth[j].q_boat.empty() &&
+               berth[j].goods_num <
+                   Boat::boat_capacity - boat[berth[j].q_boat.front()].num) {
       // 最后冲刺选有船的泊位
       continue;
     }

@@ -1,5 +1,7 @@
 #include "boat.h"
 
+#include <iostream>
+
 #include "berth.h"
 #include "param.h"
 Boat boat[10];
@@ -78,13 +80,27 @@ void Boat::ChooseBerth() {
  * 船在虚拟点选择泊位
  * 依据1 泊位货物数量
  */
-void Boat::ChooseBerth3(int i) {
-  int target_berth = i * 2;
-  int max_berth =
-      berth[target_berth].goods_num >= berth[target_berth + 1].goods_num
-          ? target_berth
-          : (target_berth + 1);
-  pos = max_berth;
+void Boat::ChooseBerth3(int boat_id) {
+  int max_goods = -1;
+  int target_pos = -1;
+  for (int i = 0; i < 10; ++i) {
+    if (berth[i].goods_num > max_goods && berth[i].boat_id == -1) {
+      target_pos = i;
+      max_goods = berth[i].goods_num;
+    }
+  }
+  if (id != 1 && max_goods == 0) {
+    return;
+  }
+  berth[target_pos].boat_id = boat_id;
+  pos = target_pos;
+
+  // int target_berth = i * 2;
+  // int max_berth =
+  //     berth[target_berth].goods_num >= berth[target_berth + 1].goods_num
+  //         ? target_berth
+  //         : (target_berth + 1);
+  // pos = max_berth;
 }
 
 /*
@@ -110,22 +126,60 @@ bool Boat::LeaveCond() {
  * 2 船在泊位停留的时间
  * 3 另一个泊位的货物数量
  */
-bool Boat::ChangeBerth3(int i) {
-  int target_berth = i * 2;  // 负责的第一个泊位
-  int other_berth = (pos == target_berth) ? target_berth + 1
-                                          : target_berth;  // 船负责的另一个泊位
-  if (id > 15000 - berth[target_berth].transport_time - CHANGE_BERTH_TIME -
+bool Boat::ChangeBerth3(int boat_id) {
+  if (berth[pos].goods_num > 0) {
+    return false;
+  }
+  int target_pos = pos;
+  int max_goods = 0;
+  for (int i = 0; i < 10; ++i) {
+    if (i != pos && berth[i].goods_num > max_goods &&
+        berth[i].goods_num > Boat::boat_capacity / 5 &&
+        berth[i].boat_id == -1) {
+      target_pos = i;
+      max_goods = berth[i].goods_num;
+    }
+  }
+  if (target_pos == pos) {
+    return false;
+  }
+  if (id > 15000 - berth[target_pos].transport_time - CHANGE_BERTH_TIME -
                TOLERANT_LEAVE_TIME) {
     // 防止船换泊位后，不能回虚拟点了
     return false;
   }
-  // 该船舶没货物了
-  // 船还有很多容量且隔壁有很多货物
-  if (berth[pos].goods_num < berth[pos].loading_speed &&
-      boat[i].num < (boat_capacity * 0.3) &&
-      berth[other_berth].goods_num > (boat_capacity * 0.8)) {
-    pos = other_berth;  // 更新目标泊位
-    return true;
+#ifdef DEBUG
+  std::cerr << boat_id << " 船更换泊位 " << pos << " -> " << target_pos
+            << " 当前货物数量：" << num << std::endl;
+#endif
+  // 出队
+  if (!berth[pos].q_boat.empty()) {
+    berth[pos].q_boat.pop();
   }
-  return false;
+  berth[pos].boat_id = -1;
+  pos = target_pos;
+  berth[target_pos].boat_id = boat_id;
+  return true;
+
+  //   int target_berth = i * 2;  // 负责的第一个泊位
+  //   int other_berth = (pos == target_berth) ? target_berth + 1
+  //                                           : target_berth;  //
+  //                                           船负责的另一个泊位
+  //   if (id > 15000 - berth[target_berth].transport_time - CHANGE_BERTH_TIME -
+  //                TOLERANT_LEAVE_TIME) {
+  //     // 防止船换泊位后，不能回虚拟点了
+  //     return false;
+  //   }
+  //   // 该船舶没货物了
+  //   // 船还有很多容量且隔壁有很多货物
+  //   if (berth[pos].goods_num < berth[pos].loading_speed &&
+  //       berth[other_berth].goods_num > berth[other_berth].loading_speed) {
+  // #ifdef DEBUG
+  //     std::cerr << i << " 船更换泊位 " << pos << " -> " << other_berth
+  //               << " 当前货物数量：" << num << std::endl;
+  // #endif
+  //     pos = other_berth;  // 更新目标泊位
+  //     return true;
+  //   }
+  //   return false;
 }

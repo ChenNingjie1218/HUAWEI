@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-// #define DEBUG
+#define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;
@@ -32,11 +32,11 @@ const int N = 210;
 #define BERTH_WEIGHT_AFTER_BOAT_CHOOSE 1  //船选择泊位后，泊位权重的减少
 
 // A*算法深度
-#define CUT_A_STAR
+// #define CUT_A_STAR
 #define DEFAULT_A_STAR_DEEP 150
 
 // 机器人找货物容忍步数
-#define TOLERANT_TIME 30
+#define TOLERANT_TIME 40
 
 // 船最后走可容忍时间的
 #define TOLERANT_LEAVE_TIME 10
@@ -45,10 +45,10 @@ const int N = 210;
 #define TOLERANT_WAIT_TIME 1000
 
 // 货物筛选域值
-#define GOODS_VALUE_VALVE 20
+#define GOODS_VALUE_VALVE 50
 
 // 贵重货物域值
-#define VALUEABLE_GOODS_VALVE 150
+#define VALUEABLE_GOODS_VALVE 170
 
 // 最后冲刺阶段的容忍时间
 #define FINAL_TOLERANT_TIME 100

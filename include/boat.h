@@ -32,13 +32,13 @@ struct Boat {
   void ChooseBerth();
 
   // version:3.0: 选择固定的两个泊位
-  void ChooseBerth3(int i);
+  void ChooseBerth3(int boat_id);
 
   // 离开港口的条件
   bool LeaveCond();
 
   // 判断是否更换港口
-  bool ChangeBerth3(int i);
+  bool ChangeBerth3(int boat_id);
 };
 
 #endif

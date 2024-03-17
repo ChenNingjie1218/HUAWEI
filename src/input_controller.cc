@@ -98,7 +98,7 @@ void InputController::Input() {
 
     // 泊位上残留货物数量
     for (int i = 0; i < 10; ++i) {
-      std::cerr << "船上残留货物:" << berth[i].goods_num << std::endl;
+      std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
     }
 
     // 地上残留货物
@@ -114,7 +114,15 @@ void InputController::Input() {
   // 计算往船上装了多少货物
   int dis_id = temp_id - id;
   for (int i = 0; i < 10; i++) {
-    if (!berth[i].q_boat.empty() && berth[i].goods_num > 0) {
+#ifdef DEBUG
+    if (!berth[i].q_boat.empty() && boat[berth[i].q_boat.front()].status == 1 &&
+        berth[i].goods_num == 0) {
+      std::cerr << i << "空等" << std::endl;
+    }
+#endif
+
+    if (!berth[i].q_boat.empty() && berth[i].goods_num > 0 &&
+        boat[berth[i].q_boat.front()].status == 1) {
       int load_num = berth[i].loading_speed * dis_id;
       if (load_num >= berth[i].goods_num) {
         boat[berth[i].q_boat.front()].num += berth[i].goods_num;

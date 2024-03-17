@@ -144,26 +144,21 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
     if (ch[current.x][current.y] == 'B') {
       // 不紧急 找到更近的泊位可结束
       // 紧急   需要该泊位有船
+      int temp_berth_id =
+          InputController::GetInstance()->location_to_berth_id[current];
       bool can_finish =
-          !is_urgent ||
-          (is_urgent &&
-           !berth[InputController::GetInstance()->location_to_berth_id[current]]
-                .q_boat.empty());
+          !is_urgent || (is_urgent && !berth[temp_berth_id].q_boat.empty());
 
       if (can_finish) {
 #ifdef DEBUG
-        if (berth_id ==
-            InputController::GetInstance()->location_to_berth_id[current]) {
+        if (berth_id == temp_berth_id) {
           std::cerr << "A*没有换新的目标泊位" << std::endl;
         } else {
-          std::cerr
-              << "A*换了新的目标泊位 " << berth_id << " to "
-              << InputController::GetInstance()->location_to_berth_id[current]
-              << std::endl;
+          std::cerr << "A*换了新的目标泊位 " << berth_id << " to "
+                    << temp_berth_id << std::endl;
         }
 #endif
-        berth_id =
-            InputController::GetInstance()->location_to_berth_id[current];
+        berth_id = temp_berth_id;
         Location temp = current;
         path.clear();
         // int count = 0;

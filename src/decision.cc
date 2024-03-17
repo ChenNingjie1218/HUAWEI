@@ -57,6 +57,9 @@ void DecisionManager::DecisionBoat() {
 
         // 决策去哪个泊位
         boat[i].ChooseBerth3(i);
+        if (boat[i].pos == -1) {
+          continue;
+        }
 #ifdef DEBUG
         std::cerr << "boat " << i << " choose berth:" << boat[i].pos
                   << std::endl;
@@ -67,7 +70,7 @@ void DecisionManager::DecisionBoat() {
         if (!berth[boat[i].pos].q_boat.empty()) {
           berth[boat[i].pos].q_boat.pop();
         }
-
+        berth[boat[i].pos].boat_id = -1;
 // 决策是否驶离
 #ifdef DEBUG
         std::cerr << "boat " << i << " leave " << boat[i].pos << std::endl;
@@ -76,10 +79,6 @@ void DecisionManager::DecisionBoat() {
         q_decision.push(decision);
         boat[i].num = 0;                     // 清空船中货物
       } else if (boat[i].ChangeBerth3(i)) {  // 更换港口
-        // 出队
-        if (!berth[boat[i].pos].q_boat.empty()) {
-          berth[boat[i].pos].q_boat.pop();
-        }
         // 更换港口
         Decision decision(DECISION_TYPE_BOAT_SHIP, i, boat[i].pos);
         q_decision.push(decision);  // 决策入队
@@ -532,7 +531,7 @@ void NextPoint::OutPut() {
       Decision decision(DECISION_TYPE_ROBOT_PULL, robot_id, -1);
       DecisionManager::GetInstance()->q_decision.push(decision);
       // 增加泊位权重
-      ++berth[robot->berth_id].weight;
+      ++berth[robot[robot_id].berth_id].weight;
       // robot[robot_id].berth_id = -1;
     } else if (!robot[robot_id].goods && robot[robot_id].target_goods &&
                robot[robot_id].target_goods->x == robot[robot_id].x &&

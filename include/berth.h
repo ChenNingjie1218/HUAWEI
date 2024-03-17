@@ -13,10 +13,13 @@ struct Berth {
   int loading_speed;
 
   // 权重
-  int weight;
+  int weight = 0;
 
   // 货物数量
   int goods_num;
+
+  // 目标为这个泊位的boat id
+  int boat_id = -1;
 
   //到泊位的船队列
   std::queue<int> q_boat;

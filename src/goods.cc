@@ -69,6 +69,12 @@ void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
     first_free_goods = head_goods->next;
   }
   goods = nullptr;
+
+#ifdef DEBUG
+  if (first_free_goods->next == head_goods) {
+    std::cerr << "货物链表空了" << std::endl;
+  }
+#endif
 }
 
 // 刷新货物链表
