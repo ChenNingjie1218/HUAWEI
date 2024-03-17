@@ -93,6 +93,22 @@ void InputController::Input() {
   // }
   int temp_id = 0;
   if (scanf("%d%d", &temp_id, &money) == EOF) {
+#ifdef DEBUG
+    fclose(debug_command_file);
+
+    // 泊位上残留货物数量
+    for (int i = 0; i < 10; ++i) {
+      std::cerr << "船上残留货物:" << berth[i].goods_num << std::endl;
+    }
+
+    // 地上残留货物
+    Goods* head_goods = GoodsManager::GetInstance()->head_goods;
+    Goods* cur = head_goods->next;
+    while (cur != head_goods) {
+      std::cerr << "地上残留货物: " << cur->money << std::endl;
+      cur = cur->next;
+    }
+#endif
     exit(0);
   }
   // 计算往船上装了多少货物
@@ -109,6 +125,14 @@ void InputController::Input() {
       }
     }
   }
+
+  // 跳帧
+#ifdef DEBUG
+  if (dis_id > 1) {
+    std::cerr << "跳帧：" << dis_id << std::endl;
+  }
+#endif
+
   id = temp_id;
 #ifdef DEBUG
   std::cerr << "------------------帧数id: " << id << "------------------"
@@ -131,7 +155,7 @@ void InputController::Input() {
             i, x, y, val);
 #endif
     if (ch[x][y] == '.' || ch[x][y] == 'A' || ch[x][y] == 'B') {
-      if (val < GOODS_VALUE_VALVE) {
+      if (val < GoodsManager::GetInstance()->value_valve) {
 #ifdef DEBUG
         std::cerr << "货物价值过低被抛弃: " << val << std::endl;
 #endif

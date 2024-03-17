@@ -111,8 +111,17 @@ void Robot::UpdateTargetGoods() {
       // 该货物被选过了 可以改进弄一个全局指针
       // 但是有可能表前面的没有被选择，待定
       p_goods = p_goods->next;
+      need_change_first_free_goods = false;
       continue;
     }
+
+    // 用曼哈顿距离初筛
+    if (std::abs(x - p_goods->x) + std::abs(y - p_goods->y) > astar_deep) {
+      p_goods = p_goods->next;
+      need_change_first_free_goods = false;
+      continue;
+    }
+
 // 调用a*算法获取路径及其长度：p_goods的坐标为终点，robot：x、y是起点
 // 将长度和p_goods->money归一化加权作为权值，若大于当前权值则更新
 #ifdef DEBUG
@@ -134,7 +143,7 @@ void Robot::UpdateTargetGoods() {
     }
 
     int size = route.size();
-    if (size + id - p_goods->birth > LIFETIME) {
+    if (size + id - p_goods->birth > LIFETIME + TOLERANT_TIME) {
       // 过去捡会超过生命周期
 #ifdef DEBUG
       std::cerr << "can not get this good" << std::endl;

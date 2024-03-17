@@ -72,7 +72,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 // 超过深度剪枝
 #ifdef CUT_A_STAR
     if (find_goods && cost_so_far[current] > astar_deep) {
-      if (astar_deep < LIFETIME) {
+      if (astar_deep < LIFETIME - 50) {
         astar_deep += 50;
       }
       return false;
@@ -80,29 +80,36 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 #endif
 
     // 如果是找货物
-    if (find_goods && gds[current.x][current.y] &&
-        gds[current.x][current.y]->robot_id == -1 &&
-        gds[current.x][current.y]->money >= find_goods->money) {
-      find_goods = gds[current.x][current.y];
-      // 只换更值钱的货物
-      // 货物可达
+    if (gds[current.x][current.y] &&
+        gds[current.x][current.y]->robot_id == -1) {
+      // if (find_goods->money < VALUEABLE_GOODS_VALVE &&
+      //     gds[current.x][current.y]->money > find_goods->money) {
+      if (gds[current.x][current.y]->money > find_goods->money) {
+        // 只换更值钱的货物
+        // 仅当该目标货物不是贵重物品时
+        find_goods = gds[current.x][current.y];
+      }
+
+      if (find_goods->x == current.x && find_goods->y == current.y) {
+        // 到达目标货物
 #ifdef CUT_A_STAR
-      if (astar_deep > DEFAULT_A_STAR_DEEP) {
-        astar_deep -= 50;
-      }
+        if (astar_deep > DEFAULT_A_STAR_DEEP) {
+          astar_deep -= 50;
+        }
 #endif
-      Location temp = current;
-      path.clear();
-      // int count = 0;
-      while (temp != start) {
-        path.push_back(temp);
-        // std::cerr << "(" << temp.x << "," << temp.y << ")" << std::endl;
-        temp = came_from[temp];
-        // ++count;
+        Location temp = current;
+        path.clear();
+        // int count = 0;
+        while (temp != start) {
+          path.push_back(temp);
+          // std::cerr << "(" << temp.x << "," << temp.y << ")" << std::endl;
+          temp = came_from[temp];
+          // ++count;
+        }
+        // std::cerr << count << std::endl;
+        std::reverse(path.begin(), path.end());
+        return true;
       }
-      // std::cerr << count << std::endl;
-      std::reverse(path.begin(), path.end());
-      return true;
     }
 
     for (auto next : Point(current).neighbors) {

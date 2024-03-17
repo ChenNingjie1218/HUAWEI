@@ -20,6 +20,10 @@ Goods::Goods(int x, int y, int money, int birth) {
 }
 
 void GoodsManager::PushGoods(Goods *new_goods) {
+  ++goods_num;
+  if (goods_num > 15) {
+    UpdateValueValve(true);
+  }
   gds[new_goods->x][new_goods->y] = new_goods;
   if (head_goods->next == head_goods) {
     // 空链表
@@ -38,9 +42,20 @@ void GoodsManager::PushGoods(Goods *new_goods) {
 };
 // 删除货物
 void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
+  --goods_num;
+  if (goods_num < 15) {
+    UpdateValueValve(false);
+  }
   gds[goods->x][goods->y] = nullptr;
   goods->pre->next = goods->next;
   goods->next->pre = goods->pre;
+
+#ifdef DEBUG
+  if (is_timeout) {
+    std::cerr << "损失货物 money: " << goods->money << std::endl;
+  }
+#endif
+
   if (is_timeout && goods->robot_id > -1) {
 #ifdef DEBUG
     std::cerr << "货物失效 robot " << goods->robot_id << "失去目标"
@@ -68,5 +83,14 @@ void GoodsManager::FreshGoodsLists() {
       // 剪枝
       break;
     }
+  }
+}
+
+// 更新价值域值
+void GoodsManager::UpdateValueValve(bool is_plus) {
+  if (is_plus) {
+    value_valve = VALUEABLE_GOODS_VALVE;
+  } else {
+    value_valve = GOODS_VALUE_VALVE;
   }
 }

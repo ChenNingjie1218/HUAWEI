@@ -35,6 +35,9 @@ const int N = 210;
 #define CUT_A_STAR
 #define DEFAULT_A_STAR_DEEP 150
 
+// 机器人找货物容忍步数
+#define TOLERANT_TIME 40
+
 // 船最后走可容忍时间的
 #define TOLERANT_LEAVE_TIME 10
 
