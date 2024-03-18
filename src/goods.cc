@@ -17,6 +17,9 @@ Goods::Goods(int x, int y, int money, int birth) {
   this->y = y;
   this->money = money;
   this->birth = birth;
+  for (int i = 0; i < 10; ++i) {
+    reachable[i] = true;
+  }
 }
 
 void GoodsManager::PushGoods(Goods *new_goods) {

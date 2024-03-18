@@ -72,6 +72,8 @@ struct Astar {
                    Goods *&find_goods);
   // 找泊位A*
   bool AstarSearch(std::vector<Location> &path, int &berth_id, int is_urgent);
+  // 判断泊位是否可达
+  bool AstarSearch(int berth_id);
 };
 
 #endif

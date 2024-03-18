@@ -101,7 +101,7 @@ int Robot::JudgePriority(Robot *first, Robot *second) {
  * 寻找目标货物
  */
 
-void Robot::UpdateTargetGoods() {
+void Robot::UpdateTargetGoods(int robot_id) {
   Goods *head_goods = GoodsManager::GetInstance()->head_goods;
   Goods *p_goods = GoodsManager::GetInstance()->first_free_goods;
   std::vector<Location> route;
@@ -112,6 +112,11 @@ void Robot::UpdateTargetGoods() {
   while (p_goods->next != head_goods) {
     if (p_goods->robot_id > -1) {
       // 该货物被选过了
+      p_goods = p_goods->next;
+      continue;
+    }
+    if (!p_goods->reachable[robot_id]) {
+      // 该货物不可达
       p_goods = p_goods->next;
       continue;
     }
@@ -130,12 +135,22 @@ void Robot::UpdateTargetGoods() {
               << find_goods->y << ")" << std::endl;
 #endif
     Astar astar(x, y, find_goods->x, find_goods->y);
-    if (!astar.AstarSearch(route, astar_deep, find_goods)) {
+    Goods *temp_goods = find_goods;
+    if (!astar.AstarSearch(route, astar_deep, temp_goods)) {
 #ifdef DEBUG
       std::cerr << "route empty" << std::endl;
 #endif
+      //  该货物不可达
+      p_goods->reachable[robot_id] = false;
     } else {
-      target_goods = find_goods;
+      target_goods = temp_goods;
+#ifdef DEBUG
+      if (target_goods == find_goods) {
+        std::cerr << "same target goods" << std::endl;
+      } else {
+        std::cerr << "better target goods" << std::endl;
+      }
+#endif
       path = route;
       need_change_first_free_goods =
           find_goods == GoodsManager::GetInstance()->first_free_goods;
@@ -155,35 +170,27 @@ void Robot::FindBerth() {
   int min_man_id = 0;  // 曼哈顿最小距离泊位id
   std::vector<Location> route;
   double min_man = 99999, cal_man;  // 曼哈顿距离
-  bool is_valuable_goods =
-      target_goods->money > VALUEABLE_GOODS_VALVE ? true : false;
-  is_valuable_goods = false;
   bool is_final_sprint =
       id > 15000 - InputController::GetInstance()->max_transport_time -
                CHANGE_BERTH_TIME - FINAL_TOLERANT_TIME;
   // 寻找最近的泊位
-  for (int j = 0; j < 10; j++) {
-    if (is_valuable_goods && berth[j].q_boat.empty() &&
-        berth[j].goods_num <
-            Boat::boat_capacity - boat[berth[j].q_boat.front()].num) {
-      // 贵重货物往有船的地方送
-      continue;
-    } else if (is_final_sprint && berth[j].q_boat.empty() &&
-               berth[j].goods_num <
-                   Boat::boat_capacity - boat[berth[j].q_boat.front()].num) {
+  int size = berth_accessed.size();
+  for (int j = 0; j < size; ++j) {
+    if (is_final_sprint && berth[berth_accessed[j]].q_boat.empty() &&
+        berth[berth_accessed[j]].goods_num <
+            Boat::boat_capacity -
+                boat[berth[berth_accessed[j]].q_boat.front()].num) {
       // 最后冲刺选有船的泊位
       continue;
     }
-    cal_man = std::fabs(x - berth[j].x - 1.5) + std::fabs(y - berth[j].y - 1.5);
+    cal_man = std::fabs(x - berth[berth_accessed[j]].x - 1.5) +
+              std::fabs(y - berth[berth_accessed[j]].y - 1.5);
     if (min_man > cal_man) {
-      min_man_id = j;
+      min_man_id = berth_accessed[j];
       min_man = cal_man;
     }
   }
-#ifdef DEBUG
-  std::cerr << (is_valuable_goods ? "是贵重物品" : "不是贵重物品")
-            << "min_man_id:" << min_man_id << std::endl;
-#endif
+
   Astar astar(x, y, berth[min_man_id].x + 1, berth[min_man_id].y + 1);
-  astar.AstarSearch(path, berth_id, is_valuable_goods || is_final_sprint);
+  astar.AstarSearch(path, berth_id, is_final_sprint);
 }

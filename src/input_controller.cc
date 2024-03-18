@@ -46,6 +46,16 @@ void InputController::Init() {
     fprintf(debug_map_file, "\n");
   }
 #endif
+
+  // 记录机器人初始位置
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= n; j++) {
+      if (ch[i][j] == 'A') {
+        robot_initial_position.push_back(Location(i, j));
+      }
+    }
+  }
+
   // 泊位数据
   for (int i = 0; i < berth_num; i++) {
     int id;
@@ -55,6 +65,7 @@ void InputController::Init() {
     ++berth[id].x;
     ++berth[id].y;
     InitBerthMap(id, berth[id].x, berth[id].y);
+    InitReachableBerth(id, berth[id].x, berth[id].y);
 #ifdef DEBUG
     fprintf(
         debug_map_file,
@@ -198,6 +209,12 @@ void InputController::Input() {
     }
     robot[i].goods = temp_goods;
     robot[i].pre_goods = temp_goods;
+
+    // 第一帧更新机器人可达的泊位
+    if (id == 1) {
+      robot[i].berth_accessed =
+          reachable_berths[Location(robot[i].x, robot[i].y)];
+    }
   }
 
   // 船的实时数据
@@ -236,6 +253,19 @@ void InputController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {
       location_to_berth_id[Location(berth_x + i, berth_y + j)] = berth_id;
+    }
+  }
+}
+
+// 初始化每个机器人可达的泊位
+void InputController::InitReachableBerth(int berth_id, int berth_x,
+                                         int berth_y) {
+  int size = robot_initial_position.size();
+  for (int i = 0; i < size; ++i) {
+    Astar astar(robot_initial_position[i].x, robot_initial_position[i].y,
+                berth_x + 1, berth_y + 1);
+    if (astar.AstarSearch(berth_id)) {
+      reachable_berths[robot_initial_position[i]].push_back(berth_id);
     }
   }
 }

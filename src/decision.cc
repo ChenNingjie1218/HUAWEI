@@ -267,7 +267,7 @@ void DecisionManager::DecisionRobot() {
 #ifdef DEBUG
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif
-      robot[i].UpdateTargetGoods();
+      robot[i].UpdateTargetGoods(i);
 #ifdef DEBUG
       std::cerr << "robot " << i << " finished UpdateTargetGoods after pull"
                 << std::endl;
@@ -311,7 +311,7 @@ void DecisionManager::DecisionRobot() {
 #ifdef DEBUG
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif
-      robot[i].UpdateTargetGoods();
+      robot[i].UpdateTargetGoods(i);
       if (!robot[i].path.empty()) {
 // 有新的目标货物
 #ifdef DEBUG

@@ -11,7 +11,8 @@ struct Goods {
   int y;
   Goods *pre;  // 双向链表连接货物
   Goods *next;  // 按生存周期排列的，具有队列性质，又可随机删除
-  int robot_id = -1;  // 选择该货物的机器人
+  int robot_id = -1;   // 选择该货物的机器人
+  bool reachable[10];  // 货物可达散列表
 };
 
 // 货物管理器
@@ -39,6 +40,9 @@ struct GoodsManager {
   // 刷新货物链表
   void FreshGoodsLists();
 
+  // 更新价值域值
+  void UpdateValueValve(bool is_plus);
+
   // 货物链表头节点
   Goods *head_goods = new Goods();
 
@@ -51,8 +55,5 @@ struct GoodsManager {
 
   // 收入货物链表的价值域值
   int value_valve = GOODS_VALUE_VALVE;
-
-  // 更新价值域值
-  void UpdateValueValve(bool is_plus);
 };
 #endif

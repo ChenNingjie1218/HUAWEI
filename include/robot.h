@@ -30,8 +30,12 @@ struct Robot {
 
   Goods *target_goods;
   std::vector<Location> path;
+
+  // 可到达的港口
+  std::vector<int> berth_accessed;
+
   // 更新目标货物
-  void UpdateTargetGoods();
+  void UpdateTargetGoods(int robot_id);
 
   // 更新路线
   void UpdateTargetRoot();
