@@ -23,10 +23,12 @@ Goods::Goods(int x, int y, int money, int birth) {
 }
 
 void GoodsManager::PushGoods(Goods *new_goods) {
+#ifdef GOODS_FILTER
   ++goods_num;
-  if (goods_num > 15) {
+  if (goods_num > GOODS_FILTER_VALVE_NUM) {
     UpdateValueValve(true);
   }
+#endif
   gds[new_goods->x][new_goods->y] = new_goods;
   if (head_goods->next == head_goods) {
     // 空链表
@@ -45,10 +47,12 @@ void GoodsManager::PushGoods(Goods *new_goods) {
 };
 // 删除货物
 void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
+#ifdef GOODS_FILTER
   --goods_num;
-  if (goods_num < 15) {
+  if (goods_num < GOODS_FILTER_VALVE_NUM) {
     UpdateValueValve(false);
   }
+#endif
   gds[goods->x][goods->y] = nullptr;
   goods->pre->next = goods->next;
   goods->next->pre = goods->pre;

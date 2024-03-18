@@ -32,7 +32,8 @@ InputController*& InputController::GetInstance() {
  */
 char ch[N][N];
 int money;
-int id;  // 帧号
+int id;                // 帧号
+int busy_point[N][N];  // 堵车点
 
 // 初始化
 void InputController::Init() {
@@ -53,6 +54,7 @@ void InputController::Init() {
       if (ch[i][j] == 'A') {
         robot_initial_position.push_back(Location(i, j));
       }
+      busy_point[i][j] = 0;
     }
   }
 
@@ -174,6 +176,7 @@ void InputController::Input() {
             i, x, y, val);
 #endif
     if (ch[x][y] == '.' || ch[x][y] == 'A' || ch[x][y] == 'B') {
+#ifdef GOODS_FILTER
       if (val < GoodsManager::GetInstance()->value_valve) {
 #ifdef DEBUG
         std::cerr << "货物价值过低被抛弃: " << val << std::endl;
@@ -181,6 +184,7 @@ void InputController::Input() {
         // 忽略不值钱的货物
         continue;
       }
+#endif
       Goods* new_goods = new Goods(x, y, val, id);
       GoodsManager::GetInstance()->PushGoods(new_goods);
     }

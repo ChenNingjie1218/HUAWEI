@@ -41,7 +41,8 @@ struct NextPoint {
   void PushRobot(int robot_id, std::vector<int>& not_move_id);
 
   // 做决策
-  void OutPut();
+  // 剔除not_move_robot_id中能够让位的机器人id
+  void OutPut(std::vector<int>& not_move_robot_id);
 };
 
 // 决策管理

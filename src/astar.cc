@@ -8,6 +8,7 @@
 #include "param.h"
 extern char ch[N][N];
 extern Goods *gds[N][N];
+extern int busy_point[N][N];
 extern int id;
 extern Berth berth[berth_num + 10];
 // 方向数组
@@ -44,6 +45,9 @@ Point::Point(Location loc) {
 }
 
 bool Point::CanReach() {
+  if (busy_point[loc.x][loc.y] > BUSY_VALVE) {
+    return false;
+  }
   if (ch[loc.x][loc.y] == '.' || ch[loc.x][loc.y] == 'A' ||
       ch[loc.x][loc.y] == 'B') {
     return true;

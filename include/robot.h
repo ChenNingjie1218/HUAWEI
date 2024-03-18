@@ -21,7 +21,7 @@ struct Robot {
   int status;
   int mbx, mby;  //什么意思？
   // A*的深度
-  int astar_deep = 150;
+  int astar_deep = DEFAULT_A_STAR_DEEP;
 
   // 目标港口
   int berth_id = -1;

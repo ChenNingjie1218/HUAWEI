@@ -113,6 +113,9 @@ void Boat::ChooseBerth3(int boat_id) {
 bool Boat::LeaveCond() {
   if (pos != -1 &&
       id > 15000 - berth[pos].transport_time - TOLERANT_LEAVE_TIME) {
+#ifdef DEBUG
+    std::cerr << "船离开了，剩余货物数量:" << berth[pos].goods_num << std::endl;
+#endif
     return true;
   }
   // 容量达到80%就走
@@ -134,7 +137,7 @@ bool Boat::ChangeBerth3(int boat_id) {
   int max_goods = 0;
   for (int i = 0; i < 10; ++i) {
     if (i != pos && berth[i].goods_num > max_goods &&
-        berth[i].goods_num > Boat::boat_capacity / 5 &&
+        berth[i].goods_num > Boat::boat_capacity / 10 &&
         berth[i].boat_id == -1) {
       target_pos = i;
       max_goods = berth[i].goods_num;

@@ -14,8 +14,10 @@ extern Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
 extern char ch[N][N];
 extern Goods *gds[N][N];
+extern int busy_point[N][N];
 extern int id;
 extern std::array<Location, 4> DIRS;
+bool can_find_goods = true;  // 每次决策只找一次物品
 DecisionManager *DecisionManager::instance_ = nullptr;
 
 Decision::Decision(int type, int id, int param) {
@@ -239,6 +241,7 @@ bool DecisionManager::GetAway(int robot_id, std::vector<NextPoint> &next_points,
  *
  */
 void DecisionManager::DecisionRobot() {
+  can_find_goods = true;
 #ifdef DEBUG
   std::cerr << "-----------------------------------Robot-----------"
                "--------------------------"
@@ -268,7 +271,11 @@ void DecisionManager::DecisionRobot() {
 #ifdef DEBUG
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif
-      robot[i].UpdateTargetGoods(i);
+      if (can_find_goods) {
+        robot[i].UpdateTargetGoods(i);
+        can_find_goods = false;
+      }
+
 #ifdef DEBUG
       std::cerr << "robot " << i << " finished UpdateTargetGoods after pull"
                 << std::endl;
@@ -358,7 +365,10 @@ void DecisionManager::DecisionRobot() {
 #ifdef DEBUG
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif
-      robot[i].UpdateTargetGoods(i);
+      if (can_find_goods) {
+        robot[i].UpdateTargetGoods(i);
+        can_find_goods = false;
+      }
       if (!robot[i].path.empty()) {
 // 有新的目标货物
 #ifdef DEBUG
@@ -488,13 +498,68 @@ void DecisionManager::DecisionRobot() {
     }
   }
 
-  // 下移动决策
-  size = next_points.size();
 #ifdef DEBUG
   std::cerr << "Start MOVE DECISION, next_points size:" << size << std::endl;
 #endif
+  // 下移动决策
+  size = next_points.size();
   for (int i = 0; i < size; ++i) {
-    next_points[i].OutPut();
+    next_points[i].OutPut(not_move_id);
+  }
+
+  // 记录拥堵点
+  not_move_size = not_move_id.size();
+  for (int i = 0; i < not_move_size; ++i) {
+    int robot_id = not_move_id[i];
+    busy_point[robot[robot_id].x][robot[robot_id].y]++;
+    if (busy_point[robot[robot_id].x][robot[robot_id].y] > BUSY_VALVE) {
+#ifdef DEBUG
+      std::cerr << "机器人原地罚站超时" << std::endl;
+#endif
+      // 该机器人原地占了BUSY_VALVE次了
+      if (robot[robot_id].goods) {
+// 在送货
+#ifdef DEBUG
+        std::cerr << "机器人更改新的路线，找泊位" << std::endl;
+#endif
+        robot[robot_id].path.clear();
+        robot[robot_id].FindBerth(robot[robot_id].x, robot[robot_id].y);
+#ifdef DEBUG
+        std::cerr << "机器人更改完新的路线：" << robot[robot_id].path.size()
+                  << std::endl;
+#endif
+      } else if (robot[robot_id].target_goods) {
+// 在拿货
+#ifdef DEBUG
+        std::cerr << "机器人更改新的路线，找货物" << std::endl;
+#endif
+        robot[robot_id].target_goods->robot_id = -1;
+        robot[robot_id].target_goods = nullptr;
+        // 还原first_free_goods指针
+        Goods *head_goods = GoodsManager::GetInstance()->head_goods;
+        GoodsManager::GetInstance()->first_free_goods = head_goods->next;
+        while (GoodsManager::GetInstance()->first_free_goods->next !=
+                   head_goods &&
+               GoodsManager::GetInstance()->first_free_goods->robot_id > -1) {
+          GoodsManager::GetInstance()->first_free_goods =
+              GoodsManager::GetInstance()->first_free_goods->next;
+        }
+
+        // 找新的目标货物
+        robot[robot_id].path.clear();
+        robot[robot_id].UpdateTargetGoods(robot_id);
+        if (!robot[robot_id].path.empty()) {
+          robot[robot_id].target_goods->robot_id = robot_id;
+#ifdef DEBUG
+          std::cerr << "机器人成功更改新的路线" << std::endl;
+#endif
+        } else {
+#ifdef DEBUG
+          std::cerr << "机器人无法更改新的路线" << std::endl;
+#endif
+        }
+      }
+    }
   }
 }
 
@@ -534,7 +599,8 @@ void NextPoint::PushRobot(int robot_id, std::vector<int> &not_move_id) {
 }
 
 // 做移动决策
-void NextPoint::OutPut() {
+// 剔除not_move_robot_id中能够让位的机器人id
+void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
   // 该落点有机器人决策落入
   if (count) {
     int robot_id = list_robot[0];
@@ -558,6 +624,15 @@ void NextPoint::OutPut() {
 #endif
       return;
     }
+    // 剔除not_move_robot_id中能够让位的机器人id
+    int size = not_move_robot_id.size();
+    for (int i = 0; i < size; ++i) {
+      if (not_move_robot_id[i] == robot_id) {
+        not_move_robot_id.erase(not_move_robot_id.begin() + i);
+      }
+    }
+    busy_point[robot[robot_id].x][robot[robot_id].y] = 0;  // 该点不拥堵
+
     DecisionManager::GetInstance()->q_decision.push(
         Decision(DECISION_TYPE_ROBOT_MOVE, robot_id, param));
 

@@ -50,8 +50,10 @@ struct GoodsManager {
   // 每次找路径从该节点开始
   Goods *first_free_goods = head_goods;
 
+#ifdef GOODS_FILTER
   // 货物链表中的货物数量
   int goods_num = 0;
+#endif
 
   // 收入货物链表的价值域值
   int value_valve = GOODS_VALUE_VALVE;
