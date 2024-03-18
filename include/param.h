@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-#define DEBUG
+// #define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;
@@ -52,9 +52,9 @@ const int N = 210;
  * 开启后将按照 GOODS_VALUE_VALVE 筛选货物
  * 当货物数量超过 GOODS_FILTER_VALVE_NUM 将会按照 VALUEABLE_GOODS_VALVE 筛选货物
  */
-// #define GOODS_FILTER
-#define GOODS_VALUE_VALVE 0        // 货物筛选域值
-#define GOODS_FILTER_VALVE_NUM 15  // 货物筛选数量域值
+#define GOODS_FILTER
+#define GOODS_VALUE_VALVE 20       // 货物筛选域值
+#define GOODS_FILTER_VALVE_NUM 50  // 货物筛选数量域值
 #define VALUEABLE_GOODS_VALVE 150  // 贵重货物域值
 
 // 最后冲刺阶段的容忍时间
@@ -62,4 +62,7 @@ const int N = 210;
 
 // 判断该点拥堵的域值
 #define BUSY_VALVE 5
+
+// 判断泊位值不值得过去 boat_capacity / 该值
+#define BERTH_DIVISOR 10
 #endif

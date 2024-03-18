@@ -196,6 +196,7 @@ void InputController::Input() {
     scanf("%d%d%d%d", &temp_goods, &robot[i].x, &robot[i].y, &robot[i].status);
     ++robot[i].x;
     ++robot[i].y;
+    ++busy_point[robot[i].x][robot[i].y];
 #ifdef DEBUG
     fprintf(debug_command_file,
             "robot %d info: goods = %d, x = %d, y = %d, status = %d\n", i,

@@ -89,7 +89,7 @@ void Boat::ChooseBerth3(int boat_id) {
       max_goods = berth[i].goods_num;
     }
   }
-  if (id != 1 && max_goods == 0) {
+  if (max_goods < Boat::boat_capacity / BERTH_DIVISOR) {
     return;
   }
   berth[target_pos].boat_id = boat_id;
@@ -130,7 +130,7 @@ bool Boat::ChangeBerth3(int boat_id) {
   int max_goods = 0;
   for (int i = 0; i < 10; ++i) {
     if (i != pos && berth[i].goods_num > max_goods &&
-        berth[i].goods_num > Boat::boat_capacity / 10 &&
+        berth[i].goods_num > Boat::boat_capacity / BERTH_DIVISOR &&
         berth[i].boat_id == -1) {
       target_pos = i;
       max_goods = berth[i].goods_num;

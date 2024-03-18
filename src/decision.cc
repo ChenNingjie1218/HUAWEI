@@ -230,7 +230,9 @@ void DecisionManager::DecisionRobot() {
       }
       robot[i].goods = false;
     } else if (!robot[i].goods && gds[robot[i].x][robot[i].y]) {
-      std::cerr << "地上有货物" << std::endl;
+#ifdef DEBUG
+// std::cerr << "地上有货物" << std::endl;
+#endif
       bool is_get = false;
       // 机器人没拿货且地上有货物
       if (robot[i].target_goods &&
@@ -241,36 +243,38 @@ void DecisionManager::DecisionRobot() {
         std::cerr << "robot " << i << " 装目标货：(" << robot[i].x << ","
                   << robot[i].y << ")" << std::endl;
 #endif
-      }
-      //       else if (robot[i].target_goods &&
-      //                  gds[robot[i].x][robot[i].y]->money >
-      //                  VALUEABLE_GOODS_VALVE) {
-      //         // 有目标货物的情况下，路过的地上有贵重货物
-      //         is_get = true;
-      //         // 放弃原目标货物
-      //         robot[i].target_goods->robot_id = -1;
-      //         robot[i].target_goods = gds[robot[i].x][robot[i].y];
-      //         robot[i].target_goods->robot_id = i;
+        // } else if (robot[i].target_goods &&
+        //            gds[robot[i].x][robot[i].y]->money > VALUEABLE_GOODS_VALVE
+        //            && gds[robot[i].x][robot[i].y]->robot_id == -1) {
+      } else if (robot[i].target_goods &&
+                 gds[robot[i].x][robot[i].y]->money > VALUEABLE_GOODS_VALVE) {
+        // 有目标货物的情况下，路过的地上有贵重货物
+        is_get = true;
+        // 放弃原目标货物
+        if (gds[robot[i].x][robot[i].y]->robot_id != -1) {
+          // 有机器人选了这个目标货物
+          // 给他抢了
+          robot[gds[robot[i].x][robot[i].y]->robot_id].target_goods = nullptr;
+        }
+        robot[i].target_goods->robot_id = -1;
+        robot[i].target_goods = gds[robot[i].x][robot[i].y];
+        robot[i].target_goods->robot_id = i;
 
-      //         // 还原first_free_goods指针
-      //         Goods *head_goods = GoodsManager::GetInstance()->head_goods;
-      //         GoodsManager::GetInstance()->first_free_goods =
-      //         head_goods->next; while
-      //         (GoodsManager::GetInstance()->first_free_goods->next !=
-      //                    head_goods &&
-      //                GoodsManager::GetInstance()->first_free_goods->robot_id
-      //                > -1) {
-      //           GoodsManager::GetInstance()->first_free_goods =
-      //               GoodsManager::GetInstance()->first_free_goods->next;
-      //         }
+        // 还原first_free_goods指针
+        Goods *head_goods = GoodsManager::GetInstance()->head_goods;
+        GoodsManager::GetInstance()->first_free_goods = head_goods->next;
+        while (GoodsManager::GetInstance()->first_free_goods->next !=
+                   head_goods &&
+               GoodsManager::GetInstance()->first_free_goods->robot_id > -1) {
+          GoodsManager::GetInstance()->first_free_goods =
+              GoodsManager::GetInstance()->first_free_goods->next;
+        }
 
-      // #ifdef DEBUG
-      //         std::cerr << "robot " << i << " 装路过的高价货：(" <<
-      //         robot[i].x << ","
-      //                   << robot[i].y << ")" << std::endl;
-      // #endif
-      //       }
-      else if (!robot[i].target_goods) {
+#ifdef DEBUG
+        std::cerr << "robot " << i << " 装路过的高价货：(" << robot[i].x << ","
+                  << robot[i].y << ")" << std::endl;
+#endif
+      } else if (!robot[i].target_goods) {
         // 机器人没目标货物，且该帧刚好生成了一个货物在脚底下
         is_get = true;
         robot[i].target_goods = gds[robot[i].x][robot[i].y];
@@ -597,7 +601,9 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
       ++berth[robot[robot_id].berth_id].weight;
       // robot[robot_id].berth_id = -1;
     } else if (!robot[robot_id].goods && gds[x][y]) {
+#ifdef DEBUG
       std::cerr << "地上有货物" << std::endl;
+#endif
       bool is_get = false;
       // 机器人没拿货且地上有货物
       if (robot[robot_id].target_goods &&
@@ -608,33 +614,38 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
         std::cerr << "robot " << robot_id << " 移动后装目标货：(" << x << ","
                   << y << ")" << std::endl;
 #endif
-      }
-      //       else if (robot[robot_id].target_goods &&
-      //                  gds[x][y]->money > VALUEABLE_GOODS_VALVE) {
-      //         // 有目标货物的情况下，路过的地上有贵重货物
-      //         is_get = true;
-      //         // 放弃原目标货物
-      //         robot[robot_id].target_goods->robot_id = -1;
-      //         robot[robot_id].target_goods = gds[x][y];
+        // } else if (robot[robot_id].target_goods &&
+        //            gds[x][y]->money > VALUEABLE_GOODS_VALVE &&
+        //            gds[x][y]->robot_id == -1) {
+      } else if (robot[robot_id].target_goods &&
+                 gds[x][y]->money > VALUEABLE_GOODS_VALVE) {
+        // 有目标货物的情况下，路过的地上有贵重货物
+        is_get = true;
+        // 放弃原目标货物
+        if (gds[x][y]->robot_id != -1) {
+          // 有机器人选了这个目标货物
+          // 给他抢了
+          robot[gds[x][y]->robot_id].target_goods = nullptr;
+        }
+        robot[robot_id].target_goods->robot_id = -1;
+        robot[robot_id].target_goods = gds[x][y];
+        gds[x][y]->robot_id = robot_id;
 
-      //         // 还原first_free_goods指针
-      //         Goods *head_goods = GoodsManager::GetInstance()->head_goods;
-      //         GoodsManager::GetInstance()->first_free_goods =
-      //         head_goods->next; while
-      //         (GoodsManager::GetInstance()->first_free_goods->next !=
-      //                    head_goods &&
-      //                GoodsManager::GetInstance()->first_free_goods->robot_id
-      //                > -1) {
-      //           GoodsManager::GetInstance()->first_free_goods =
-      //               GoodsManager::GetInstance()->first_free_goods->next;
-      //         }
+        // 还原first_free_goods指针
+        Goods *head_goods = GoodsManager::GetInstance()->head_goods;
+        GoodsManager::GetInstance()->first_free_goods = head_goods->next;
+        while (GoodsManager::GetInstance()->first_free_goods->next !=
+                   head_goods &&
+               GoodsManager::GetInstance()->first_free_goods->robot_id > -1) {
+          GoodsManager::GetInstance()->first_free_goods =
+              GoodsManager::GetInstance()->first_free_goods->next;
+        }
 
-      // #ifdef DEBUG
-      //         std::cerr << "robot " << robot_id << " 移动后装路过的高价货：("
-      //         << x
-      //                   << "," << y << ")" << std::endl;
-      // #endif
-      //       }  // 区别于移动前动作，这里只有这两种情况
+#ifdef DEBUG
+        std::cerr << "robot " << robot_id << " 移动后装路过的高价货：(" << x
+                  << "," << y << ")" << std::endl;
+#endif
+      }  // 区别于移动前动作，这里只有这两种情况
       if (is_get) {
         // 装货
         Decision decision(DECISION_TYPE_ROBOT_GET, robot_id, -1);

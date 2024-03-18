@@ -74,6 +74,9 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 
   while (!frontier.empty()) {
     Location current = frontier.get();
+    if (current != start && busy_point[current.x][current.y]) {
+      continue;
+    }
 // 超过深度剪枝
 #ifdef CUT_A_STAR
     if (cost_so_far[current] > astar_deep) {
