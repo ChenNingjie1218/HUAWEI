@@ -32,8 +32,11 @@ const int N = 210;
 #define BERTH_WEIGHT_AFTER_BOAT_CHOOSE 1  //船选择泊位后，泊位权重的减少
 
 // A*算法深度
+// A*是否剪枝
 // #define CUT_A_STAR
 #define DEFAULT_A_STAR_DEEP 150
+// A*是否切换更近的货物
+#define CHANGE_CLOSED_GOODS
 
 // 机器人找货物容忍步数
 #define TOLERANT_TIME 40
@@ -48,8 +51,9 @@ const int N = 210;
 #define GOODS_VALUE_VALVE 50
 
 // 贵重货物域值
-#define VALUEABLE_GOODS_VALVE 170
+#define VALUEABLE_GOODS_VALVE 150
 
 // 最后冲刺阶段的容忍时间
 #define FINAL_TOLERANT_TIME 100
+
 #endif

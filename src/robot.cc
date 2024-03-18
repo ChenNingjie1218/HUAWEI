@@ -166,7 +166,8 @@ void Robot::UpdateTargetGoods(int robot_id) {
   }
 }
 
-void Robot::FindBerth() {
+// 存在移动后找泊位，这里不能直接用机器人的位置
+void Robot::FindBerth(int start_x, int start_y) {
   int min_man_id = 0;  // 曼哈顿最小距离泊位id
   std::vector<Location> route;
   double min_man = 99999, cal_man;  // 曼哈顿距离
@@ -191,6 +192,7 @@ void Robot::FindBerth() {
     }
   }
 
-  Astar astar(x, y, berth[min_man_id].x + 1, berth[min_man_id].y + 1);
+  Astar astar(start_x, start_y, berth[min_man_id].x + 1,
+              berth[min_man_id].y + 1);
   astar.AstarSearch(path, berth_id, is_final_sprint);
 }

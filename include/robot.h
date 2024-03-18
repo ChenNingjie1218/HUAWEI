@@ -70,7 +70,7 @@ struct Robot {
   static int JudgePriority(Robot *first, Robot *second);
 
   //拿到货物后寻找港口
-  void FindBerth();
+  void FindBerth(int start_x, int start_y);
 };
 
 #endif

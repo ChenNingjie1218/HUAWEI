@@ -85,12 +85,12 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
         gds[current.x][current.y]->robot_id == -1 &&
         cost_so_far[current] <
             LIFETIME - id + gds[current.x][current.y]->birth - TOLERANT_TIME) {
-      // if (find_goods->money < VALUEABLE_GOODS_VALVE &&
-      //     gds[current.x][current.y]->money > find_goods->money) {
+#ifdef CHANGE_CLOSED_GOODS
       if (gds[current.x][current.y]->money > VALUEABLE_GOODS_VALVE) {
         // 只换值钱的货物
         find_goods = gds[current.x][current.y];
       }
+#endif
 
       if (find_goods->x == current.x && find_goods->y == current.y) {
         // 到达目标货物

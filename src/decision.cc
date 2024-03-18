@@ -13,6 +13,7 @@ extern Boat boat[10];
 extern Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
 extern char ch[N][N];
+extern Goods *gds[N][N];
 extern int id;
 extern std::array<Location, 4> DIRS;
 DecisionManager *DecisionManager::instance_ = nullptr;
@@ -280,29 +281,75 @@ void DecisionManager::DecisionRobot() {
         robot[i].target_goods->robot_id = i;
       }
       robot[i].goods = false;
-    } else if (!robot[i].goods && robot[i].target_goods != nullptr &&
-               robot[i].target_goods->x == robot[i].x &&
-               robot[i].target_goods->y == robot[i].y) {
+    } else if (!robot[i].goods && gds[robot[i].x][robot[i].y]) {
+      std::cerr << "地上有货物" << std::endl;
+      bool is_get = false;
+      // 机器人没拿货且地上有货物
+      if (robot[i].target_goods &&
+          gds[robot[i].x][robot[i].y] == robot[i].target_goods) {
+        // 地上的货物为机器人准备捡的货物
+        is_get = true;
 #ifdef DEBUG
-      std::cerr << "robot " << i << " 装货：(" << robot[i].x << ","
-                << robot[i].y << ")" << std::endl;
+        std::cerr << "robot " << i << " 装目标货：(" << robot[i].x << ","
+                  << robot[i].y << ")" << std::endl;
 #endif
-      // 装货
-      Decision decision(DECISION_TYPE_ROBOT_GET, i, -1);
-      q_decision.push(decision);
+      }
+      //       else if (robot[i].target_goods &&
+      //                  gds[robot[i].x][robot[i].y]->money >
+      //                  VALUEABLE_GOODS_VALVE) {
+      //         // 有目标货物的情况下，路过的地上有贵重货物
+      //         is_get = true;
+      //         // 放弃原目标货物
+      //         robot[i].target_goods->robot_id = -1;
+      //         robot[i].target_goods = gds[robot[i].x][robot[i].y];
+      //         robot[i].target_goods->robot_id = i;
 
-      // 决策更新目标泊位和泊位权重
-      robot[i].FindBerth();
-      // berth_weight[robot[i].berth_id]++;
+      //         // 还原first_free_goods指针
+      //         Goods *head_goods = GoodsManager::GetInstance()->head_goods;
+      //         GoodsManager::GetInstance()->first_free_goods =
+      //         head_goods->next; while
+      //         (GoodsManager::GetInstance()->first_free_goods->next !=
+      //                    head_goods &&
+      //                GoodsManager::GetInstance()->first_free_goods->robot_id
+      //                > -1) {
+      //           GoodsManager::GetInstance()->first_free_goods =
+      //               GoodsManager::GetInstance()->first_free_goods->next;
+      //         }
+
+      // #ifdef DEBUG
+      //         std::cerr << "robot " << i << " 装路过的高价货：(" <<
+      //         robot[i].x << ","
+      //                   << robot[i].y << ")" << std::endl;
+      // #endif
+      //       }
+      else if (!robot[i].target_goods) {
+        // 机器人没目标货物，且该帧刚好生成了一个货物在脚底下
+        is_get = true;
+        robot[i].target_goods = gds[robot[i].x][robot[i].y];
+        robot[i].target_goods->robot_id = i;
 #ifdef DEBUG
-      std::cerr << "成功更新目标泊位" << std::endl;
+        std::cerr << "robot " << i << " 装地上新生成的货：(" << robot[i].x
+                  << "," << robot[i].y << ")" << std::endl;
 #endif
-      // 捡到货物将其从链表删除
-      GoodsManager::GetInstance()->DeleteGoods(robot[i].target_goods);
+      }
+      if (is_get) {
+        // 装货
+        Decision decision(DECISION_TYPE_ROBOT_GET, i, -1);
+        q_decision.push(decision);
 
-      //当前持有货物
-      robot[i].goods = true;
-      robot[i].pre_goods = true;
+        // 决策更新目标泊位和泊位权重
+        robot[i].FindBerth(robot[i].x, robot[i].y);
+        // berth_weight[robot[i].berth_id]++;
+#ifdef DEBUG
+        std::cerr << "成功更新目标泊位" << std::endl;
+#endif
+        // 捡到货物将其从链表删除
+        GoodsManager::GetInstance()->DeleteGoods(robot[i].target_goods);
+
+        //当前持有货物
+        robot[i].goods = true;
+        robot[i].pre_goods = true;
+      }
     }
     // if (!robot[i].goods) {
     // 空闲机器人
@@ -533,29 +580,63 @@ void NextPoint::OutPut() {
       // 增加泊位权重
       ++berth[robot[robot_id].berth_id].weight;
       // robot[robot_id].berth_id = -1;
-    } else if (!robot[robot_id].goods && robot[robot_id].target_goods &&
-               robot[robot_id].target_goods->x == robot[robot_id].x &&
-               robot[robot_id].target_goods->y == robot[robot_id].y) {
+    } else if (!robot[robot_id].goods && gds[x][y]) {
+      std::cerr << "地上有货物" << std::endl;
+      bool is_get = false;
+      // 机器人没拿货且地上有货物
+      if (robot[robot_id].target_goods &&
+          gds[x][y] == robot[robot_id].target_goods) {
+        // 地上的货物为机器人准备捡的货物
+        is_get = true;
 #ifdef DEBUG
-      std::cerr << "robot " << robot_id << " 移动后装货：(" << x << "," << y
-                << ")" << std::endl;
+        std::cerr << "robot " << robot_id << " 移动后装目标货：(" << x << ","
+                  << y << ")" << std::endl;
 #endif
-      // 装货
-      Decision decision(DECISION_TYPE_ROBOT_GET, robot_id, -1);
-      DecisionManager::GetInstance()->q_decision.push(decision);
+      }
+      //       else if (robot[robot_id].target_goods &&
+      //                  gds[x][y]->money > VALUEABLE_GOODS_VALVE) {
+      //         // 有目标货物的情况下，路过的地上有贵重货物
+      //         is_get = true;
+      //         // 放弃原目标货物
+      //         robot[robot_id].target_goods->robot_id = -1;
+      //         robot[robot_id].target_goods = gds[x][y];
 
-      // 决策更新目标泊位和泊位权重
-      robot[robot_id].FindBerth();
-      // berth_weight[robot[i].berth_id]++;
+      //         // 还原first_free_goods指针
+      //         Goods *head_goods = GoodsManager::GetInstance()->head_goods;
+      //         GoodsManager::GetInstance()->first_free_goods =
+      //         head_goods->next; while
+      //         (GoodsManager::GetInstance()->first_free_goods->next !=
+      //                    head_goods &&
+      //                GoodsManager::GetInstance()->first_free_goods->robot_id
+      //                > -1) {
+      //           GoodsManager::GetInstance()->first_free_goods =
+      //               GoodsManager::GetInstance()->first_free_goods->next;
+      //         }
+
+      // #ifdef DEBUG
+      //         std::cerr << "robot " << robot_id << " 移动后装路过的高价货：("
+      //         << x
+      //                   << "," << y << ")" << std::endl;
+      // #endif
+      //       }  // 区别于移动前动作，这里只有这两种情况
+      if (is_get) {
+        // 装货
+        Decision decision(DECISION_TYPE_ROBOT_GET, robot_id, -1);
+        DecisionManager::GetInstance()->q_decision.push(decision);
+
+        // 决策更新目标泊位和泊位权重
+        robot[robot_id].FindBerth(x, y);
+        // berth_weight[robot[i].berth_id]++;
 #ifdef DEBUG
-      std::cerr << "成功更新目标泊位" << std::endl;
+        std::cerr << "成功更新目标泊位" << std::endl;
 #endif
-      // 捡到货物将其从链表删除
-      GoodsManager::GetInstance()->DeleteGoods(robot[robot_id].target_goods);
+        // 捡到货物将其从链表删除
+        GoodsManager::GetInstance()->DeleteGoods(robot[robot_id].target_goods);
 
-      //当前持有货物
-      robot[robot_id].goods = true;
-      robot[robot_id].pre_goods = true;
+        //当前持有货物
+        robot[robot_id].goods = true;
+        robot[robot_id].pre_goods = true;
+      }
     }
   }
 }
