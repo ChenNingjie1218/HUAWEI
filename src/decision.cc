@@ -109,10 +109,6 @@ bool DecisionManager::GetAway(int robot_id, std::vector<NextPoint> &next_points,
   int size = next_points.size();
   int x = robot[robot_id].x, y = robot[robot_id].y,
       ignore_x = robot[ignore_id].x, ignore_y = robot[ignore_id].y;
-  // // 要占领的next_point的id
-  // int occupy_point_id = -1;
-  // // 要占领的不动机器人的id
-  // std::set<int>::iterator getaway_it = not_move_id.end();
 
   // 1.看周围有没有不被占用的空位
   int first_dir;
@@ -170,61 +166,6 @@ bool DecisionManager::GetAway(int robot_id, std::vector<NextPoint> &next_points,
       }
     }
   }
-
-  //   // 2.让周围不动的让位
-  //   if (getaway_it != not_move_id.end()) {
-  // #ifdef DEBUG
-  //     std::cerr << "要占领让位" << std::endl;
-  // #endif
-  //     // 占领
-  //     int getaway_id = *getaway_it;
-
-  //     // 增加新落点
-  //     if (x == robot[getaway_id].x && y - 1 == robot[getaway_id].y) {
-  //       // 占领左
-  //       NextPoint add_next_point = NextPoint(x, y - 1, robot_id);
-  //       next_points.push_back(add_next_point);
-  //     } else if (x == robot[getaway_id].x && y + 1 == robot[getaway_id].y) {
-  //       // 占领右
-  //       NextPoint add_next_point = NextPoint(x, y + 1, robot_id);
-  //       next_points.push_back(add_next_point);
-  //     } else if (x - 1 == robot[getaway_id].x && y == robot[getaway_id].y) {
-  //       // 占领上
-  //       NextPoint add_next_point = NextPoint(x - 1, y, robot_id);
-  //       next_points.push_back(add_next_point);
-  //     } else {
-  //       // 占领下
-  //       NextPoint add_next_point = NextPoint(x + 1, y, robot_id);
-  //       next_points.push_back(add_next_point);
-  //     }
-  //     // 将让的位加入让位机器的人path
-  //     robot[robot_id].AddFirst(x, y);
-
-  //     not_move_id.erase(getaway_it);
-  //     GetAway(getaway_id, next_points, robot_id, not_move_id);
-  //     return;
-  //   }
-
-  //   // 3.抢占位置
-  //   if (occupy_point_id > -1) {
-  // #ifdef DEBUG
-  //     std::cerr << "抢占位置" << std::endl;
-  // #endif
-
-  //     // 把当前机器人id插到最前面
-  //     int count = next_points[occupy_point_id].count;
-  //     for (int i = count; i > 0; --i) {
-  //       next_points[occupy_point_id].list_robot[i] =
-  //           next_points[occupy_point_id].list_robot[i - 1];
-  //     }
-  //     next_points[occupy_point_id].list_robot[0] = robot_id;
-  //     not_move_id.insert(next_points[occupy_point_id].list_robot[1]);
-  //     // 将让的位加入让位机器的人path
-  //     robot[robot_id].AddFirst(x, y);
-
-  //     // 产生了新的不动机器人需要判断
-  //     return;
-  // }
 
 #ifdef DEBUG
   std::cerr << "!!!!!!!!!!!!!!!!!!!! Can not get away !!!!!!!!!!!!!!!!!!!!"

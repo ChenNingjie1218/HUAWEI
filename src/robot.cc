@@ -17,18 +17,6 @@ Robot::Robot(int startX, int startY) {
   y = startY;
 }
 
-// // 清除path
-// void Robot::ClearPath() {
-// #ifdef DEBUG
-//   std::cerr << "ClearPath: path size ---- " << path.size() << std::endl;
-// #endif
-//   std::list<Location>::iterator it = path.begin();
-//   while (it != path.end()) {
-//     delete *it;
-//   }
-//   path.clear();
-// }
-
 // 删除path的第一个点
 void Robot::RemoveFirst() {
   if (!path.empty()) {

@@ -94,13 +94,6 @@ void Boat::ChooseBerth3(int boat_id) {
   }
   berth[target_pos].boat_id = boat_id;
   pos = target_pos;
-
-  // int target_berth = i * 2;
-  // int max_berth =
-  //     berth[target_berth].goods_num >= berth[target_berth + 1].goods_num
-  //         ? target_berth
-  //         : (target_berth + 1);
-  // pos = max_berth;
 }
 
 /*
@@ -163,26 +156,4 @@ bool Boat::ChangeBerth3(int boat_id) {
   pos = target_pos;
   berth[target_pos].boat_id = boat_id;
   return true;
-
-  //   int target_berth = i * 2;  // 负责的第一个泊位
-  //   int other_berth = (pos == target_berth) ? target_berth + 1
-  //                                           : target_berth;  //
-  //                                           船负责的另一个泊位
-  //   if (id > 15000 - berth[target_berth].transport_time - CHANGE_BERTH_TIME -
-  //                TOLERANT_LEAVE_TIME) {
-  //     // 防止船换泊位后，不能回虚拟点了
-  //     return false;
-  //   }
-  //   // 该船舶没货物了
-  //   // 船还有很多容量且隔壁有很多货物
-  //   if (berth[pos].goods_num < berth[pos].loading_speed &&
-  //       berth[other_berth].goods_num > berth[other_berth].loading_speed) {
-  // #ifdef DEBUG
-  //     std::cerr << i << " 船更换泊位 " << pos << " -> " << other_berth
-  //               << " 当前货物数量：" << num << std::endl;
-  // #endif
-  //     pos = other_berth;  // 更新目标泊位
-  //     return true;
-  //   }
-  //   return false;
 }

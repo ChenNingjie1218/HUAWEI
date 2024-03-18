@@ -4,7 +4,7 @@
 
 #include "robot.h"
 
-Goods *gds[N][N] = {nullptr};
+Goods *gds[N][N] = {{nullptr}};
 extern int id;
 extern Robot robot[robot_num + 10];
 GoodsManager *GoodsManager::instance_ = nullptr;
