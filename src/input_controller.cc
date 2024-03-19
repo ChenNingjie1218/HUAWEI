@@ -34,6 +34,7 @@ char ch[N][N];
 int money;
 int id;                // 帧号
 int busy_point[N][N];  // 堵车点
+int parent[N * N];
 
 // 初始化
 void InputController::Init() {
@@ -48,13 +49,31 @@ void InputController::Init() {
   }
 #endif
 
-  // 记录机器人初始位置
-  for (int i = 1; i <= n; i++) {
-    for (int j = 1; j <= n; j++) {
+  for (int i = 1; i <= n; ++i) {
+    for (int j = 1; j <= n; ++j) {
+      // 记录机器人初始位置
       if (ch[i][j] == 'A') {
         robot_initial_position.push_back(Location(i, j));
       }
+
+      // 初始化堵车标记
       busy_point[i][j] = 0;
+
+      // 初始化区域号
+      parent[i * n + j] = i * n + j;
+    }
+  }
+
+  for (int i = 1; i <= n; ++i) {
+    for (int j = 1; j <= n; ++j) {
+      if (ch[i][j] == '.' || ch[i][j] == 'A' || ch[i][j] == 'B') {
+        if (ch[i - 1][j] == '.' || ch[i - 1][j] == 'A' || ch[i - 1][j] == 'B') {
+          MergeArea(i * n + j, (i - 1) * n + j);
+        }
+        if (ch[i][j - 1] == '.' || ch[i][j - 1] == 'A' || ch[i][j - 1] == 'B') {
+          MergeArea(i * n + j, i * n + j - 1);
+        }
+      }
     }
   }
 
@@ -187,6 +206,7 @@ void InputController::Input() {
 #endif
       Goods* new_goods = new Goods(x, y, val, id);
       GoodsManager::GetInstance()->PushGoods(new_goods);
+      new_goods->area_id = FindArea(x * n + y);
     }
   }
 
@@ -215,10 +235,11 @@ void InputController::Input() {
     robot[i].goods = temp_goods;
     robot[i].pre_goods = temp_goods;
 
-    // 第一帧更新机器人可达的泊位
+    // 第一帧更新机器人可达的泊位、区号
     if (id == 1) {
       robot[i].berth_accessed =
           reachable_berths[Location(robot[i].x, robot[i].y)];
+      robot[i].area_id = FindArea(robot[i].x * n + robot[i].y);
     }
   }
 
@@ -272,5 +293,22 @@ void InputController::InitReachableBerth(int berth_id, int berth_x,
     if (astar.AstarSearch(berth_id)) {
       reachable_berths[robot_initial_position[i]].push_back(berth_id);
     }
+  }
+}
+
+// 用并查集分区
+// 找集合
+int InputController::FindArea(int id) {
+  if (parent[id] != id) {
+    parent[id] = FindArea(parent[id]);
+  }
+  return parent[id];
+}
+// 合并集合
+void InputController::MergeArea(int id_1, int id_2) {
+  int root_1 = FindArea(id_1);
+  int root_2 = FindArea(id_2);
+  if (root_1 != root_2) {
+    parent[root_2] = root_1;
   }
 }

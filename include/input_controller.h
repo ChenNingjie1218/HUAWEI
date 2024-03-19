@@ -34,5 +34,11 @@ struct InputController {
 
   // 船到虚拟点的最大耗时
   int max_transport_time = 0;
+
+  // 用并查集分区
+  // 找集合
+  int FindArea(int id);
+  // 合并集合
+  void MergeArea(int id_1, int id_2);
 };
 #endif

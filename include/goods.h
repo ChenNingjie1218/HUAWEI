@@ -13,6 +13,7 @@ struct Goods {
   Goods *next;  // 按生存周期排列的，具有队列性质，又可随机删除
   int robot_id = -1;   // 选择该货物的机器人
   bool reachable[10];  // 货物可达散列表
+  int area_id;         // 所处区号
 };
 
 // 货物管理器

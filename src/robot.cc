@@ -108,6 +108,10 @@ void Robot::UpdateTargetGoods(int robot_id) {
       p_goods = p_goods->next;
       continue;
     }
+    if (p_goods->area_id != area_id) {
+      p_goods = p_goods->next;
+      continue;
+    }
     int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
     if (min_man > cal_man &&
         cal_man < LIFETIME - id + p_goods->birth - TOLERANT_TIME) {

@@ -25,6 +25,9 @@ struct Robot {
 
   // 目标港口
   int berth_id = -1;
+
+  // 所处区号
+  int area_id;
   Robot() = default;
   Robot(int startX, int startY);
 
