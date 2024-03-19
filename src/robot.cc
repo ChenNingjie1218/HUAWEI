@@ -156,8 +156,10 @@ bool Robot::UpdateTargetGoods(int robot_id) {
               GoodsManager::GetInstance()->first_free_goods->next;
         }
       }
+      return true;
     }
   }
+  return false;
 }
 
 // 存在移动后找泊位，这里不能直接用机器人的位置
