@@ -58,7 +58,7 @@ const int N = 210;
 #define VALUEABLE_GOODS_VALVE 150  // 贵重货物域值
 
 // 最后冲刺阶段的容忍时间
-#define FINAL_TOLERANT_TIME 100
+#define FINAL_TOLERANT_TIME 200
 
 // 判断该点拥堵的域值
 #define BUSY_VALVE 5
