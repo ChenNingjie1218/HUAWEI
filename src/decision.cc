@@ -246,8 +246,10 @@ void DecisionManager::DecisionRobot() {
         // } else if (robot[i].target_goods &&
         //            gds[robot[i].x][robot[i].y]->money > VALUEABLE_GOODS_VALVE
         //            && gds[robot[i].x][robot[i].y]->robot_id == -1) {
-      } else if (robot[i].target_goods &&
-                 gds[robot[i].x][robot[i].y]->money > VALUEABLE_GOODS_VALVE) {
+      }
+#ifdef CAN_GRAB_GOODS
+      else if (robot[i].target_goods &&
+               gds[robot[i].x][robot[i].y]->money > VALUEABLE_GOODS_VALVE) {
         // 有目标货物的情况下，路过的地上有贵重货物
         is_get = true;
         // 放弃原目标货物
@@ -274,7 +276,9 @@ void DecisionManager::DecisionRobot() {
         std::cerr << "robot " << i << " 装路过的高价货：(" << robot[i].x << ","
                   << robot[i].y << ")" << std::endl;
 #endif
-      } else if (!robot[i].target_goods) {
+      }
+#endif
+      else if (!robot[i].target_goods) {
         // 机器人没目标货物，且该帧刚好生成了一个货物在脚底下
         is_get = true;
         robot[i].target_goods = gds[robot[i].x][robot[i].y];
@@ -617,8 +621,10 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
         // } else if (robot[robot_id].target_goods &&
         //            gds[x][y]->money > VALUEABLE_GOODS_VALVE &&
         //            gds[x][y]->robot_id == -1) {
-      } else if (robot[robot_id].target_goods &&
-                 gds[x][y]->money > VALUEABLE_GOODS_VALVE) {
+      }
+#ifdef CAN_GRAB_GOODS
+      else if (robot[robot_id].target_goods &&
+               gds[x][y]->money > VALUEABLE_GOODS_VALVE) {
         // 有目标货物的情况下，路过的地上有贵重货物
         is_get = true;
         // 放弃原目标货物
@@ -646,6 +652,7 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
                   << "," << y << ")" << std::endl;
 #endif
       }  // 区别于移动前动作，这里只有这两种情况
+#endif
       if (is_get) {
         // 装货
         Decision decision(DECISION_TYPE_ROBOT_GET, robot_id, -1);

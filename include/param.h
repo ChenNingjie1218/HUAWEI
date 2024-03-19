@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-// #define DEBUG
+#define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;
@@ -42,7 +42,7 @@ const int N = 210;
 #define TOLERANT_TIME 40
 
 // 船最后走可容忍时间的
-#define TOLERANT_LEAVE_TIME 10
+#define TOLERANT_LEAVE_TIME 5
 
 // 船在港口停留时间
 #define TOLERANT_WAIT_TIME 1000
@@ -65,4 +65,7 @@ const int N = 210;
 
 // 判断泊位值不值得过去 boat_capacity / 该值
 #define BERTH_DIVISOR 10
+
+// 是否允许抢占货物
+// #define CAN_GRAB_GOODS
 #endif
