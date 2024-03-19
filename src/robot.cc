@@ -109,6 +109,7 @@ void Robot::UpdateTargetGoods(int robot_id) {
       continue;
     }
     if (p_goods->area_id != area_id) {
+      // 不在一个分区
       p_goods = p_goods->next;
       continue;
     }
@@ -120,7 +121,8 @@ void Robot::UpdateTargetGoods(int robot_id) {
     }
     p_goods = p_goods->next;
   }
-  if (find_goods->robot_id == -1 && find_goods->reachable[robot_id]) {
+  if (min_man < 99999 && find_goods->robot_id == -1 &&
+      find_goods->reachable[robot_id]) {
 #ifdef DEBUG
     std::cerr << "------- start astar -------" << std::endl;
     std::cerr << "(" << x << "," << y << ")---->(" << find_goods->x << ","
