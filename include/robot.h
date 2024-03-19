@@ -38,16 +38,7 @@ struct Robot {
   std::vector<int> berth_accessed;
 
   // 更新目标货物
-  void UpdateTargetGoods(int robot_id);
-
-  // 更新路线
-  void UpdateTargetRoot();
-
-  // 清目标货物，重置容忍次数
-  void ResetTargetGoods();
-
-  // 清除path
-  void ClearPath();
+  bool UpdateTargetGoods(int robot_id);
 
   // 删除path的第一个点
   void RemoveFirst();

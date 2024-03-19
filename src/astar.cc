@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "berth.h"
+#include "boat.h"
 #include "input_controller.h"
 #include "param.h"
 extern char ch[N][N];
@@ -11,6 +12,7 @@ extern Goods *gds[N][N];
 extern int busy_point[N][N];
 extern int id;
 extern Berth berth[berth_num + 10];
+extern Boat boat[10];
 // 方向数组
 std::array<Location, 4> DIRS = {Location(1, 0), Location(-1, 0), Location(0, 1),
                                 Location(0, -1)};
@@ -152,10 +154,19 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
       // 紧急   需要该泊位有船
       int temp_berth_id =
           InputController::GetInstance()->location_to_berth_id[current];
-      bool can_finish =
-          !is_urgent || (is_urgent && !berth[temp_berth_id].q_boat.empty());
-
-      if (can_finish) {
+      bool can_finish = !is_urgent;
+      if (is_urgent && berth[temp_berth_id].boat_id != -1) {
+        if (berth[temp_berth_id].q_boat.empty()) {
+          // 船即将到该泊位
+          can_finish = true;
+        } else if (berth[temp_berth_id].goods_num <
+                   Boat::boat_capacity -
+                       boat[berth[temp_berth_id].q_boat.front()].num) {
+          // 该泊位有船，且泊位上的货物装不满船
+          can_finish = true;
+        }
+      }
+      if (can_finish || berth_id == temp_berth_id) {
 #ifdef DEBUG
         if (berth_id == temp_berth_id) {
           std::cerr << "A*没有换新的目标泊位" << std::endl;

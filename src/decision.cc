@@ -212,8 +212,7 @@ void DecisionManager::DecisionRobot() {
 #ifdef DEBUG
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif
-      if (can_find_goods) {
-        robot[i].UpdateTargetGoods(i);
+      if (can_find_goods && robot[i].UpdateTargetGoods(i)) {
         can_find_goods = false;
       }
 
@@ -307,15 +306,17 @@ void DecisionManager::DecisionRobot() {
         robot[i].pre_goods = true;
       }
     }
-    // if (!robot[i].goods) {
+    if (robot[i].goods && robot[i].path.empty()) {
+      // 如果有货物但是没路径
+      robot[i].FindBerth(robot[i].x, robot[i].y);
+    }
     // 空闲机器人
     if (!robot[i].target_goods && !robot[i].goods) {
       robot[i].path.clear();
 #ifdef DEBUG
       std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif
-      if (can_find_goods) {
-        robot[i].UpdateTargetGoods(i);
+      if (can_find_goods && robot[i].UpdateTargetGoods(i)) {
         can_find_goods = false;
       }
       if (!robot[i].path.empty()) {

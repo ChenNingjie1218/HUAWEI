@@ -89,7 +89,7 @@ int Robot::JudgePriority(Robot *first, Robot *second) {
  * 寻找目标货物
  */
 
-void Robot::UpdateTargetGoods(int robot_id) {
+bool Robot::UpdateTargetGoods(int robot_id) {
   Goods *head_goods = GoodsManager::GetInstance()->head_goods;
   Goods *p_goods = GoodsManager::GetInstance()->first_free_goods;
   std::vector<Location> route;
@@ -121,7 +121,7 @@ void Robot::UpdateTargetGoods(int robot_id) {
     }
     p_goods = p_goods->next;
   }
-  if (min_man < 99999 && find_goods->robot_id == -1 &&
+  if (min_man < 500 && find_goods->robot_id == -1 &&
       find_goods->reachable[robot_id]) {
 #ifdef DEBUG
     std::cerr << "------- start astar -------" << std::endl;
@@ -165,19 +165,25 @@ void Robot::FindBerth(int start_x, int start_y) {
   int min_man_id = 0;  // 曼哈顿最小距离泊位id
   std::vector<Location> route;
   double min_man = 99999, cal_man;  // 曼哈顿距离
-  // bool is_final_sprint =
-  //     id > 15000 - InputController::GetInstance()->max_transport_time -
-  //              CHANGE_BERTH_TIME - FINAL_TOLERANT_TIME;
+  bool is_final_sprint =
+      id > 15000 - InputController::GetInstance()->max_transport_time -
+               CHANGE_BERTH_TIME - FINAL_TOLERANT_TIME;
   // 寻找最近的泊位
   int size = berth_accessed.size();
   for (int j = 0; j < size; ++j) {
-    // if (is_final_sprint && berth[berth_accessed[j]].q_boat.empty() &&
-    //     berth[berth_accessed[j]].goods_num <
-    //         Boat::boat_capacity -
-    //             boat[berth[berth_accessed[j]].q_boat.front()].num) {
-    //   // 最后冲刺选有船的泊位
-    //   continue;
-    // }
+    if (is_final_sprint) {
+      if (berth[berth_accessed[j]].boat_id == -1) {
+        // 不需要往之后没船来的泊位送货
+        continue;
+      }
+      if (!berth[berth_accessed[j]].q_boat.empty() &&
+          berth[berth_accessed[j]].goods_num >=
+              Boat::boat_capacity -
+                  boat[berth[berth_accessed[j]].q_boat.front()].num) {
+        // 该泊位有船，且自己能装满后离开，不需要再往这儿送货
+        continue;
+      }
+    }
     cal_man = std::fabs(x - berth[berth_accessed[j]].x - 1.5) +
               std::fabs(y - berth[berth_accessed[j]].y - 1.5);
     if (min_man > cal_man) {
@@ -185,9 +191,11 @@ void Robot::FindBerth(int start_x, int start_y) {
       min_man = cal_man;
     }
   }
-
-  Astar astar(start_x, start_y, berth[min_man_id].x + 1,
-              berth[min_man_id].y + 1);
-  // astar.AstarSearch(path, berth_id, is_final_sprint);
-  astar.AstarSearch(path, berth_id, false);
+  if (min_man != 99999) {
+    Astar astar(start_x, start_y, berth[min_man_id].x + 1,
+                berth[min_man_id].y + 1);
+    astar.AstarSearch(path, min_man_id, is_final_sprint);
+    berth_id = min_man_id;
+    // astar.AstarSearch(path, berth_id, false);
+  }
 }

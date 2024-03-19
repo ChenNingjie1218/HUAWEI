@@ -123,22 +123,45 @@ bool Boat::LeaveCond() {
  * 3 另一个泊位的货物数量
  */
 bool Boat::ChangeBerth3(int boat_id) {
-  if (berth[pos].goods_num > 0) {
+  if (berth[pos].goods_num > berth[pos].loading_speed) {
     return false;
   }
+  // 先看有没有船舶能让自己填满
   int target_pos = pos;
-  int max_goods = 0;
   for (int i = 0; i < 10; ++i) {
-    if (i != pos && berth[i].goods_num > max_goods &&
-        berth[i].goods_num > Boat::boat_capacity / BERTH_DIVISOR &&
-        berth[i].boat_id == -1) {
-      target_pos = i;
-      max_goods = berth[i].goods_num;
+    if (i != pos && berth[i].boat_id == -1 &&
+        berth[i].goods_num >= Boat::boat_capacity - num) {
+      if (target_pos == pos) {
+        // 找到的第一个能把该船填满的船舶
+        target_pos = i;
+      } else if (berth[i].goods_num < berth[target_pos].goods_num) {
+        // 在都能把该船填满的情况下，选货最少的
+        target_pos = i;
+      }
     }
   }
   if (target_pos == pos) {
+    // 没有能把该船填满的船舶
+    int max_goods = 0;
+    for (int i = 0; i < 10; ++i) {
+      if (i != pos && berth[i].boat_id == -1) {
+        if (berth[i].goods_num > max_goods &&
+            berth[i].goods_num > Boat::boat_capacity / BERTH_DIVISOR) {
+          target_pos = i;
+          max_goods = berth[i].goods_num;
+        }
+      }
+    }
+  } else {
+#ifdef DEBUG
+    std::cerr << "找到了能填满船的泊位，没有选择货物最多的泊位" << std::endl;
+#endif
+  }
+
+  if (target_pos == pos) {
     return false;
   }
+
   if (id > 15000 - berth[target_pos].transport_time - CHANGE_BERTH_TIME -
                TOLERANT_LEAVE_TIME) {
     // 防止船换泊位后，不能回虚拟点了
