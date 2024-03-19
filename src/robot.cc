@@ -116,7 +116,7 @@ void Robot::UpdateTargetGoods(int robot_id) {
     }
     p_goods = p_goods->next;
   }
-  if (find_goods->robot_id == -1) {
+  if (find_goods->robot_id == -1 && find_goods->reachable[robot_id]) {
 #ifdef DEBUG
     std::cerr << "------- start astar -------" << std::endl;
     std::cerr << "(" << x << "," << y << ")---->(" << find_goods->x << ","
@@ -129,7 +129,7 @@ void Robot::UpdateTargetGoods(int robot_id) {
       std::cerr << "route empty" << std::endl;
 #endif
       //  该货物不可达
-      p_goods->reachable[robot_id] = false;
+      find_goods->reachable[robot_id] = false;
     } else {
       target_goods = temp_goods;
 #ifdef DEBUG
