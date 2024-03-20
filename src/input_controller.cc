@@ -163,6 +163,12 @@ void InputController::Input() {
         boat[berth[i].q_boat.front()].num += load_num;
         berth[i].goods_num -= load_num;
       }
+      if (boat[berth[i].q_boat.front()].num > Boat::boat_capacity) {
+        // 装载速度大于1的时候出现超额
+        berth[i].goods_num +=
+            boat[berth[i].q_boat.front()].num - Boat::boat_capacity;
+        boat[berth[i].q_boat.front()].num = Boat::boat_capacity;
+      }
     }
   }
 
