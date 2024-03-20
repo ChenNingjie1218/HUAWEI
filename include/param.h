@@ -29,48 +29,37 @@ const int N = 210;
 #define DECISION_ROBOT_UP 2
 #define DECISION_ROBOT_DOWN 3
 
-#define BERTH_WEIGHT_AFTER_BOAT_CHOOSE 1  //船选择泊位后，泊位权重的减少
+#define BERTH_WEIGHT_AFTER_BOAT_CHOOSE 1  // 参数 船选择泊位后，泊位权重的减少
 
 // A*算法深度
-// A*是否剪枝
-// #define CUT_A_STAR
-#define DEFAULT_A_STAR_DEEP 150
-// A*是否切换更近的货物
-#define CHANGE_CLOSED_GOODS
-// A*是否存取算过的路径
-// #define SAVE_OLD_PATH
+// #define CUT_A_STAR               // 开关 A*是否剪枝
+#define DEFAULT_A_STAR_DEEP 150  // 参数 默认A*剪枝深度
+#define CHANGE_CLOSED_GOODS      // 开关 A*是否切换更近的货物
+// #define SAVE_OLD_PATH            // 开关 A*是否存取算过的路径
 
-// 机器人找货物容忍步数
-#define TOLERANT_TIME 40
+#define TOLERANT_TIME 40  // 参数 机器人找货物容忍步数
 
-// 船最后走可容忍时间的
-#define TOLERANT_LEAVE_TIME 5
+#define TOLERANT_LEAVE_TIME 5  // 参数 船最后走可容忍时间的
 
-// 船在港口停留时间
-#define TOLERANT_WAIT_TIME 1000
+#define TOLERANT_WAIT_TIME 1000  // 参数 船在港口停留时间
 
 /*
  * 是否开启货物筛选机制
  * 开启后将按照 GOODS_VALUE_VALVE 筛选货物
  * 当货物数量超过 GOODS_FILTER_VALVE_NUM 将会按照 VALUEABLE_GOODS_VALVE 筛选货物
  */
-#define GOODS_FILTER
-#define GOODS_VALUE_VALVE 20       // 货物筛选域值
-#define GOODS_FILTER_VALVE_NUM 50  // 货物筛选数量域值
-#define VALUEABLE_GOODS_VALVE 150  // 贵重货物域值
+#define GOODS_FILTER               // 开关 货物过滤机制
+#define GOODS_VALUE_VALVE 20       // 参数 货物筛选域值
+#define GOODS_FILTER_VALVE_NUM 50  // 参数 货物筛选数量域值
+#define VALUEABLE_GOODS_VALVE 150  // 参数 贵重货物域值
 
-// 最后冲刺阶段的容忍时间
-#define FINAL_TOLERANT_TIME 200
+#define FINAL_TOLERANT_TIME 200  // 参数 最后冲刺阶段的容忍时间
 
-// 判断该点拥堵的域值
-#define BUSY_VALVE 5
+#define BUSY_VALVE 5  // 参数 判断该点拥堵的域值
 
-// 判断泊位值不值得过去 boat_capacity / 该值
-#define BERTH_DIVISOR 10
+#define BERTH_DIVISOR 10  // 参数 判断泊位值不值得过去 boat_capacity / 该值
 
-// 是否允许抢占货物
-// #define CAN_GRAB_GOODS
+// #define CAN_GRAB_GOODS  // 开关 是否允许路上抢占别人货物
 
-// 一个机器人一个泊位
-// #define ONE_ROBOT_ONE_BERTH
+// #define ONE_ROBOT_ONE_BERTH  // 开关 一个机器人一个泊位
 #endif
