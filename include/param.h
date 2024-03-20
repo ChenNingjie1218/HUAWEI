@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-#define DEBUG
+// #define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;
@@ -37,6 +37,8 @@ const int N = 210;
 #define DEFAULT_A_STAR_DEEP 150
 // A*是否切换更近的货物
 #define CHANGE_CLOSED_GOODS
+// A*是否存取算过的路径
+// #define SAVE_OLD_PATH
 
 // 机器人找货物容忍步数
 #define TOLERANT_TIME 40

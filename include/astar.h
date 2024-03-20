@@ -74,6 +74,11 @@ struct Astar {
   bool AstarSearch(std::vector<Location> &path, int &berth_id, int is_urgent);
   // 判断泊位是否可达
   bool AstarSearch(int berth_id);
+#ifdef SAVE_OLD_PATH
+  // 将算过的A*路径存起来
+  static std::map<std::pair<Location, Location>, std::vector<Location>>
+      old_path;
+#endif
 };
 
 #endif

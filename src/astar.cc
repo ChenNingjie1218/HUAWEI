@@ -16,6 +16,9 @@ extern Boat boat[10];
 // 方向数组
 std::array<Location, 4> DIRS = {Location(1, 0), Location(-1, 0), Location(0, 1),
                                 Location(0, -1)};
+#ifdef SAVE_OLD_PATH
+std::map<std::pair<Location, Location>, std::vector<Location>> Astar::old_path;
+#endif
 
 Location::Location(int x, int y) {
   this->x = x;
@@ -67,6 +70,14 @@ Astar::Astar(int start_x, int start_y, int end_x, int end_y)
 // 找货物A*
 bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
                         Goods *&find_goods) {
+#ifdef SAVE_OLD_PATH
+  std::pair<Location, Location> route = std::make_pair(start, end);
+  if (old_path.find(route) != old_path.end()) {
+    // 已经算过了
+    path = old_path[std::make_pair(start, end)];
+    return true;
+  }
+#endif
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
   std::unordered_map<Location, double> cost_so_far;
@@ -119,6 +130,9 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
         }
         // std::cerr << count << std::endl;
         std::reverse(path.begin(), path.end());
+#ifdef SAVE_OLD_PATH
+        old_path[route] = path;
+#endif
         return true;
       }
     }
@@ -140,6 +154,14 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 // 找泊位A*
 bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
                         int is_urgent) {
+#ifdef SAVE_OLD_PATH
+  std::pair<Location, Location> route = std::make_pair(start, end);
+  if (old_path.find(route) != old_path.end()) {
+    // 已经算过了
+    path = old_path[route];
+    return true;
+  }
+#endif
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
   std::unordered_map<Location, double> cost_so_far;
@@ -185,8 +207,12 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
           temp = came_from[temp];
           // ++count;
         }
+
         // std::cerr << count << std::endl;
         std::reverse(path.begin(), path.end());
+#ifdef SAVE_OLD_PATH
+        old_path[route] = path;
+#endif
         return true;
       }
     }
