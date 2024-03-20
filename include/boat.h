@@ -38,7 +38,7 @@ struct Boat {
   bool LeaveCond();
 
   // 判断是否更换港口
-  bool ChangeBerth3(int boat_id);
+  bool ChangeBerth3(int boat_id, bool force = false);
 };
 
 #endif
