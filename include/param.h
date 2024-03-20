@@ -70,4 +70,7 @@ const int N = 210;
 
 // 是否允许抢占货物
 // #define CAN_GRAB_GOODS
+
+// 一个机器人一个泊位
+// #define ONE_ROBOT_ONE_BERTH
 #endif

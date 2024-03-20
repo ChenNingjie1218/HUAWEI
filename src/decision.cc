@@ -231,6 +231,9 @@ void DecisionManager::DecisionRobot() {
 
       // 增加泊位权重
       ++berth[robot->berth_id].weight;
+#ifdef ONE_ROBOT_ONE_BERTH
+      berth[robot->berth_id].robot_id = -1;
+#endif
       // robot[i].berth_id = -1;
       // 下货的位置可能不是计算的位置，path里面还有内容
       robot[i].path.clear();
@@ -330,11 +333,21 @@ void DecisionManager::DecisionRobot() {
         //当前持有货物
         robot[i].goods = true;
         robot[i].pre_goods = true;
+#ifdef ONE_ROBOT_ONE_BERTH
+        if (!robot[i].path.empty()) {
+          berth[robot[i].berth_id].robot_id = i;
+        }
+#endif
       }
     }
     if (robot[i].goods && robot[i].path.empty()) {
       // 如果有货物但是没路径
       robot[i].FindBerth(robot[i].x, robot[i].y);
+#ifdef ONE_ROBOT_ONE_BERTH
+      if (!robot[i].path.empty()) {
+        berth[robot[i].berth_id].robot_id = i;
+      }
+#endif
     }
     // 空闲机器人
     if (!robot[i].target_goods && !robot[i].goods) {
@@ -500,6 +513,12 @@ void DecisionManager::DecisionRobot() {
 #endif
         robot[robot_id].path.clear();
         robot[robot_id].FindBerth(robot[robot_id].x, robot[robot_id].y);
+#ifdef ONE_ROBOT_ONE_BERTH
+        if (!robot[robot_id].path.empty()) {
+          berth[robot[robot_id].berth_id].robot_id = robot_id;
+        }
+#endif
+
 #ifdef DEBUG
         std::cerr << "机器人更改完新的路线：" << robot[robot_id].path.size()
                   << std::endl;
@@ -630,6 +649,9 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
       DecisionManager::GetInstance()->q_decision.push(decision);
       // 增加泊位权重
       ++berth[robot[robot_id].berth_id].weight;
+#ifdef ONE_ROBOT_ONE_BERTH
+      berth[robot[robot_id].berth_id].robot_id = -1;
+#endif
       // robot[robot_id].berth_id = -1;
     } else if (!robot[robot_id].goods && gds[x][y]) {
 #ifdef DEBUG
@@ -697,6 +719,11 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
         //当前持有货物
         robot[robot_id].goods = true;
         robot[robot_id].pre_goods = true;
+#ifdef ONE_ROBOT_ONE_BERTH
+        if (!robot[robot_id].path.empty()) {
+          berth[robot[robot_id].berth_id].robot_id = robot_id;
+        }
+#endif
       }
     }
   }

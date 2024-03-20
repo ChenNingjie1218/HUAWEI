@@ -186,6 +186,13 @@ void Robot::FindBerth(int start_x, int start_y) {
         continue;
       }
     }
+#ifdef ONE_ROBOT_ONE_BERTH
+    if (berth[berth_accessed[j]].robot_id != -1 && !is_final_sprint) {
+      // 有机器人往这个泊位送，放弃该泊位
+      // 冲刺阶段不这样
+      continue;
+    }
+#endif
     cal_man = std::fabs(x - berth[berth_accessed[j]].x - 1.5) +
               std::fabs(y - berth[berth_accessed[j]].y - 1.5);
     if (min_man > cal_man) {
