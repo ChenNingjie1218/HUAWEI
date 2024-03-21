@@ -97,10 +97,11 @@ void DecisionManager::DecisionBoat() {
           berth[boat[boat_id[i]].pos].q_boat.pop();
         }
         berth[boat[boat_id[i]].pos].boat_id = -1;
-// 决策是否驶离
+        // 决策是否驶离
+
 #ifdef DEBUG
-        std::cerr << "boat " << boat_id[i] << " leave " << boat[boat_id[i]].pos
-                  << std::endl;
+        std::cerr << "船 " << boat_id[i] << " 离开 " << boat[boat_id[i]].pos
+                  << " 货物数量: " << boat[boat_id[i]].num << std::endl;
 #endif
         Decision decision(DECISION_TYPE_BOAT_GO, boat_id[i], -1);
         q_decision.push(decision);
@@ -113,8 +114,9 @@ void DecisionManager::DecisionBoat() {
       }
 
     } else if (boat[boat_id[i]].status == 2) {
-// 在等待
-// 可以决策是否换船舶，换哪个船舶
+      // 在等待
+      // 可以决策是否换船舶，换哪个船舶
+
 #ifdef DEBUG
       std::cerr << "boat " << boat_id[i] << " is waiting "
                 << boat[boat_id[i]].pos << std::endl;
@@ -250,7 +252,8 @@ void DecisionManager::DecisionRobot() {
                 << std::endl;
 #endif
       if (!robot[i].path.empty()) {
-// 有新的目标货物
+        // 有新的目标货物
+
 #ifdef DEBUG
         std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
 #endif
@@ -259,7 +262,7 @@ void DecisionManager::DecisionRobot() {
       robot[i].goods = false;
     } else if (!robot[i].goods && gds[robot[i].x][robot[i].y]) {
 #ifdef DEBUG
-// std::cerr << "地上有货物" << std::endl;
+      std::cerr << "地上有货物" << std::endl;
 #endif
       bool is_get = false;
       // 机器人没拿货且地上有货物
@@ -507,7 +510,8 @@ void DecisionManager::DecisionRobot() {
 #endif
       // 该机器人原地占了BUSY_VALVE次了
       if (robot[robot_id].goods) {
-// 在送货
+        // 在送货
+
 #ifdef DEBUG
         std::cerr << "机器人更改新的路线，找泊位" << std::endl;
 #endif
@@ -524,7 +528,8 @@ void DecisionManager::DecisionRobot() {
                   << std::endl;
 #endif
       } else if (robot[robot_id].target_goods) {
-// 在拿货
+        // 在拿货
+
 #ifdef DEBUG
         std::cerr << "机器人更改新的路线，找货物" << std::endl;
 #endif

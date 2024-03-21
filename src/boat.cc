@@ -103,6 +103,10 @@ void Boat::ChooseBerth3(int boat_id) {
   }
   berth[target_pos].boat_id = boat_id;
   pos = target_pos;
+#ifdef DEBUG
+  std::cerr << boat_id << " 船从虚拟点选择泊位: " << target_pos << " 货物数量："
+            << berth[target_pos].goods_num << std::endl;
+#endif
 }
 
 /*
