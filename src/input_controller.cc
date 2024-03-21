@@ -259,6 +259,10 @@ void InputController::Input() {
     if (temp_status != boat[i].status && temp_status == 0 &&
         boat[i].pos != -1) {
       berth[boat[i].pos].q_boat.push(i);
+      if (id > 15000 - 2 * max_transport_time -
+                   berth[boat[i].pos].transport_time - Boat::boat_capacity) {
+        boat[i].can_force = false;
+      }
     }
 
     // 离开泊位出队

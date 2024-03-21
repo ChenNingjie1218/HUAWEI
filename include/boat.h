@@ -26,6 +26,9 @@ struct Boat {
   //大于13000帧后用该变量保证船再捡一会货物
   int final_count;
 
+  // 强制召回
+  bool can_force = true;
+
   Boat();
 
   // 虚拟点选择泊位

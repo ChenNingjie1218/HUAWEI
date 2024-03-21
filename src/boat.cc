@@ -5,6 +5,7 @@
 
 #include "berth.h"
 #include "decision.h"
+#include "input_controller.h"
 #include "param.h"
 Boat boat[10];
 extern Berth berth[berth_num + 10];
@@ -124,6 +125,20 @@ bool Boat::LeaveCond() {
               << " 船货物数量: " << num << std::endl;
 #endif
     return true;
+  }
+
+  if (pos != -1 && can_force && num &&
+      id > 15000 - 3 * InputController::GetInstance()->max_transport_time -
+               boat_capacity) {
+    if (num + berth[pos].goods_num < boat_capacity && num > boat_capacity / 2) {
+      // 去下个泊位都装不满
+      can_force = false;
+#ifdef DEBUG
+      std::cerr << berth[pos].boat_id << " 被强制召回,货物数量: " << num
+                << std::endl;
+#endif
+      return true;
+    }
   }
   // 容量达到80%就走
   return num >= boat_capacity;

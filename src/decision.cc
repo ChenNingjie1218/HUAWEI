@@ -121,6 +121,21 @@ void DecisionManager::DecisionBoat() {
       std::cerr << "boat " << boat_id[i] << " is waiting "
                 << boat[boat_id[i]].pos << std::endl;
 #endif
+    } else if (boat[boat_id[i]].pos != -1 && boat[boat_id[i]].LeaveCond()) {
+      // 强制召回切换泊位的船且装不满的
+      if (!berth[boat[boat_id[i]].pos].q_boat.empty()) {
+        berth[boat[boat_id[i]].pos].q_boat.pop();
+      }
+      berth[boat[boat_id[i]].pos].boat_id = -1;
+      // 决策是否驶离
+
+#ifdef DEBUG
+      std::cerr << " boat " << boat_id[i] << " 换船舶中被强制召回 "
+                << boat[boat_id[i]].pos << std::endl;
+#endif
+      Decision decision(DECISION_TYPE_BOAT_GO, boat_id[i], -1);
+      q_decision.push(decision);
+      boat[boat_id[i]].num = 0;  // 清空船中货物
     }
   }
 }
