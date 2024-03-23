@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-#define DEBUG
+// #define DEBUG
 
 const int k_Cost1 = 0;
 const int k_Cost2 = 2;
@@ -50,8 +50,8 @@ const int N = 210;
  */
 #define GOODS_FILTER               // 开关 货物过滤机制
 #define GOODS_VALUE_VALVE 20       // 参数 货物筛选域值
-#define GOODS_FILTER_VALVE_NUM 30  // 参数 货物筛选数量域值
-#define VALUEABLE_GOODS_VALVE 80   // 参数 贵重货物域值
+#define GOODS_FILTER_VALVE_NUM 50  // 参数 货物筛选数量域值
+#define VALUEABLE_GOODS_VALVE 150  // 参数 贵重货物域值
 
 #define FINAL_TOLERANT_TIME 200  // 参数 最后冲刺阶段的容忍时间
 
