@@ -49,16 +49,9 @@ void InputController::Init() {
   }
 #endif
   // 迷宫图机器人位置标记
-  maze_tag.push_back(Location(10, 105));
-  maze_tag.push_back(Location(15, 44));
-  maze_tag.push_back(Location(25, 139));
-  maze_tag.push_back(Location(43, 113));
-  maze_tag.push_back(Location(54, 59));
-  maze_tag.push_back(Location(58, 132));
-  maze_tag.push_back(Location(80, 118));
-  maze_tag.push_back(Location(90, 54));
-  maze_tag.push_back(Location(97, 99));
-  maze_tag.push_back(Location(123, 103));
+  InitMazeTag();
+  // 另一张图机器人位置标记
+  InitOtherTag();
 
   for (int i = 1; i <= n; ++i) {
     for (int j = 1; j <= n; ++j) {
@@ -80,6 +73,10 @@ void InputController::Init() {
     Robot::maze = true;
 #ifdef DEBUG
     std::cerr << "识别为迷宫图" << std::endl;
+#endif
+  } else if (robot_initial_position == other_tag) {
+#ifdef DEBUG
+    std::cerr << "识别为另一张图" << std::endl;
 #endif
   }
 
@@ -338,3 +335,20 @@ void InputController::MergeArea(int id_1, int id_2) {
     parent[root_2] = root_1;
   }
 }
+
+// 初始化迷宫图tag
+void InputController::InitMazeTag() {
+  maze_tag.push_back(Location(10, 105));
+  maze_tag.push_back(Location(15, 44));
+  maze_tag.push_back(Location(25, 139));
+  maze_tag.push_back(Location(43, 113));
+  maze_tag.push_back(Location(54, 59));
+  maze_tag.push_back(Location(58, 132));
+  maze_tag.push_back(Location(80, 118));
+  maze_tag.push_back(Location(90, 54));
+  maze_tag.push_back(Location(97, 99));
+  maze_tag.push_back(Location(123, 103));
+}
+
+// 初始化另一张地图的tag
+void InputController::InitOtherTag() {}
