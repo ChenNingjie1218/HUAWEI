@@ -27,6 +27,7 @@ struct InputController {
   std::vector<Location> maze_tag;
   // 另一张地图检测用
   std::vector<Location> other_tag;
+  bool is_other_map = false;
 
   // Location是机器人的位置，int为泊位id，用于在第一帧根据location映射可达的泊位
   std::map<Location, std::vector<int>> reachable_berths;
@@ -51,5 +52,8 @@ struct InputController {
 
   // 初始化另一张地图的tag
   void InitOtherTag();
+
+  // 造海
+  void BuildSea();
 };
 #endif

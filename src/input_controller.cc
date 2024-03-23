@@ -75,6 +75,8 @@ void InputController::Init() {
     std::cerr << "识别为迷宫图" << std::endl;
 #endif
   } else if (robot_initial_position == other_tag) {
+    BuildSea();
+    is_other_map = true;
 #ifdef DEBUG
     std::cerr << "识别为另一张图" << std::endl;
 #endif
