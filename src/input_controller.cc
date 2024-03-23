@@ -380,4 +380,25 @@ void InputController::BuildSea() {
       }
     }
   }
+  for (int i = 92; i < 97; i++) {
+    for (int j = 10; j < 200; j++) {
+      if (ch[i][j] == '.') {
+        ch[i][j] = '*';
+      }
+    }
+  }
+  for (int i = 97; i < 102; i++) {
+    for (int j = 7; j < 200; j++) {
+      if (ch[i][j] == '.') {
+        ch[i][j] = '*';
+      }
+    }
+  }
+  for (int i = 103; i < 106; i++) {
+    for (int j = 4; j < 200; j++) {
+      if (ch[i][j] == '.') {
+        ch[i][j] = '*';
+      }
+    }
+  }
 }
