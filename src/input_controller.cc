@@ -363,3 +363,21 @@ void InputController::InitOtherTag() {
   other_tag.push_back(Location(191, 183));
   other_tag.push_back(Location(197, 101));
 }
+
+// 造海
+void InputController::BuildSea() {
+  for (int i = 82; i < 108; i++) {
+    for (int j = 63; j < 152; j++) {
+      if (ch[i][j] == '.') {
+        ch[i][j] = '*';
+      }
+    }
+  }
+  for (int i = 79; i < 83; i++) {
+    for (int j = 71; j < 153; j++) {
+      if (ch[i][j] == '.') {
+        ch[i][j] = '*';
+      }
+    }
+  }
+}
