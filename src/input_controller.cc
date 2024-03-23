@@ -313,11 +313,11 @@ void InputController::InitReachableBerth(int berth_id, int berth_x,
                                          int berth_y) {
   int size = robot_initial_position.size();
   for (int i = 0; i < size; ++i) {
-    Astar astar(robot_initial_position[i].x, robot_initial_position[i].y,
-                berth_x + 1, berth_y + 1);
-    if (astar.AstarSearch(berth_id)) {
-      reachable_berths[robot_initial_position[i]].push_back(berth_id);
-    }
+    // Astar astar(robot_initial_position[i].x, robot_initial_position[i].y,
+    //             berth_x + 1, berth_y + 1);
+    // if (astar.AstarSearch(berth_id)) {
+    reachable_berths[robot_initial_position[i]].push_back(berth_id);
+    // }
   }
 }
 
