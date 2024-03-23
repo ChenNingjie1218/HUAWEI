@@ -134,7 +134,13 @@ bool Robot::UpdateTargetGoods(int robot_id) {
     } else if (InputController::GetInstance()->is_other_map) {
       goods_area = 2;
     }
-
+    if (InputController::GetInstance()->is_other_map &&
+        GoodsManager::GetInstance()->goods_num < GOODS_FILTER_VALVE_NUM &&
+        area != goods_area) {
+      // 防止货物太少，机器人绕大圈
+      p_goods = p_goods->next;
+      continue;
+    }
     int cal_man;
     if (area == goods_area) {
       cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
