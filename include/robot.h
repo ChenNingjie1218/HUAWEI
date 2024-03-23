@@ -37,6 +37,10 @@ struct Robot {
   // 可到达的港口
   std::vector<int> berth_accessed;
 
+  // 正式赛迷宫地图用
+  static bool maze;
+  bool out_maze = true;
+
   // 更新目标货物
   bool UpdateTargetGoods(int robot_id);
 

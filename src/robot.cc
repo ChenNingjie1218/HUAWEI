@@ -9,6 +9,7 @@
 #include "input_controller.h"
 #include "param.h"
 Robot robot[robot_num + 10];
+bool Robot::maze = false;
 extern Berth berth[berth_num + 10];
 extern int id;
 extern Boat boat[10];

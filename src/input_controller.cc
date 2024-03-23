@@ -48,6 +48,17 @@ void InputController::Init() {
     fprintf(debug_map_file, "\n");
   }
 #endif
+  // 迷宫图机器人位置标记
+  maze_tag.push_back(Location(10, 105));
+  maze_tag.push_back(Location(15, 44));
+  maze_tag.push_back(Location(25, 139));
+  maze_tag.push_back(Location(43, 113));
+  maze_tag.push_back(Location(54, 59));
+  maze_tag.push_back(Location(58, 132));
+  maze_tag.push_back(Location(80, 118));
+  maze_tag.push_back(Location(90, 54));
+  maze_tag.push_back(Location(97, 99));
+  maze_tag.push_back(Location(123, 103));
 
   for (int i = 1; i <= n; ++i) {
     for (int j = 1; j <= n; ++j) {
@@ -62,6 +73,14 @@ void InputController::Init() {
       // 初始化区域号
       parent[i * n + j] = i * n + j;
     }
+  }
+
+  // 判断是不是正式赛迷宫图
+  if (robot_initial_position == maze_tag) {
+    Robot::maze = true;
+#ifdef DEBUG
+    std::cerr << "识别为迷宫图" << std::endl;
+#endif
   }
 
   for (int i = 1; i <= n; ++i) {

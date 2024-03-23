@@ -326,6 +326,7 @@ void DecisionManager::DecisionRobot() {
 
         // 决策更新目标泊位和泊位权重
         robot[i].FindBerth(robot[i].x, robot[i].y);
+        robot[i].out_maze = false;
         // berth_weight[robot[i].berth_id]++;
 #ifdef DEBUG
         std::cerr << "成功更新目标泊位" << std::endl;
@@ -346,11 +347,21 @@ void DecisionManager::DecisionRobot() {
     if (robot[i].goods && robot[i].path.empty()) {
       // 如果有货物但是没路径
       robot[i].FindBerth(robot[i].x, robot[i].y);
+      robot[i].out_maze = false;
 #ifdef ONE_ROBOT_ONE_BERTH
       if (!robot[i].path.empty()) {
         berth[robot[i].berth_id].robot_id = i;
       }
 #endif
+    } else if (Robot::maze && !robot[i].out_maze &&
+               (robot[i].y == 174 || robot[i].y == 175)) {
+      // 右边出迷宫
+
+#ifdef DEBUG
+      std::cerr << "右边出迷宫" << std::endl;
+#endif
+      robot[i].FindBerth(robot[i].x, robot[i].y);
+      robot[i].out_maze = true;
     }
     // 空闲机器人
     if (!robot[i].target_goods && !robot[i].goods) {
@@ -517,6 +528,7 @@ void DecisionManager::DecisionRobot() {
 #endif
         robot[robot_id].path.clear();
         robot[robot_id].FindBerth(robot[robot_id].x, robot[robot_id].y);
+        robot[robot_id].out_maze = false;
 #ifdef ONE_ROBOT_ONE_BERTH
         if (!robot[robot_id].path.empty()) {
           berth[robot[robot_id].berth_id].robot_id = robot_id;
@@ -714,6 +726,7 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
 
         // 决策更新目标泊位和泊位权重
         robot[robot_id].FindBerth(x, y);
+        robot[robot_id].out_maze = false;
         // berth_weight[robot[i].berth_id]++;
 #ifdef DEBUG
         std::cerr << "成功更新目标泊位" << std::endl;

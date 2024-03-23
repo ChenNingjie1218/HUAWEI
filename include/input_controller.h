@@ -23,6 +23,9 @@ struct InputController {
   // 机器人初始位置 该位置还无法对应机器人id
   std::vector<Location> robot_initial_position;
 
+  // 迷宫图检测用
+  std::vector<Location> maze_tag;
+
   // Location是机器人的位置，int为泊位id，用于在第一帧根据location映射可达的泊位
   std::map<Location, std::vector<int>> reachable_berths;
 
