@@ -354,7 +354,7 @@ void DecisionManager::DecisionRobot() {
       }
 #endif
     } else if (Robot::maze && !robot[i].out_maze &&
-               (robot[i].y == 174 || robot[i].y == 175)) {
+               (robot[i].y == 174 || robot[i].y == 175 || robot[i].x == 150)) {
       // 右边出迷宫
 
 #ifdef DEBUG
