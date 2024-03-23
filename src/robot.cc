@@ -97,6 +97,20 @@ bool Robot::UpdateTargetGoods(int robot_id) {
   bool need_change_first_free_goods = true;
   Goods *find_goods = p_goods;
   int min_man = 99999;
+  /*
+   * 特化 另一张地图分上下区域 绕路给予惩罚
+   * @param area
+   * 0 - 不用惩罚
+   * 1 - 上
+   * 2 - 下
+   */
+
+  int area = 0;
+  if (InputController::GetInstance()->is_other_map && x < 100) {
+    area = 1;
+  } else if (InputController::GetInstance()->is_other_map) {
+    area = 2;
+  }
 
   while (p_goods->next != head_goods) {
     if (p_goods->robot_id > -1) {
@@ -114,7 +128,20 @@ bool Robot::UpdateTargetGoods(int robot_id) {
       p_goods = p_goods->next;
       continue;
     }
-    int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
+    int goods_area = 0;
+    if (InputController::GetInstance()->is_other_map && p_goods->x < 100) {
+      goods_area = 1;
+    } else if (InputController::GetInstance()->is_other_map) {
+      goods_area = 2;
+    }
+
+    int cal_man;
+    if (area == goods_area) {
+      cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
+    } else {
+      cal_man = std::abs(x - p_goods->x) + p_goods->y + y;
+    }
+
     if (min_man > cal_man &&
         cal_man < LIFETIME - id + p_goods->birth - TOLERANT_TIME) {
       min_man = cal_man;
