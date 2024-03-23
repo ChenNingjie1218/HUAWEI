@@ -351,4 +351,15 @@ void InputController::InitMazeTag() {
 }
 
 // 初始化另一张地图的tag
-void InputController::InitOtherTag() {}
+void InputController::InitOtherTag() {
+  other_tag.push_back(Location(50, 41));
+  other_tag.push_back(Location(58, 122));
+  other_tag.push_back(Location(67, 167));
+  other_tag.push_back(Location(137, 155));
+  other_tag.push_back(Location(189, 41));
+  other_tag.push_back(Location(190, 125));
+  other_tag.push_back(Location(190, 160));
+  other_tag.push_back(Location(191, 88));
+  other_tag.push_back(Location(191, 183));
+  other_tag.push_back(Location(197, 101));
+}
