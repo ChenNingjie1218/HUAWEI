@@ -7,6 +7,7 @@
 #include "boat.h"
 #include "input_controller.h"
 #include "param.h"
+#include "robot.h"
 extern char ch[N][N];
 extern Goods *gds[N][N];
 extern int busy_point[N][N];
@@ -103,10 +104,13 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
     // 如果是找货物
     if (gds[current.x][current.y] &&
         gds[current.x][current.y]->robot_id == -1 &&
-        cost_so_far[current] <
-            LIFETIME - id + gds[current.x][current.y]->birth - TOLERANT_TIME) {
+        cost_so_far[current] < LIFETIME - id +
+                                   gds[current.x][current.y]->birth -
+                                   (TOLERANT_TIME + (Robot::maze ? 20 : 0))) {
 #ifdef CHANGE_CLOSED_GOODS
-      if (gds[current.x][current.y]->money > VALUEABLE_GOODS_VALVE) {
+      if (gds[current.x][current.y]->money > VALUEABLE_GOODS_VALVE + Robot::maze
+              ? 70
+              : 0) {
         // 只换值钱的货物
         find_goods = gds[current.x][current.y];
       }

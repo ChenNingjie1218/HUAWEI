@@ -118,7 +118,7 @@ void InputController::Init() {
   }
   // 船容积
   scanf("%d", &Boat::boat_capacity);
-  Boat::boat_capacity -= BOAT_CAPACITY_REDUCE;
+  Boat::boat_capacity -= (BOAT_CAPACITY_REDUCE - (Robot::maze ? 2 : 0));
 #ifdef DEBUG
   fprintf(debug_map_file, "船容量：%d\n", Boat::boat_capacity);
 #endif

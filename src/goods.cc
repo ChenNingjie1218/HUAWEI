@@ -25,7 +25,7 @@ Goods::Goods(int x, int y, int money, int birth) {
 void GoodsManager::PushGoods(Goods *new_goods) {
 #ifdef GOODS_FILTER
   ++goods_num;
-  if (goods_num > GOODS_FILTER_VALVE_NUM) {
+  if (goods_num > GOODS_FILTER_VALVE_NUM + (Robot::maze ? 1 : 0)) {
     UpdateValueValve(true);
   }
 #endif
@@ -49,7 +49,7 @@ void GoodsManager::PushGoods(Goods *new_goods) {
 void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
 #ifdef GOODS_FILTER
   --goods_num;
-  if (goods_num < GOODS_FILTER_VALVE_NUM) {
+  if (goods_num < GOODS_FILTER_VALVE_NUM + Robot::maze ? 1 : 0) {
     UpdateValueValve(false);
   }
 #endif
@@ -102,8 +102,8 @@ void GoodsManager::FreshGoodsLists() {
 // 更新价值域值
 void GoodsManager::UpdateValueValve(bool is_plus) {
   if (is_plus) {
-    value_valve = VALUEABLE_GOODS_VALVE;
+    value_valve = VALUEABLE_GOODS_VALVE + (Robot::maze ? 70 : 0);
   } else {
-    value_valve = GOODS_VALUE_VALVE;
+    value_valve = GOODS_VALUE_VALVE - (Robot::maze ? 4 : 0);
   }
 }
