@@ -100,7 +100,7 @@ void DecisionManager::DecisionBoat() {
         // 决策是否驶离
 
 #ifdef DEBUG
-        std::cerr << "船 " << boat_id[i] << " 离开 " << boat[boat_id[i]].pos
+        std::cerr << boat_id[i] << " 船离开 " << boat[boat_id[i]].pos
                   << " 货物数量: " << boat[boat_id[i]].num << std::endl;
 #endif
         Decision decision(DECISION_TYPE_BOAT_GO, boat_id[i], -1);
@@ -118,8 +118,8 @@ void DecisionManager::DecisionBoat() {
       // 可以决策是否换船舶，换哪个船舶
 
 #ifdef DEBUG
-      std::cerr << "boat " << boat_id[i] << " is waiting "
-                << boat[boat_id[i]].pos << std::endl;
+      std::cerr << boat_id[i] << " 船正在船舶外等待 " << boat[boat_id[i]].pos
+                << std::endl;
 #endif
     }
   }

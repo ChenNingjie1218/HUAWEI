@@ -120,7 +120,8 @@ bool Boat::LeaveCond() {
   if (pos != -1 &&
       id > 15000 - berth[pos].transport_time - TOLERANT_LEAVE_TIME) {
 #ifdef DEBUG
-    std::cerr << "船离开了，剩余货物数量: " << berth[pos].goods_num
+    std::cerr << berth[pos].boat_id
+              << " 船离开了，剩余货物数量: " << berth[pos].goods_num
               << " 船货物数量: " << num << std::endl;
 #endif
     return true;
@@ -185,7 +186,8 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
       // 让它换个坑位
 
 #ifdef DEBUG
-      std::cerr << boat_id << "抢占，该船舶有船: " << berth[target_pos].boat_id
+      std::cerr << boat_id
+                << " 船抢占，该船舶有船: " << berth[target_pos].boat_id
                 << std::endl;
 #endif
       // 更换港口
@@ -194,7 +196,7 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
       DecisionManager::GetInstance()->q_decision.push(decision);  // 决策入队
     }
 #ifdef DEBUG
-    std::cerr << boat_id << " 找到了能填满船的泊位，选择回家最快的泊位 "
+    std::cerr << boat_id << " 船找到了能填满船的泊位，选择回家最快的泊位 "
               << target_pos << std::endl;
 #endif
   }
