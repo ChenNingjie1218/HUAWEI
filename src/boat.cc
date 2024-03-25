@@ -127,7 +127,7 @@ bool Boat::LeaveCond() {
     return true;
   }
   // 容量达到80%就走
-  return num >= boat_capacity;
+  return num >= boat_capacity - BOAT_CAPACITY_REDUCE;
 }
 
 /*
