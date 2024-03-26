@@ -1,7 +1,6 @@
 #ifndef DECISION_H_
 #define DECISION_H_
 #include <queue>
-#include <vector>
 // 决策
 struct Decision {
   /*
@@ -19,30 +18,6 @@ struct Decision {
   // 第二参数
   int param;
   Decision(int type, int id, int param);
-};
-
-/*
- * 落点节点
- * 下一步准备走这个点
- */
-struct NextPoint {
-  int x, y;
-  // 机器人数量
-  int count;
-  // 要走这个点的机器人
-  int list_robot[4];
-  NextPoint() {}
-  NextPoint(int x, int y, int robot_id);
-  /*
-   * 落点选择机器人决策
-   *
-   * - 插入算法：插入排序
-   */
-  void PushRobot(int robot_id, std::vector<int>& not_move_id);
-
-  // 做决策
-  // 剔除not_move_robot_id中能够让位的机器人id
-  void OutPut(std::vector<int>& not_move_robot_id);
 };
 
 // 决策管理
@@ -70,18 +45,6 @@ struct DecisionManager {
    *
    */
   void DecisionRobot();
-
-  /*
-   * 机器人是否拦路
-   * @ret next_points的下标
-   */
-  int IsBlock(int robot_id, std::vector<NextPoint>& next_points);
-
-  // 让路
-  bool GetAway(int robot_id, std::vector<NextPoint>& next_points, int ignore_id,
-               std::vector<int>& not_move_id);
-  // 检测是否存在死锁
-  bool IsDeadLock(NextPoint& first_point, NextPoint& second_point);
 
   // 决策队列
   std::queue<Decision> q_decision;

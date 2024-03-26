@@ -230,35 +230,3 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
   }
   return false;
 }
-// 判断泊位是否可达
-bool Astar::AstarSearch(int berth_id) {
-  PriorityQueue<Location, double> frontier;
-  std::unordered_map<Location, Location> came_from;
-  std::unordered_map<Location, double> cost_so_far;
-  frontier.put(start, 0);
-  came_from[start] = start;
-  cost_so_far[start] = 0;
-
-  std::map<Location, int> location_to_berth_id =
-      InputController::GetInstance()->location_to_berth_id;
-  while (!frontier.empty()) {
-    Location current = frontier.get();
-    if (ch[current.x][current.y] == 'B' &&
-        location_to_berth_id.find(current) != location_to_berth_id.end() &&
-        location_to_berth_id[current] == berth_id) {
-      return true;
-    }
-
-    for (auto next : Point(current).neighbors) {
-      double new_cost = cost_so_far[current] + 1;
-      if (cost_so_far.find(next) == cost_so_far.end() ||
-          new_cost < cost_so_far[next]) {
-        cost_so_far[next] = new_cost;
-        double priority = new_cost + heuristic(next, end);
-        frontier.put(next, priority);
-        came_from[next] = current;
-      }
-    }
-  }
-  return false;
-}

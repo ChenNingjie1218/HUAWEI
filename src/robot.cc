@@ -11,7 +11,9 @@
 Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
 extern int id;
+extern char ch[N][N];
 extern Boat boat[10];
+extern std::array<Location, 4> DIRS;
 Robot::Robot(int startX, int startY) {
   x = startX;
   y = startY;
@@ -206,5 +208,104 @@ void Robot::FindBerth(int start_x, int start_y) {
     astar.AstarSearch(path, min_man_id, is_final_sprint);
     berth_id = min_man_id;
     // astar.AstarSearch(path, berth_id, false);
+  }
+}
+
+/*
+ * 机器人是否拦路
+ * @ret next_points的下标
+ */
+int Robot::IsBlock(std::vector<NextPoint> &next_points) {
+  int size = next_points.size();
+  for (int i = 0; i < size; ++i) {
+    if (next_points[i].count && x == next_points[i].x &&
+        y == next_points[i].y) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/*
+ * 让路
+ * @ret 让路方向： DIR 数组下标
+ * @bref 只考虑空闲位
+ */
+int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
+                   std::vector<int> &not_move_id) {
+  // 可能存在不能让位的情况
+
+  int size = next_points.size();
+  int ignore_x = robot[ignore_id].x, ignore_y = robot[ignore_id].y;
+
+  // 看周围有没有不被占用的空位
+  int first_dir;
+  for (first_dir = 0; first_dir < 4; ++first_dir) {
+    if (ignore_x + DIRS[first_dir].x == x &&
+        ignore_y + DIRS[first_dir].y == y) {
+      break;
+    }
+  }
+
+#ifdef DEBUG
+  std::vector<std::string> dir_string = {"下", "上", "右", "左"};
+#endif
+  for (int i = 1; i <= 4; ++i) {
+    int index = (first_dir + i) % 4;
+    if (x + DIRS[index].x == ignore_x && y + DIRS[index].y == ignore_y) {
+      // 放弃ignore方向移动
+      continue;
+    }
+    if (ch[x + DIRS[index].x][y + DIRS[index].y] == '.' ||
+        ch[x + DIRS[index].x][y + DIRS[index].y] == 'A' ||
+        ch[x + DIRS[index].x][y + DIRS[index].y] == 'B') {
+      bool can_leave = true;
+      for (int k = 0; k < size; ++k) {
+        if (x + DIRS[index].x == next_points[k].x &&
+            y + DIRS[index].y == next_points[k].y) {
+          // 位置即将被某个机器人占用
+          can_leave = false;
+          break;
+        }
+      }
+      if (can_leave) {
+        // 检测是否被占用
+        for (std::vector<int>::iterator it = not_move_id.begin();
+             it != not_move_id.end(); ++it) {
+          if (robot[*it].x == x + DIRS[index].x &&
+              robot[*it].y == y + DIRS[index].y) {
+            can_leave = false;
+            break;
+          }
+        }
+        if (can_leave) {
+          // 有空位的情况
+#ifdef DEBUG
+          std::cerr << "向" << dir_string[index] << "让位" << std::endl;
+#endif
+          // 增加新落点
+          NextPoint add_next_point =
+              NextPoint(x + DIRS[index].x, y + DIRS[index].y, id_);
+          next_points.push_back(add_next_point);
+          // 将让的位加入让位机器的人path
+          AddFirst(x, y);
+          return index;
+        }
+      }
+    }
+  }
+#ifdef DEBUG
+  std::cerr << "!!!!!!!!!!!!!!!!!!!! Can not get away !!!!!!!!!!!!!!!!!!!!"
+            << std::endl;
+#endif
+  return -1;
+}
+
+//  初始化berth_accessed数组
+void Robot::InitAccessedBerth() {
+  for (int i = 0; i < 10; ++i) {
+    if (area_id == berth[i].area_id) {
+      berth_accessed.push_back(i);
+    }
   }
 }

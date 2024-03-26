@@ -86,18 +86,19 @@ void InputController::Init() {
     ++berth[id].x;
     ++berth[id].y;
     InitBerthMap(id, berth[id].x, berth[id].y);
-    InitReachableBerth(id, berth[id].x, berth[id].y);
+    berth[id].area_id = FindArea(berth[id].x * n + berth[id].y);
 #ifdef DEBUG
-    fprintf(
-        debug_map_file,
-        "泊位 %d: x = %d, y = %d, transport_time = %d, loading_speed = %d\n",
-        id, berth[id].x, berth[id].y, berth[id].transport_time,
-        berth[id].loading_speed);
+    fprintf(debug_map_file,
+            "泊位 %d: x = %d, y = %d, transport_time = %d, loading_speed = "
+            "%d\n",
+            id, berth[id].x, berth[id].y, berth[id].transport_time,
+            berth[id].loading_speed);
 #endif
     if (berth[id].transport_time > max_transport_time) {
       max_transport_time = berth[id].transport_time;
     }
   }
+
   // 船容积
   scanf("%d", &Boat::boat_capacity);
 #ifdef DEBUG
@@ -243,9 +244,9 @@ void InputController::Input() {
 
     // 第一帧更新机器人可达的泊位、区号
     if (id == 1) {
-      robot[i].berth_accessed =
-          reachable_berths[Location(robot[i].x, robot[i].y)];
+      robot[i].id_ = i;  // 初始化robot的id
       robot[i].area_id = FindArea(robot[i].x * n + robot[i].y);
+      robot[i].InitAccessedBerth();
     }
   }
 
@@ -260,13 +261,6 @@ void InputController::Input() {
       berth[boat[i].pos].q_boat.push(i);
     }
 
-    // 离开泊位出队
-    // if (temp_status != boat[i].status && boat[i].pos == -1) {
-    //   // 先到港口先出队，还未考虑到港口后在去别的港口的情况
-    //   if (!berth[boat[i].pos].q_boat.empty()) {
-    //     berth[boat[i].pos].q_boat.pop();
-    //   }
-    // }
     boat[i].status = temp_status;
 #ifdef DEBUG
     fprintf(debug_command_file, "boat %d info: status = %d, pos = %d\n", i,
@@ -285,19 +279,6 @@ void InputController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {
       location_to_berth_id[Location(berth_x + i, berth_y + j)] = berth_id;
-    }
-  }
-}
-
-// 初始化每个机器人可达的泊位
-void InputController::InitReachableBerth(int berth_id, int berth_x,
-                                         int berth_y) {
-  int size = robot_initial_position.size();
-  for (int i = 0; i < size; ++i) {
-    Astar astar(robot_initial_position[i].x, robot_initial_position[i].y,
-                berth_x + 1, berth_y + 1);
-    if (astar.AstarSearch(berth_id)) {
-      reachable_berths[robot_initial_position[i]].push_back(berth_id);
     }
   }
 }

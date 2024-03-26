@@ -72,7 +72,7 @@ void OutputController::Output() {
   std::cerr << DecisionManager::GetInstance()->q_decision.size() << std::endl;
   fprintf(
       debug_command_file,
-      "-----------------------------OUTPUT:%d------------------------------\n",
+      "-----------------------------OUTPUT:%ld------------------------------\n",
       DecisionManager::GetInstance()->q_decision.size());
 
 #endif

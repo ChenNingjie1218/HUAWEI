@@ -3,10 +3,13 @@
 
 #include "astar.h"
 #include "goods.h"
+#include "nextpoint.h"
 
 // 机器人
 struct Robot {
   int x, y;
+
+  int id_;
 
   // 是否携带货物
   int goods;
@@ -19,7 +22,7 @@ struct Robot {
 
   // 是否是正常运行状态
   int status;
-  int mbx, mby;  //什么意思？
+
   // A*的深度
   int astar_deep = DEFAULT_A_STAR_DEEP;
 
@@ -65,6 +68,23 @@ struct Robot {
 
   //拿到货物后寻找港口
   void FindBerth(int start_x, int start_y);
+
+  /*
+   * 机器人是否拦路
+   * @ret next_points的下标
+   */
+  int IsBlock(std::vector<NextPoint> &next_points);
+
+  /*
+   * 让路
+   * @ret 让路方向： DIR 数组下标
+   * @bref 只考虑空闲位
+   */
+  int GetAway(std::vector<NextPoint> &next_points, int ignore_id,
+              std::vector<int> &not_move_id);
+
+  //  初始化berth_accessed数组
+  void InitAccessedBerth();
 };
 
 #endif

@@ -20,14 +20,8 @@ struct InputController {
   // 初始化坐标映射到泊位id的map
   void InitBerthMap(int berth_id, int berth_x, int berth_y);
 
-  // 机器人初始位置 该位置还无法对应机器人id
+  // 机器人初始位置 该位置还无法对应机器人id 可以用来辨别地图
   std::vector<Location> robot_initial_position;
-
-  // Location是机器人的位置，int为泊位id，用于在第一帧根据location映射可达的泊位
-  std::map<Location, std::vector<int>> reachable_berths;
-
-  // 初始化每个机器人可达的泊位
-  void InitReachableBerth(int berth_id, int berth_x, int berth_y);
 
   // 坐标映射到泊位id
   std::map<Location, int> location_to_berth_id;

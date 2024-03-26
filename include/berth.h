@@ -22,6 +22,10 @@ struct Berth {
 
   // 目标为这个泊位的boat id
   int boat_id = -1;
+
+  // 所处区号
+  int area_id = -1;
+
 #ifdef ONE_ROBOT_ONE_BERTH
   // 目标为这个泊位的机器人
   int robot_id = -1;
