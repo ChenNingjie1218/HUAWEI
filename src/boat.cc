@@ -126,7 +126,11 @@ bool Boat::LeaveCond() {
 #endif
     return true;
   }
-  // 容量达到80%就走
+  if (berth[pos].goods_num > 0) {
+    // 能装满就装满了走
+    return num >= boat_capacity;
+  }
+  // 微调快满的船又去换泊位
   return num >= boat_capacity - BOAT_CAPACITY_REDUCE;
 }
 
@@ -138,7 +142,7 @@ bool Boat::LeaveCond() {
  * 3 另一个泊位的货物数量
  */
 bool Boat::ChangeBerth3(int boat_id, bool force) {
-  if (berth[pos].goods_num > berth[pos].loading_speed && !force) {
+  if (berth[pos].goods_num > 0 && !force) {
     return false;
   }
   // 先看有没有船舶能让自己填满
