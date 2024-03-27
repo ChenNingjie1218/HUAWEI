@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <unordered_map>
 
 #include "berth.h"
 #include "boat.h"
