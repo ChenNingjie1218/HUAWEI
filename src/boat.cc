@@ -13,69 +13,7 @@ extern int id;
 // 随机泊位
 int rand_berth = 0;
 
-Boat::Boat() {
-  num = 0;
-  final_count = 0;
-  waiting_time = 0;
-}
-
-/*
- * version:1.0
- * 船在虚拟点选择泊位
- * 依据1 前往泊位的机器人数量
- */
-// void Boat::ChooseBerth(int rand_berth) {
-void Boat::ChooseBerth() {
-  int max_berth = 0, cur_berth = 0;
-  // for (int j = 0; j < 10; j++) {
-  //   if (berth[j].weight > max_berth) {
-  //     max_berth = j;
-  //   }
-  // }
-  if (max_berth == 0) {
-    // cur_berth = ++rand_berth % 10;
-
-    pos = ++rand_berth % 10;
-    // if (berth[cur_berth].q_boat.empty() && cur_berth >= 0) {
-    //   pos = cur_berth;
-    // }
-
-    // for (; rand_berth < 10; rand_berth++) {
-    //   if (berth[rand_berth].q_boat.empty()) {
-    //     pos = rand_berth;
-    //   }
-    // }
-  } else {
-    pos = max_berth;
-    berth[max_berth].weight -= BERTH_WEIGHT_AFTER_BOAT_CHOOSE;  //权重减少
-  }
-}
-
-/*
- * version:2.0
- * 船在虚拟点选择泊位
- * 依据1 前往泊位的机器人数量
- */
-// void Boat::ChooseBerth(int &rand_berth) {
-//   int max_berth = -1;
-//   int cur_weight = 0, max_weight = 0;
-//   for (int j = 0; j < 10; j++) {
-//     cur_weight = berth[j].weight / boat_capacity + 1;
-//     if (berth[j].weight > max_weight) {
-//       max_berth = j;
-//       max_weight = berth[j].weight;
-//     }
-//   }
-//   if (max_berth == -1) {
-//     pos = ++rand_berth % 10;
-//   } else {
-//     pos = max_berth;
-//     berth[max_berth].weight -= boat_capacity;  // 权重减少
-//     berth[max_berth].weight =
-//         berth[max_berth].weight > 0 ? berth[max_berth].weight : 0;  //
-//         权重非负
-//   }
-// }
+Boat::Boat() { num = 0; }
 
 /*
  * version:3.0

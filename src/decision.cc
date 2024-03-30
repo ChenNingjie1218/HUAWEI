@@ -49,7 +49,7 @@ void DecisionManager::DecisionBoat() {
                "--------------------------"
             << std::endl;
 #endif
-  //最大权重泊位，权重都为0就随机泊位
+  // 最大权重泊位，权重都为0就随机泊位
   // int rand_berth = 0;
   // 按船装的货物数量顺序来抉择
   int boat_id[5];

@@ -11,9 +11,6 @@ struct Boat {
   // 船的最大容量
   static int boat_capacity;
 
-  // 船舶停留时间 v2.0
-  int waiting_time;
-
   /*
    * 状态
    * 可能值：
@@ -23,13 +20,7 @@ struct Boat {
    */
   int status;
 
-  //大于13000帧后用该变量保证船再捡一会货物
-  int final_count;
-
   Boat();
-
-  // 虚拟点选择泊位
-  void ChooseBerth();
 
   // version:3.0: 选择固定的两个泊位
   void ChooseBerth3(int boat_id);
