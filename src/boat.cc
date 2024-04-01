@@ -12,6 +12,7 @@ int Boat::boat_capacity = 0;
 extern int id;
 
 Boat::Boat() { num = 0; }
+Boat::Boat(int x, int y){};
 
 /*
  * version:3.0

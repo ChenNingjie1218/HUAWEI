@@ -9,12 +9,8 @@
 #include "boat.h"
 #include "map_controller.h"
 #include "param.h"
+#include "rent_controller.h"
 #include "robot.h"
-extern Boat boat[10];
-extern Robot robot[robot_num + 10];
-extern Berth berth[berth_num + 10];
-extern char ch[N][N];
-extern Goods *gds[N][N];
 // extern int busy_point[N][N];
 extern int id;
 extern std::array<Location, 4> DIRS;
@@ -55,6 +51,7 @@ void DecisionManager::DecisionBoat() {
   // 按船装的货物数量顺序来抉择
   int boat_id[5];
   boat_id[0] = 0;
+  auto &boat = RentController::GetInstance()->boat;
   for (int i = 1; i < 5; ++i) {
     bool flag = true;
     for (int j = i - 1; j >= 0; --j) {
@@ -74,7 +71,7 @@ void DecisionManager::DecisionBoat() {
 #ifdef DEBUG
   std::cerr << "船按货物数量排完序" << std::endl;
 #endif
-
+  auto &berth = MapController::GetInstance()->berth;
   for (int i = 0; i < 5; ++i) {
     // status 0 运输中 无需考虑决策
     if (boat[boat_id[i]].status == 1) {
@@ -142,6 +139,8 @@ void DecisionManager::DecisionRobot() {
 #endif
   std::vector<NextPoint> next_points;
   std::vector<int> not_move_id;
+  auto &robot = RentController::GetInstance()->robot;
+  auto &ch = MapController::GetInstance()->ch;
   for (int i = 0; i < 10; ++i) {
     // --------- 移动前动作 ---------
     // if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B' &&
@@ -155,8 +154,6 @@ void DecisionManager::DecisionRobot() {
       Decision decision(DECISION_TYPE_ROBOT_PULL, i, -1);
       q_decision.push(decision);
 
-      // 增加泊位权重
-      ++berth[robot->berth_id].weight;
 #ifdef ONE_ROBOT_ONE_BERTH
       berth[robot->berth_id].robot_id = -1;
 #endif
@@ -184,14 +181,16 @@ void DecisionManager::DecisionRobot() {
         robot[i].target_goods->robot_id = i;
       }
       robot[i].goods = false;
-    } else if (!robot[i].goods && gds[robot[i].x][robot[i].y]) {
+    } else if (!robot[i].goods &&
+               MapController::GetInstance()->gds[robot[i].x][robot[i].y]) {
 #ifdef DEBUG
       std::cerr << "地上有货物" << std::endl;
 #endif
       bool is_get = false;
       // 机器人没拿货且地上有货物
       if (robot[i].target_goods &&
-          gds[robot[i].x][robot[i].y] == robot[i].target_goods) {
+          MapController ::GetInstance()->gds[robot[i].x][robot[i].y] ==
+              robot[i].target_goods) {
         // 地上的货物为机器人准备捡的货物
         is_get = true;
 #ifdef DEBUG
@@ -236,7 +235,8 @@ void DecisionManager::DecisionRobot() {
       else if (!robot[i].target_goods) {
         // 机器人没目标货物，且该帧刚好生成了一个货物在脚底下
         is_get = true;
-        robot[i].target_goods = gds[robot[i].x][robot[i].y];
+        robot[i].target_goods =
+            MapController::GetInstance()->gds[robot[i].x][robot[i].y];
         robot[i].target_goods->robot_id = i;
 #ifdef DEBUG
         std::cerr << "robot " << i << " 装地上新生成的货：(" << robot[i].x
@@ -305,7 +305,8 @@ void DecisionManager::DecisionRobot() {
       next_x = iter->x;
       next_y = iter->y;
       bool same_flag = false;
-      for (int j = 0; j < next_points.size(); ++j) {
+      for (std::vector<NextPoint>::size_type j = 0; j < next_points.size();
+           ++j) {
         if (next_points[j].x == next_x && next_points[j].y == next_y) {
           // 有相同落点
           same_flag = true;
