@@ -7,12 +7,10 @@
 #include "boat.h"
 #include "goods.h"
 #include "input_controller.h"
+#include "map_controller.h"
 #include "param.h"
-Robot robot[robot_num + 10];
-extern Berth berth[berth_num + 10];
+#include "rent_controller.h"
 extern int id;
-extern char ch[N][N];
-extern Boat boat[10];
 extern std::array<Location, 4> DIRS;
 Robot::Robot(int startX, int startY) {
   x = startX;
@@ -176,6 +174,7 @@ void Robot::FindBerth(int start_x, int start_y) {
                DynamicParam::GetInstance()->GetFinalTolerantTime();
   // 寻找最近的泊位
   int size = berth_accessed.size();
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
   for (int j = 0; j < size; ++j) {
     if (is_final_sprint) {
       if (berth[berth_accessed[j]].boat_id == -1) {
@@ -185,7 +184,9 @@ void Robot::FindBerth(int start_x, int start_y) {
       if (!berth[berth_accessed[j]].q_boat.empty() &&
           berth[berth_accessed[j]].goods_num >=
               Boat::boat_capacity -
-                  boat[berth[berth_accessed[j]].q_boat.front()].num) {
+                  RentController::GetInstance()
+                      ->boat[berth[berth_accessed[j]].q_boat.front()]
+                      .num) {
         // 该泊位有船，且自己能装满后离开，不需要再往这儿送货
         continue;
       }
@@ -236,7 +237,7 @@ int Robot::IsBlock(std::vector<NextPoint> &next_points) {
 int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
                    std::vector<int> &not_move_id) {
   // 可能存在不能让位的情况
-
+  std::vector<Robot> &robot = RentController::GetInstance()->robot;
   int size = next_points.size();
   int ignore_x = robot[ignore_id].x, ignore_y = robot[ignore_id].y;
 
@@ -252,6 +253,7 @@ int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
 #ifdef DEBUG
   std::vector<std::string> dir_string = {"下", "上", "右", "左"};
 #endif
+  char(&ch)[N][N] = MapController::GetInstance()->ch;
   for (int i = 1; i <= 4; ++i) {
     int index = (first_dir + i) % 4;
     if (x + DIRS[index].x == ignore_x && y + DIRS[index].y == ignore_y) {
@@ -305,6 +307,7 @@ int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
 
 //  初始化berth_accessed数组
 void Robot::InitAccessedBerth() {
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
   for (int i = 0; i < 10; ++i) {
     if (area_id == berth[i].area_id) {
       berth_accessed.push_back(i);

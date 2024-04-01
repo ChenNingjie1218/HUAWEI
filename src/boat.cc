@@ -10,8 +10,6 @@
 #include "rent_controller.h"
 int Boat::boat_capacity = 0;
 extern int id;
-// 随机泊位
-int rand_berth = 0;
 
 Boat::Boat() { num = 0; }
 

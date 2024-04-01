@@ -231,7 +231,6 @@ void InputController::Input() {
     // 放置成功港口货物加一
     if (robot[i].pre_goods - temp_goods == 1) {
       berth[robot[i].berth_id].goods_num++;
-      berth[robot[i].berth_id].weight++;
       robot[i].berth_id = -1;
       // boat[berth[robot[i].berth_id].q_boat.front()].num++;
     }
