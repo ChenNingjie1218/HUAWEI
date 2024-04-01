@@ -3,12 +3,10 @@
 #include <iostream>
 
 #include "decision.h"
+#include "map_controller.h"
 #include "param.h"
+#include "rent_controller.h"
 #include "robot.h"
-extern Robot robot[robot_num + 10];
-extern int busy_point[N][N];
-extern char ch[N][N];
-extern Goods *gds[N][N];
 NextPoint::NextPoint(int x, int y, int robot_id) {
   this->x = x;
   this->y = y;
@@ -23,6 +21,7 @@ NextPoint::NextPoint(int x, int y, int robot_id) {
  */
 void NextPoint::PushRobot(int robot_id, std::vector<int> &not_move_id) {
   int i;
+  std::vector<Robot> &robot = RentController::GetInstance()->robot;
   for (i = count - 1; i >= 0; --i) {
     if (Robot::JudgePriority(&robot[list_robot[i]], &robot[robot_id]) == 1) {
       list_robot[i + 1] = robot_id;
@@ -50,6 +49,7 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
   // 该落点有机器人决策落入
   if (count) {
     int robot_id = list_robot[0];
+    std::vector<Robot> &robot = RentController::GetInstance()->robot;
 #ifdef DEBUG
     std::cerr << "robot " << robot_id << " decided to move from ("
               << robot[robot_id].x << "," << robot[robot_id].y << ") to (" << x
@@ -77,7 +77,8 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
         not_move_robot_id.erase(not_move_robot_id.begin() + i);
       }
     }
-    busy_point[robot[robot_id].x][robot[robot_id].y] = 0;  // 该点不拥堵
+    MapController::GetInstance()
+        ->busy_point[robot[robot_id].x][robot[robot_id].y] = 0;  // 该点不拥堵
 
     DecisionManager::GetInstance()->q_decision.push(
         Decision(DECISION_TYPE_ROBOT_MOVE, robot_id, param));
@@ -90,7 +91,8 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
 
     // 如果移动决策移动后动作
     // --------- 移动后动作 ---------
-    if (robot[robot_id].goods && ch[x][y] == 'B') {
+    if (robot[robot_id].goods &&
+        MapController::GetInstance()->ch[x][y] == 'B') {
 #ifdef DEBUG
       std::cerr << "robot " << robot_id << " 移动后卸货：(" << x << "," << y
                 << ")" << std::endl;
@@ -102,14 +104,16 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
 #ifdef ONE_ROBOT_ONE_BERTH
       berth[robot[robot_id].berth_id].robot_id = -1;
 #endif
-    } else if (!robot[robot_id].goods && gds[x][y]) {
+    } else if (!robot[robot_id].goods &&
+               MapController::GetInstance()->gds[x][y]) {
 #ifdef DEBUG
       std::cerr << "地上有货物" << std::endl;
 #endif
       bool is_get = false;
       // 机器人没拿货且地上有货物
       if (robot[robot_id].target_goods &&
-          gds[x][y] == robot[robot_id].target_goods) {
+          MapController::GetInstance()->gds[x][y] ==
+              robot[robot_id].target_goods) {
         // 地上的货物为机器人准备捡的货物
         is_get = true;
 #ifdef DEBUG
@@ -180,6 +184,7 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
 
 // 检测是否存在面对面死锁
 bool NextPoint::IsDeadLock(NextPoint &other_point) {
+  std::vector<Robot> &robot = RentController::GetInstance()->robot;
   int first_x = robot[list_robot[0]].x;
   int first_y = robot[list_robot[0]].y;
   int second_x = robot[other_point.list_robot[0]].x;

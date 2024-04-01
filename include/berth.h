@@ -14,9 +14,6 @@ struct Berth {
   // 每帧可以装载的物品数
   int loading_speed;
 
-  // 权重
-  int weight = 0;
-
   // 货物数量
   int goods_num;
 
