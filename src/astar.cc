@@ -7,13 +7,10 @@
 #include "berth.h"
 #include "boat.h"
 #include "input_controller.h"
+#include "map_controller.h"
 #include "param.h"
-extern char ch[N][N];
-extern Goods *gds[N][N];
-extern int busy_point[N][N];
+#include "rent_controller.h"
 extern int id;
-extern Berth berth[berth_num + 10];
-extern Boat boat[10];
 // 方向数组
 std::array<Location, 4> DIRS = {Location(1, 0), Location(-1, 0), Location(0, 1),
                                 Location(0, -1)};
@@ -51,11 +48,13 @@ Point::Point(Location loc) {
 }
 
 bool Point::CanReach() {
-  if (busy_point[loc.x][loc.y] > DynamicParam::GetInstance()->GetBusyValve()) {
+  if (MapController::GetInstance()->busy_point[loc.x][loc.y] >
+      DynamicParam::GetInstance()->GetBusyValve()) {
     return false;
   }
-  if (ch[loc.x][loc.y] == '.' || ch[loc.x][loc.y] == 'A' ||
-      ch[loc.x][loc.y] == 'B') {
+  if (MapController::GetInstance()->ch[loc.x][loc.y] == '.' ||
+      MapController::GetInstance()->ch[loc.x][loc.y] == 'A' ||
+      MapController::GetInstance()->ch[loc.x][loc.y] == 'B') {
     return true;
   }
   return false;
@@ -88,7 +87,8 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 
   while (!frontier.empty()) {
     Location current = frontier.get();
-    if (current != start && busy_point[current.x][current.y]) {
+    if (current != start &&
+        MapController::GetInstance()->busy_point[current.x][current.y]) {
       continue;
     }
 // 超过深度剪枝
@@ -102,16 +102,18 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 #endif
 
     // 如果是找货物
-    if (gds[current.x][current.y] &&
-        gds[current.x][current.y]->robot_id == -1 &&
+    if (MapController::GetInstance()->gds[current.x][current.y] &&
+        MapController::GetInstance()->gds[current.x][current.y]->robot_id ==
+            -1 &&
         cost_so_far[current] <
-            LIFETIME - id + gds[current.x][current.y]->birth -
+            LIFETIME - id +
+                MapController::GetInstance()->gds[current.x][current.y]->birth -
                 DynamicParam::GetInstance()->GetTolerantTime()) {
 #ifdef CHANGE_CLOSED_GOODS
-      if (gds[current.x][current.y]->money >
+      if (MapController::GetInstance()->gds[current.x][current.y]->money >
           DynamicParam::GetInstance()->GetValueableGoodsValve()) {
         // 只换值钱的货物
-        find_goods = gds[current.x][current.y];
+        find_goods = MapController::GetInstance()->gds[current.x][current.y];
       }
 #endif
 
@@ -174,19 +176,26 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
 
   while (!frontier.empty()) {
     Location current = frontier.get();
-    if (ch[current.x][current.y] == 'B') {
+    if (MapController::GetInstance()->ch[current.x][current.y] == 'B') {
       // 不紧急 找到更近的泊位可结束
       // 紧急   需要该泊位有船
       int temp_berth_id =
-          InputController::GetInstance()->location_to_berth_id[current];
+          MapController::GetInstance()->location_to_berth_id[current];
+      // InputController::GetInstance()->location_to_berth_id[current];
       bool can_finish = !is_urgent;
-      if (is_urgent && berth[temp_berth_id].boat_id != -1) {
-        if (berth[temp_berth_id].q_boat.empty()) {
+      if (is_urgent &&
+          MapController::GetInstance()->berth[temp_berth_id].boat_id != -1) {
+        if (MapController::GetInstance()->berth[temp_berth_id].q_boat.empty()) {
           // 船即将到该泊位
           can_finish = true;
-        } else if (berth[temp_berth_id].goods_num <
-                   Boat::boat_capacity -
-                       boat[berth[temp_berth_id].q_boat.front()].num) {
+        } else if (MapController::GetInstance()
+                       ->berth[temp_berth_id]
+                       .goods_num <
+                   Boat::boat_capacity - RentController::GetInstance()
+                                             ->boat[MapController::GetInstance()
+                                                        ->berth[temp_berth_id]
+                                                        .q_boat.front()]
+                                             .num) {
           // 该泊位有船，且泊位上的货物装不满船
           can_finish = true;
         }

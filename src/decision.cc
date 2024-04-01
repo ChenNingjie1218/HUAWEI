@@ -7,6 +7,7 @@
 #include "astar.h"
 #include "berth.h"
 #include "boat.h"
+#include "map_controller.h"
 #include "param.h"
 #include "robot.h"
 extern Boat boat[10];
@@ -14,7 +15,7 @@ extern Robot robot[robot_num + 10];
 extern Berth berth[berth_num + 10];
 extern char ch[N][N];
 extern Goods *gds[N][N];
-extern int busy_point[N][N];
+// extern int busy_point[N][N];
 extern int id;
 extern std::array<Location, 4> DIRS;
 bool can_find_goods = true;  // 每次决策只找一次物品
@@ -445,8 +446,11 @@ void DecisionManager::DecisionRobot() {
   not_move_size = not_move_id.size();
   for (int i = 0; i < not_move_size; ++i) {
     int robot_id = not_move_id[i];
-    busy_point[robot[robot_id].x][robot[robot_id].y]++;
-    if (busy_point[robot[robot_id].x][robot[robot_id].y] >
+    MapController::GetInstance()
+        ->busy_point[robot[robot_id].x][robot[robot_id].y]++;
+    // busy_point[robot[robot_id].x][robot[robot_id].y]++;
+    if (MapController::GetInstance()
+            ->busy_point[robot[robot_id].x][robot[robot_id].y] >
         DynamicParam::GetInstance()->GetBusyValve()) {
 #ifdef DEBUG
       std::cerr << "机器人原地罚站超时" << std::endl;

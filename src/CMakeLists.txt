@@ -1,6 +1,6 @@
 include_directories(${CMAKE_SOURCE_DIR}/include)
 add_executable(main main.cc)
-# add_library(floyd floyd.cc)
+# add_library(mylib input_controller.cc)
 aux_source_directory(. DIR_SRCS)
 add_library(mylib ${DIR_SRCS})
 target_link_libraries(main mylib)

@@ -1,4 +1,5 @@
 #include "rent_controller.h"
+
 RentController* RentController::instance_ = nullptr;
 
 RentController*& RentController::GetInstance() {
