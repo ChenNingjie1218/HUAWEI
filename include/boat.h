@@ -2,6 +2,18 @@
 #define BOAT_H_
 // 船
 struct Boat {
+  // 核心点坐标
+  int x, y;
+
+  /*
+   * 方向
+   * - 0 右
+   * - 1 左
+   * - 2 上
+   * - 3 下
+   */
+  int direction;
+
   // 货物数量
   int num;
 
@@ -14,13 +26,14 @@ struct Boat {
   /*
    * 状态
    * 可能值：
-   * - 0 运输中
-   * - 1 运行状态
-   * - 2 泊位外等待
+   * - 0 正常行驶状态
+   * - 1 恢复状态
+   * - 2 装载状态
    */
   int status;
 
   Boat();
+  Boat(int x, int y);
 
   // version:3.0: 选择固定的两个泊位
   void ChooseBerth3(int boat_id);

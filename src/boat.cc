@@ -5,9 +5,9 @@
 
 #include "berth.h"
 #include "decision.h"
+#include "map_controller.h"
 #include "param.h"
-Boat boat[10];
-extern Berth berth[berth_num + 10];
+#include "rent_controller.h"
 int Boat::boat_capacity = 0;
 extern int id;
 // 随机泊位
@@ -23,6 +23,7 @@ Boat::Boat() { num = 0; }
 void Boat::ChooseBerth3(int boat_id) {
   int max_goods = 0;
   int target_pos = -1;
+  std::vector<Berth>& berth = MapController::GetInstance()->berth;
   for (int i = 0; i < 10; ++i) {
     // 剩余装载时间
     int time = 15000 - id -
@@ -57,6 +58,7 @@ void Boat::ChooseBerth3(int boat_id) {
  * 3 正在前往该泊位的机器人数量 ？
  */
 bool Boat::LeaveCond() {
+  std::vector<Berth>& berth = MapController::GetInstance()->berth;
   if (pos != -1 &&
       id > 15000 - berth[pos].transport_time -
                DynamicParam::GetInstance()->GetTolerantLeaveTime()) {
@@ -84,6 +86,7 @@ bool Boat::LeaveCond() {
  * 3 另一个泊位的货物数量
  */
 bool Boat::ChangeBerth3(int boat_id, bool force) {
+  std::vector<Berth>& berth = MapController::GetInstance()->berth;
   if (berth[pos].goods_num > 0 && !force) {
     return false;
   }
@@ -95,7 +98,9 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
     int goods_num = std::min(time * berth[i].loading_speed, berth[i].goods_num);
     if (i != pos && goods_num >= boat_capacity - num) {
       if (!berth[i].q_boat.empty() &&
-          berth[i].goods_num >= boat_capacity - boat[berth[i].boat_id].num) {
+          berth[i].goods_num >=
+              boat_capacity -
+                  RentController::GetInstance()->boat[berth[i].boat_id].num) {
         // 该泊位有船 且它自己能装满
         continue;
       } else if (berth[i].boat_id == -1) {
@@ -126,8 +131,9 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
     }
   } else {
     if (!berth[target_pos].q_boat.empty() &&
-        boat[berth[target_pos].boat_id].ChangeBerth3(berth[target_pos].boat_id,
-                                                     true)) {
+        RentController::GetInstance()
+            ->boat[berth[target_pos].boat_id]
+            .ChangeBerth3(berth[target_pos].boat_id, true)) {
       // 如果该泊位有船
       // 让它换个坑位
 
@@ -137,8 +143,9 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
                 << std::endl;
 #endif
       // 更换港口
-      Decision decision(DECISION_TYPE_BOAT_SHIP, berth[target_pos].boat_id,
-                        boat[berth[target_pos].boat_id].pos);
+      Decision decision(
+          DECISION_TYPE_BOAT_SHIP, berth[target_pos].boat_id,
+          RentController::GetInstance()->boat[berth[target_pos].boat_id].pos);
       DecisionManager::GetInstance()->q_decision.push(decision);  // 决策入队
     }
 #ifdef DEBUG
