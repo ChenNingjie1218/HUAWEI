@@ -22,3 +22,18 @@ void MapController::MergeArea(int id_1, int id_2) {
     parent[root_2] = root_1;
   }
 }
+
+// 机器人可达
+bool MapController::CanRobotReach(int x, int y) {
+  return ch[x][y] == '>' || ch[x][y] == 'R' || ch[x][y] == 'B' ||
+         ch[x][y] == 'C' || ch[x][y] == 'c';
+}
+
+// 初始化坐标映射到泊位id的map
+void MapController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4; ++j) {
+      location_to_berth_id[Location(berth_x + i, berth_y + j)] = berth_id;
+    }
+  }
+}

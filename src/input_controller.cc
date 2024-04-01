@@ -41,7 +41,16 @@ void InputController::Init() {
   int(&parent)[N * N] = MapController::GetInstance()->parent;
   for (int i = 1; i <= n; ++i) {
     for (int j = 1; j <= n; ++j) {
-      // 记录机器人初始位置
+      // 记录购买点、交货点
+      if (ch[i][j] == 'R')
+        MapController::GetInstance()->robot_purchase_point.push_back(
+            std::make_pair(i, j));
+      else if (ch[i][j] == 'S')
+        MapController::GetInstance()->boat_purchase_point.push_back(
+            std::make_pair(i, j));
+      else if (ch[i][j] == 'T')
+        MapController::GetInstance()->delivery_point.push_back(
+            std::make_pair(i, j));
 
       // 初始化堵车标记
       busy_point[i][j] = 0;
