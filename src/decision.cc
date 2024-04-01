@@ -446,7 +446,8 @@ void DecisionManager::DecisionRobot() {
   for (int i = 0; i < not_move_size; ++i) {
     int robot_id = not_move_id[i];
     busy_point[robot[robot_id].x][robot[robot_id].y]++;
-    if (busy_point[robot[robot_id].x][robot[robot_id].y] > BUSY_VALVE) {
+    if (busy_point[robot[robot_id].x][robot[robot_id].y] >
+        DynamicParam::GetInstance()->GetBusyValve()) {
 #ifdef DEBUG
       std::cerr << "机器人原地罚站超时" << std::endl;
 #endif

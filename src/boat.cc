@@ -25,7 +25,9 @@ void Boat::ChooseBerth3(int boat_id) {
   int target_pos = -1;
   for (int i = 0; i < 10; ++i) {
     // 剩余装载时间
-    int time = 15000 - id - TOLERANT_LEAVE_TIME - 2 * berth[i].transport_time;
+    int time = 15000 - id -
+               DynamicParam::GetInstance()->GetTolerantLeaveTime() -
+               2 * berth[i].transport_time;
     if (berth[i].boat_id == -1 && time > 0) {
       // 在剩余时间内能装多少货物
       int can_load =
@@ -56,7 +58,8 @@ void Boat::ChooseBerth3(int boat_id) {
  */
 bool Boat::LeaveCond() {
   if (pos != -1 &&
-      id > 15000 - berth[pos].transport_time - TOLERANT_LEAVE_TIME) {
+      id > 15000 - berth[pos].transport_time -
+               DynamicParam::GetInstance()->GetTolerantLeaveTime()) {
 #ifdef DEBUG
     std::cerr << berth[pos].boat_id
               << " 船离开了，剩余货物数量: " << berth[pos].goods_num
@@ -69,7 +72,8 @@ bool Boat::LeaveCond() {
     return num >= boat_capacity;
   }
   // 微调快满的船又去换泊位
-  return num >= boat_capacity - BOAT_CAPACITY_REDUCE;
+  return num >=
+         boat_capacity - DynamicParam::GetInstance()->GetBoatCapacityReduce();
 }
 
 /*
@@ -87,7 +91,7 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
   int target_pos = pos;
   for (int i = 0; i < 10; ++i) {
     int time = 15000 - id - berth[i].transport_time - CHANGE_BERTH_TIME -
-               TOLERANT_LEAVE_TIME;
+               DynamicParam::GetInstance()->GetTolerantLeaveTime();
     int goods_num = std::min(time * berth[i].loading_speed, berth[i].goods_num);
     if (i != pos && goods_num >= boat_capacity - num) {
       if (!berth[i].q_boat.empty() &&
@@ -111,7 +115,7 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
     for (int i = 0; i < 10; ++i) {
       if (i != pos && berth[i].boat_id == -1) {
         int time = 15000 - id - berth[i].transport_time - CHANGE_BERTH_TIME -
-                   TOLERANT_LEAVE_TIME;
+                   DynamicParam::GetInstance()->GetTolerantLeaveTime();
         int can_load =
             std::min(time * berth[i].transport_time, berth[i].goods_num);
         if (can_load > max_goods) {

@@ -117,7 +117,8 @@ bool Robot::UpdateTargetGoods(int robot_id) {
     }
     int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
     if (min_man > cal_man &&
-        cal_man < LIFETIME - id + p_goods->birth - TOLERANT_TIME) {
+        cal_man < LIFETIME - id + p_goods->birth -
+                      DynamicParam::GetInstance()->GetTolerantTime()) {
       min_man = cal_man;
       find_goods = p_goods;
     }
@@ -171,7 +172,8 @@ void Robot::FindBerth(int start_x, int start_y) {
   double min_man = 99999, cal_man;  // 曼哈顿距离
   bool is_final_sprint =
       id > 15000 - InputController::GetInstance()->max_transport_time -
-               CHANGE_BERTH_TIME - FINAL_TOLERANT_TIME;
+               CHANGE_BERTH_TIME -
+               DynamicParam::GetInstance()->GetFinalTolerantTime();
   // 寻找最近的泊位
   int size = berth_accessed.size();
   for (int j = 0; j < size; ++j) {
