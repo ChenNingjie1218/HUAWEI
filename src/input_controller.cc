@@ -184,6 +184,7 @@ void InputController::Input() {
         continue;
       }
 #endif
+
       Goods* new_goods = new Goods(x, y, val, id);
       GoodsManager::GetInstance()->PushGoods(new_goods);
       new_goods->area_id = MapController::GetInstance()->FindArea(x * n + y);
@@ -203,11 +204,11 @@ void InputController::Input() {
 #endif
 
   for (int i = 0; i < robot_num; i++) {
-    int temp_goods = 0, x, y;
-    scanf("%d%d%d", &temp_goods, &x, &y);
+    int robot_id, temp_goods, x, y;
+    scanf("%d%d%d%d", &robot_id, &temp_goods, &x, &y);
     if (i >= robot.size()) {
       // 新增机器人
-      robot.push_back(Robot(i, temp_goods, ++x, ++y));
+      robot.push_back(Robot(robot_id, temp_goods, ++x, ++y));
       robot[i].InitAccessedBerth();
     } else {
       // 旧机器人更新坐标
@@ -217,7 +218,7 @@ void InputController::Input() {
     ++busy_point[robot[i].x][robot[i].y];
 #ifdef DEBUG
     fprintf(debug_command_file, "robot %d info: goods = %d, x = %d, y = %d\n",
-            i, temp_goods, robot[i].x, robot[i].y);
+            robot_id, temp_goods, robot[i].x, robot[i].y);
 
 #endif
     // 放置成功港口货物加一
@@ -238,10 +239,12 @@ void InputController::Input() {
 #endif
 
   for (int i = 0; i < boat_num; i++) {
-    int id, goods_num, x, y, direction, temp_status;
-    scanf("%d%d%d%d%d%d\n", &id, &goods_num, &x, &y, &direction, &temp_status);
+    int boat_id, goods_num, x, y, direction, temp_status;
+    scanf("%d%d%d%d%d%d\n", &boat_id, &goods_num, &x, &y, &direction,
+          &temp_status);
     if (i > RentController::GetInstance()->boat.size()) {
-      boat.push_back(Boat(id, goods_num, ++x, ++y, direction, temp_status));
+      boat.push_back(
+          Boat(boat_id, goods_num, ++x, ++y, direction, temp_status));
     } else {
       boat[i].x = ++x;
       boat[i].y = ++y;

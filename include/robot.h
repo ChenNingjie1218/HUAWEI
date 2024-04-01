@@ -31,7 +31,7 @@ struct Robot {
   Robot() = default;
   Robot(int &id, int &goods, int &startX, int &startY);
 
-  Goods *target_goods;
+  Goods *target_goods = nullptr;
   std::vector<Location> path;
 
   // 可到达的港口

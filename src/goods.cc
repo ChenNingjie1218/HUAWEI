@@ -2,9 +2,8 @@
 
 #include <iostream>
 
+#include "map_controller.h"
 #include "rent_controller.h"
-
-Goods *gds[N][N] = {{nullptr}};
 extern int id;
 GoodsManager *GoodsManager::instance_ = nullptr;
 Goods::Goods() {
@@ -28,7 +27,7 @@ void GoodsManager::PushGoods(Goods *new_goods) {
     UpdateValueValve(true);
   }
 #endif
-  gds[new_goods->x][new_goods->y] = new_goods;
+  MapController::GetInstance()->gds[new_goods->x][new_goods->y] = new_goods;
   if (head_goods->next == head_goods) {
     // 空链表
     head_goods->next = new_goods;
@@ -66,7 +65,7 @@ void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
     UpdateValueValve(false);
   }
 #endif
-  gds[goods->x][goods->y] = nullptr;
+  MapController::GetInstance()->gds[goods->x][goods->y] = nullptr;
   goods->pre->next = goods->next;
   goods->next->pre = goods->pre;
 
