@@ -4,18 +4,17 @@
 
 #include <cstdio>
 
-#include "astar.h"
 #include "berth.h"
 #include "decision.h"
 #include "goods.h"
 #include "input_controller.h"
+#include "map_controller.h"
 #include "output_controller.h"
 
 #ifdef DEBUG
 FILE *debug_map_file = fopen("./debug/debug_map.txt", "w");
 FILE *debug_command_file = fopen("./debug/debug.txt", "w");
 FILE *debug_output_file = fopen("./debug/cerr.txt", "w");
-extern Berth berth[berth_num + 10];
 #endif
 
 int main() {
@@ -42,7 +41,7 @@ int main() {
   }
 #ifdef DEBUG
   fclose(debug_command_file);
-
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
   // 泊位上残留货物数量
   for (int i = 0; i < 10; ++i) {
     std::cerr << "船上残留货物:" << berth[i].goods_num << std::endl;
