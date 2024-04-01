@@ -46,81 +46,6 @@ void DecisionManager::DecisionBoat() {
                "--------------------------"
             << std::endl;
 #endif
-  // 最大权重泊位，权重都为0就随机泊位
-  // int rand_berth = 0;
-  // 按船装的货物数量顺序来抉择
-  int boat_id[5];
-  boat_id[0] = 0;
-  auto &boat = RentController::GetInstance()->boat;
-  for (int i = 1; i < 5; ++i) {
-    bool flag = true;
-    for (int j = i - 1; j >= 0; --j) {
-      if (boat[i].num > boat[boat_id[j]].num) {
-        boat_id[j + 1] = boat_id[j];
-      } else {
-        boat_id[j + 1] = i;
-        flag = false;
-        break;
-      }
-    }
-    if (flag) {
-      boat_id[0] = i;
-    }
-  }
-
-#ifdef DEBUG
-  std::cerr << "船按货物数量排完序" << std::endl;
-#endif
-  auto &berth = MapController::GetInstance()->berth;
-  for (int i = 0; i < 5; ++i) {
-    // status 0 运输中 无需考虑决策
-    if (boat[boat_id[i]].status == 1) {
-      if (boat[boat_id[i]].pos == -1) {
-        // 在虚拟点
-
-        // 决策去哪个泊位
-        boat[boat_id[i]].ChooseBerth3(boat_id[i]);
-        if (boat[boat_id[i]].pos == -1) {
-          continue;
-        }
-#ifdef DEBUG
-        std::cerr << "boat " << boat_id[i]
-                  << " choose berth:" << boat[boat_id[i]].pos << std::endl;
-#endif
-        Decision decision(DECISION_TYPE_BOAT_SHIP, boat_id[i],
-                          boat[boat_id[i]].pos);
-        q_decision.push(decision);  // 决策入队
-      } else if (boat[boat_id[i]].LeaveCond()) {
-        if (!berth[boat[boat_id[i]].pos].q_boat.empty()) {
-          berth[boat[boat_id[i]].pos].q_boat.pop();
-        }
-        berth[boat[boat_id[i]].pos].boat_id = -1;
-        // 决策是否驶离
-
-#ifdef DEBUG
-        std::cerr << boat_id[i] << " 船离开 " << boat[boat_id[i]].pos
-                  << " 货物数量: " << boat[boat_id[i]].num << std::endl;
-#endif
-        // Decision decision(DECISION_TYPE_BOAT_GO, boat_id[i], -1);
-        // q_decision.push(decision);
-        boat[boat_id[i]].num = 0;  // 清空船中货物
-      } else if (boat[boat_id[i]].ChangeBerth3(boat_id[i])) {  // 更换港口
-        // 更换港口
-        Decision decision(DECISION_TYPE_BOAT_SHIP, boat_id[i],
-                          boat[boat_id[i]].pos);
-        q_decision.push(decision);  // 决策入队
-      }
-
-    } else if (boat[boat_id[i]].status == 2) {
-      // 在等待
-      // 可以决策是否换船舶，换哪个船舶
-
-#ifdef DEBUG
-      std::cerr << boat_id[i] << " 船正在船舶外等待 " << boat[boat_id[i]].pos
-                << std::endl;
-#endif
-    }
-  }
 }
 
 /*
@@ -144,8 +69,6 @@ void DecisionManager::DecisionRobot() {
   auto robot_num = robot.size();
   for (int i = 0; i < robot_num; ++i) {
     // --------- 移动前动作 ---------
-    // if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B' &&
-    //     !berth[robot[i].berth_id].q_boat.empty()) {
     if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B') {
 #ifdef DEBUG
       std::cerr << "robot " << i << " 卸货：(" << robot[i].x << ","
@@ -158,7 +81,6 @@ void DecisionManager::DecisionRobot() {
 #ifdef ONE_ROBOT_ONE_BERTH
       berth[robot->berth_id].robot_id = -1;
 #endif
-      // robot[i].berth_id = -1;
       // 下货的位置可能不是计算的位置，path里面还有内容
       robot[i].path.clear();
       // 决策，更新目标货物, 当前不持有货物

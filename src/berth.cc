@@ -1,9 +1,9 @@
 #include "berth.h"
 
-Berth::Berth(int x, int y, int transport_time, int loading_speed) {
-  this->x = x;
-  this->y = y;
-  this->transport_time = transport_time;
-  this->loading_speed = loading_speed;
+#include "map_controller.h"
+
+Berth::Berth(int id, int x, int y, int loading_speed)
+    : id_(id), x(x), y(y), loading_speed(loading_speed) {
   goods_num = 0;
+  area_id = MapController::GetInstance()->FindArea(x * n + y);
 }

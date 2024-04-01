@@ -13,8 +13,5 @@ struct InputController {
 
   // 每帧的数据
   void Input();
-
-  // 船到虚拟点的最大耗时
-  int max_transport_time = 0;
 };
 #endif

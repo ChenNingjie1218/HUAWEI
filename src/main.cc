@@ -20,6 +20,7 @@ FILE *debug_output_file = fopen("./debug/cerr.txt", "w");
 int main() {
 #ifdef DEBUG
   setvbuf(debug_command_file, nullptr, _IONBF, 0);
+  setvbuf(debug_map_file, nullptr, _IONBF, 0);
   int output_fd = fileno(debug_output_file);
   dup2(output_fd, STDERR_FILENO);
 #endif

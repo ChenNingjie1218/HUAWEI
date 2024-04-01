@@ -59,7 +59,9 @@ void InputController::Init() {
       parent[i * n + j] = i * n + j;
     }
   }
-
+#ifdef DEBUG
+  fprintf(debug_map_file, "初始化地图数据完毕！\n");
+#endif
   for (int i = 1; i <= n; ++i) {
     for (int j = 1; j <= n; ++j) {
       if (MapController::GetInstance()->CanRobotReach(i, j)) {
@@ -80,29 +82,28 @@ void InputController::Init() {
     }
   }
 
+#ifdef DEBUG
+  fprintf(debug_map_file, "分区处理完毕\n");
+#endif
+
   // 泊位数据
-  int& berth_num = MapController::GetInstance()->berth_num;
   std::vector<Berth>& berth = MapController::GetInstance()->berth;
+  int berth_num;
   scanf("%d", &berth_num);
   for (int i = 0; i < berth_num; i++) {
-    int id;
-    scanf("%d", &id);
-    scanf("%d%d%d", &berth[id].x, &berth[id].y, &berth[id].loading_speed);
-    ++berth[id].x;
-    ++berth[id].y;
+    int id, x, y, loading_speed;
+    scanf("%d%d%d%d", &id, &x, &y, &loading_speed);
+    if (i >= berth.size()) {
+      berth.push_back(Berth(id, ++x, ++y, loading_speed));
+    }
     MapController::GetInstance()->InitBerthMap(id, berth[id].x, berth[id].y);
-    berth[id].area_id =
-        MapController::GetInstance()->FindArea(berth[id].x * n + berth[id].y);
+
 #ifdef DEBUG
     fprintf(debug_map_file,
-            "泊位 %d: x = %d, y = %d, transport_time = %d, loading_speed = "
+            "泊位 %d: x = %d, y = %d, loading_speed = "
             "%d\n",
-            id, berth[id].x, berth[id].y, berth[id].transport_time,
-            berth[id].loading_speed);
+            id, berth[id].x, berth[id].y, berth[id].loading_speed);
 #endif
-    if (berth[id].transport_time > max_transport_time) {
-      max_transport_time = berth[id].transport_time;
-    }
   }
 
   // 船容积

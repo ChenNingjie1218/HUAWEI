@@ -169,8 +169,7 @@ void Robot::FindBerth(int start_x, int start_y) {
   std::vector<Location> route;
   double min_man = 99999, cal_man;  // 曼哈顿距离
   bool is_final_sprint =
-      id > 15000 - InputController::GetInstance()->max_transport_time -
-               CHANGE_BERTH_TIME -
+      id > 15000 - CHANGE_BERTH_TIME -
                DynamicParam::GetInstance()->GetFinalTolerantTime();
   // 寻找最近的泊位
   int size = berth_accessed.size();

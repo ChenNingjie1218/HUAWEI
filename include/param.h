@@ -11,8 +11,6 @@ const int LIFETIME = 1000;
 
 // 地图长度
 const int n = 200;
-const int robot_num = 10;
-const int berth_num = 10;
 const int N = 210;
 
 // 船换泊位耗时

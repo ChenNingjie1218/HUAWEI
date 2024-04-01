@@ -5,6 +5,7 @@
 #include "param.h"
 // 泊位
 struct Berth {
+  int id_;
   int x;
   int y;
 
@@ -31,6 +32,6 @@ struct Berth {
   //到泊位的船队列
   std::queue<int> q_boat;
   Berth() {}
-  Berth(int x, int y, int transport_time, int loading_speed);
+  Berth(int id, int x, int y, int loading_speed);
 };
 #endif
