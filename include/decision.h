@@ -4,20 +4,24 @@
 // 决策
 struct Decision {
   /*
+   * - 0 机器人buy
    * - 1 机器人move
    * - 2 机器人get
    * - 3 机器人pull
-   * - 4 船ship
-   * - 5 船go
+   * - 4 船buy
+   * - 5 船reset
+   * - 6 船ship
+   * - 7 船rotate
+   * - 8 船forward
    */
   int type;
 
-  // 机器人或者船的id
-  int id;
+  // 第一个参数
+  int param_1;
 
   // 第二参数
-  int param;
-  Decision(int type, int id, int param);
+  int param_2;
+  Decision(int type, int param_1, int param_2);
 };
 
 // 决策管理

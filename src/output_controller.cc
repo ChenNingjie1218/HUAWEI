@@ -126,52 +126,77 @@ void OutputController::Output() {
     DecisionManager::GetInstance()->q_decision.pop();
     switch (next_decision.type) {
       case DECISION_TYPE_ROBOT_BUY:
-        SendBuyRobot(next_decision.id, next_decision.param);
+        SendBuyRobot(next_decision.param_1, next_decision.param_2);
 #ifdef DEBUG
-        fprintf(debug_command_file, "lbot %d %d\n", next_decision.id,
-                next_decision.param);
+        fprintf(debug_command_file, "lbot %d %d\n", next_decision.param_1,
+                next_decision.param_2);
 #endif
         break;
       case DECISION_TYPE_ROBOT_MOVE:
-        SendMove(next_decision.id, next_decision.param);
-        break;
+        SendMove(next_decision.param_1, next_decision.param_2);
 
 #ifdef DEBUG
-        fprintf(debug_command_file, "move %d %d\n", next_decision.id,
-                next_decision.param);
+        fprintf(debug_command_file, "move %d %d\n", next_decision.param_1,
+                next_decision.param_2);
 #endif
 
         break;
       case DECISION_TYPE_ROBOT_GET:
-        SendGet(next_decision.id);
-
+        SendGet(next_decision.param_1);
 #ifdef DEBUG
-        fprintf(debug_command_file, "get %d\n", next_decision.id);
+        fprintf(debug_command_file, "get %d\n", next_decision.param_1);
 #endif
 
         break;
       case DECISION_TYPE_ROBOT_PULL:
-        SendPull(next_decision.id);
+        SendPull(next_decision.param_1);
 
 #ifdef DEBUG
-        fprintf(debug_command_file, "pull %d\n", next_decision.id);
+        fprintf(debug_command_file, "pull %d\n", next_decision.param_1);
 #endif
 
         break;
       case DECISION_TYPE_BOAT_BUY:
-        SendBuyBoat(next_decision.id, next_decision.param);
+        SendBuyBoat(next_decision.param_1, next_decision.param_2);
+
+#ifdef DEBUG
+        fprintf(debug_command_file, "lboat %d %d\n", next_decision.param_1,
+                next_decision.param_2);
+#endif
+
         break;
       case DECISION_TYPE_BOAT_RESET:
-        SendReset(next_decision.id);
+        SendReset(next_decision.param_1);
+
+#ifdef DEBUG
+        fprintf(debug_command_file, "dept %d\n", next_decision.param_1);
+#endif
+
         break;
       case DECISION_TYPE_BOAT_SHIP:
-        SendDock(next_decision.id);
+        SendDock(next_decision.param_1);
+
+#ifdef DEBUG
+        fprintf(debug_command_file, "berth %d\n", next_decision.param_1);
+#endif
+
         break;
       case DECISION_TYPE_BOAT_ROTATE:
-        SendRotate(next_decision.id, next_decision.param);
+        SendRotate(next_decision.param_1, next_decision.param_2);
+
+#ifdef DEBUG
+        fprintf(debug_command_file, "rot %d %d\n", next_decision.param_1,
+                next_decision.param_2);
+#endif
+
         break;
       case DECISION_TYPE_BOAT_FORWARD:
-        SendForward(next_decision.id);
+        SendForward(next_decision.param_1);
+
+#ifdef DEBUG
+        fprintf(debug_command_file, "ship %d\n", next_decision.param_1);
+#endif
+
         break;
       default:
 #ifdef DEBUG

@@ -16,10 +16,10 @@ extern int id;
 bool can_find_goods = true;  // 每次决策只找一次物品
 DecisionManager *DecisionManager::instance_ = nullptr;
 
-Decision::Decision(int type, int id, int param) {
+Decision::Decision(int type, int param_1, int param_2 = -1) {
   this->type = type;
-  this->id = id;
-  this->param = param;
+  this->param_1 = param_1;
+  this->param_2 = param_2;
 }
 
 DecisionManager *&DecisionManager::GetInstance() {
