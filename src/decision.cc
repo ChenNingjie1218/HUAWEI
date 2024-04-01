@@ -103,8 +103,8 @@ void DecisionManager::DecisionBoat() {
         std::cerr << boat_id[i] << " 船离开 " << boat[boat_id[i]].pos
                   << " 货物数量: " << boat[boat_id[i]].num << std::endl;
 #endif
-        Decision decision(DECISION_TYPE_BOAT_GO, boat_id[i], -1);
-        q_decision.push(decision);
+        // Decision decision(DECISION_TYPE_BOAT_GO, boat_id[i], -1);
+        // q_decision.push(decision);
         boat[boat_id[i]].num = 0;  // 清空船中货物
       } else if (boat[boat_id[i]].ChangeBerth3(boat_id[i])) {  // 更换港口
         // 更换港口

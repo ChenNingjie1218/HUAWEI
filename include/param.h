@@ -52,45 +52,51 @@ const int N = 210;
 
 class DynamicParam {
  public:
-  static DynamicParam* GetInstance() {
-    if (instance_ == nullptr) {
-      instance_ = new DynamicParam();
-    }
-    return instance_;
+  static DynamicParam*& GetInstance();
+
+  int GetTolerantTime() { return tolerant_time_; }
+  int GetTolerantLeaveTime() { return tolerant_leave_time_; }
+  int GetGoodsValueValve() { return goods_value_valve_; }
+  int GetGoodsFilterValveNum() { return goods_filter_valve_num_; }
+  int GetValueableGoodsValve() { return valueable_goods_valve_; }
+  int GetFinalTolerantTime() { return final_tolerant_time_; }
+  int GetBusyValve() { return busy_valve_; }
+  int GetBoatCapacityReduce() { return boat_capacity_reduce_; }
+
+  void SetTolerantTime(int tolerant_time) { tolerant_time_ = tolerant_time; }
+  void SetTolerantLeaveTime(int tolerant_leave_time) {
+    tolerant_leave_time_ = tolerant_leave_time;
+  }
+  void SetGoodsValueValve(int goods_value_valve) {
+    goods_value_valve_ = goods_value_valve;
+  }
+  void SetGoodsFilterValveNum(int goods_filter_valve_num) {
+    goods_filter_valve_num_ = goods_filter_valve_num;
+  }
+  void SetValueableGoodsValve(int valueable_goods_valve) {
+    valueable_goods_valve_ = valueable_goods_valve;
+  }
+  void SetFinalTolerantTime(int final_tolerant_time) {
+    final_tolerant_time_ = final_tolerant_time;
+  }
+  void SetBusyValve(int busy_valve) { busy_valve_ = busy_valve; }
+  void SetBoatCapacityReduce(int boat_capacity_reduce) {
+    boat_capacity_reduce_ = boat_capacity_reduce;
   }
 
-  int GetTolerantTime() { return TOLERANT_TIME; }
-  int GetTolerantLeaveTime() { return TOLERANT_LEAVE_TIME; }
-  int GetGoodsValueValve() { return GOODS_VALUE_VALVE; }
-  int GetGoodsFilterValveNum() { return GOODS_FILTER_VALVE_NUM; }
-  int GetValueableGoodsValve() { return VALUEABLE_GOODS_VALVE; }
-  int GetFinalTolerantTime() { return FINAL_TOLERANT_TIME; }
-  int GetBusyValve() { return BUSY_VALVE; }
-  int GetBoatCapacityReduce() { return BOAT_CAPACITY_REDUCE; }
-
-  void SetTolerantTime(int val) { TOLERANT_TIME = val; }
-  void SetTolerantLeaveTime(int val) { TOLERANT_LEAVE_TIME = val; }
-  void SetGoodsValueValve(int val) { GOODS_VALUE_VALVE = val; }
-  void SetGoodsFilterValveNum(int val) { GOODS_FILTER_VALVE_NUM = val; }
-  void SetValueableGoodsValve(int val) { VALUEABLE_GOODS_VALVE = val; }
-  void SetFinalTolerantTime(int val) { FINAL_TOLERANT_TIME = val; }
-  void SetBusyValve(int val) { BUSY_VALVE = val; }
-  void SetBoatCapacityReduce(int val) { BOAT_CAPACITY_REDUCE = val; }
-
  private:
-  int TOLERANT_TIME = 40;  // 参数 机器人找货物容忍步数
-
-  int TOLERANT_LEAVE_TIME = 5;      // 参数 船最后走可容忍时间的
-  int GOODS_VALUE_VALVE = 20;       // 参数 货物筛选域值
-  int GOODS_FILTER_VALVE_NUM = 30;  // 参数 货物筛选数量域值
-  int VALUEABLE_GOODS_VALVE = 80;   // 参数 贵重货物域值
-
-  int FINAL_TOLERANT_TIME = 200;  // 参数 最后冲刺阶段的容忍时间
-
-  int BUSY_VALVE = 5;  // 参数 判断该点拥堵的域值
-
-  int BOAT_CAPACITY_REDUCE = 0;  // 参数 改变船容量
+  int tolerant_time_ = 40;           // 参数 机器人找货物容忍步数
+  int tolerant_leave_time_ = 5;      // 参数 船最后走可容忍时间的
+  int goods_value_valve_ = 20;       // 参数 货物筛选域值
+  int goods_filter_valve_num_ = 30;  // 参数 货物筛选数量域值
+  int valueable_goods_valve_ = 80;   // 参数 贵重货物域值
+  int final_tolerant_time_ = 200;    // 参数 最后冲刺阶段的容忍时间
+  int busy_valve_ = 5;               // 参数 判断该点拥堵的域值
+  int boat_capacity_reduce_ = 0;     // 参数 改变船容量
 
   static DynamicParam* instance_;
+
+  // 私有构造函数，防止直接实例化
+  DynamicParam() {}
 };
 #endif
