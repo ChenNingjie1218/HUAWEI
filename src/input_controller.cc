@@ -6,11 +6,9 @@
 #include "berth.h"
 #include "boat.h"
 #include "goods.h"
+#include "map_controller.h"
 #include "param.h"
-#include "robot.h"
-extern Berth berth[berth_num + 10];
-extern Robot robot[robot_num + 10];
-extern Boat boat[10];
+#include "rent_controller.h"
 #ifdef DEBUG
 extern FILE* debug_command_file;
 extern FILE* debug_map_file;
@@ -23,21 +21,12 @@ InputController*& InputController::GetInstance() {
   }
   return instance_;
 }
-/*
- * - · 空地
- * - * 海洋
- * - # 障碍
- * - A 机器人起始位置，总共10个
- * - B 大小为4*4，标识泊位的位置
- */
-char ch[N][N];
-int money;
-int id;                // 帧号
-int busy_point[N][N];  // 堵车点
-int parent[N * N];
+int money;  // 得分
+int id;     // 帧号
 
 // 初始化
 void InputController::Init() {
+  char(&ch)[N][N] = MapController::GetInstance()->ch;
   // 地图数据
   for (int i = 1; i <= n; i++) scanf("%s", ch[i] + 1);
 #ifdef DEBUG
@@ -48,13 +37,11 @@ void InputController::Init() {
     fprintf(debug_map_file, "\n");
   }
 #endif
-
+  int(&busy_point)[N][N] = MapController::GetInstance()->busy_point;
+  int(&parent)[N * N] = MapController::GetInstance()->parent;
   for (int i = 1; i <= n; ++i) {
     for (int j = 1; j <= n; ++j) {
       // 记录机器人初始位置
-      if (ch[i][j] == 'A') {
-        robot_initial_position.push_back(Location(i, j));
-      }
 
       // 初始化堵车标记
       busy_point[i][j] = 0;
@@ -68,16 +55,18 @@ void InputController::Init() {
     for (int j = 1; j <= n; ++j) {
       if (ch[i][j] == '.' || ch[i][j] == 'A' || ch[i][j] == 'B') {
         if (ch[i - 1][j] == '.' || ch[i - 1][j] == 'A' || ch[i - 1][j] == 'B') {
-          MergeArea(i * n + j, (i - 1) * n + j);
+          MapController::GetInstance()->MergeArea(i * n + j, (i - 1) * n + j);
         }
         if (ch[i][j - 1] == '.' || ch[i][j - 1] == 'A' || ch[i][j - 1] == 'B') {
-          MergeArea(i * n + j, i * n + j - 1);
+          MapController::GetInstance()->MergeArea(i * n + j, i * n + j - 1);
         }
       }
     }
   }
 
   // 泊位数据
+  int& berth_num = MapController::GetInstance()->berth_num;
+  std::vector<Berth>& berth = MapController::GetInstance()->berth;
   for (int i = 0; i < berth_num; i++) {
     int id;
     scanf("%d", &id);
@@ -85,8 +74,9 @@ void InputController::Init() {
           &berth[id].loading_speed);
     ++berth[id].x;
     ++berth[id].y;
-    InitBerthMap(id, berth[id].x, berth[id].y);
-    berth[id].area_id = FindArea(berth[id].x * n + berth[id].y);
+    MapController::GetInstance()->InitBerthMap(id, berth[id].x, berth[id].y);
+    berth[id].area_id =
+        MapController::GetInstance()->FindArea(berth[id].x * n + berth[id].y);
 #ifdef DEBUG
     fprintf(debug_map_file,
             "泊位 %d: x = %d, y = %d, transport_time = %d, loading_speed = "
@@ -122,9 +112,8 @@ void InputController::Input() {
   fprintf(debug_command_file,
           "-----------------------------INPUT--------------------------\n");
 #endif
-  // if (scanf("%d%d", &id, &money) != EOF) {
-  // }
   int temp_id = 0;
+  std::vector<Berth>& berth = MapController::GetInstance()->berth;
   if (scanf("%d%d", &temp_id, &money) == EOF) {
 #ifdef DEBUG
     fclose(debug_command_file);
@@ -133,18 +122,11 @@ void InputController::Input() {
     for (int i = 0; i < 10; ++i) {
       std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
     }
-
-    // 地上残留货物
-    Goods* head_goods = GoodsManager::GetInstance()->head_goods;
-    Goods* cur = head_goods->next;
-    while (cur != head_goods) {
-      std::cerr << "地上残留货物: " << cur->money << std::endl;
-      cur = cur->next;
-    }
 #endif
     exit(0);
   }
   // 计算往船上装了多少货物
+  std::vector<Boat>& boat = RentController::GetInstance()->boat;
   int dis_id = temp_id - id;
   for (int i = 0; i < 10; i++) {
 #ifdef DEBUG
@@ -186,11 +168,11 @@ void InputController::Input() {
             << std::endl;
   fprintf(debug_command_file, "帧数 id = %d, 分数 money = %d\n", id, money);
 #endif
-  // 新增货物
+  // 货物变化
   int num;
   scanf("%d", &num);
 #ifdef DEBUG
-  fprintf(debug_command_file, "new goods num = %d\n", num);
+  fprintf(debug_command_file, "change goods num = %d\n", num);
 #endif
   for (int i = 1; i <= num; i++) {
     int x, y, val;
@@ -201,7 +183,7 @@ void InputController::Input() {
     fprintf(debug_command_file, "goods %d info: x = %d, y = %d, money = %d\n",
             i, x, y, val);
 #endif
-    if (ch[x][y] == '.' || ch[x][y] == 'A' || ch[x][y] == 'B') {
+    if (money > 0 && MapController::GetInstance()->CanRobotReach(x, y)) {
 #ifdef GOODS_FILTER
       if (val < GoodsManager::GetInstance()->value_valve) {
 #ifdef DEBUG
@@ -213,11 +195,16 @@ void InputController::Input() {
 #endif
       Goods* new_goods = new Goods(x, y, val, id);
       GoodsManager::GetInstance()->PushGoods(new_goods);
-      new_goods->area_id = FindArea(x * n + y);
+      new_goods->area_id = MapController::GetInstance()->FindArea(x * n + y);
+    } else if (!money) {
+      GoodsManager::GetInstance()->RemoveExpiredGoods(x, y);
     }
   }
 
   // 机器人实时数据
+  std::vector<Robot>& robot = RentController::GetInstance()->robot;
+  int robot_num = RentController::GetInstance()->robot.size();
+  int(&busy_point)[N][N] = MapController::GetInstance()->busy_point;
   for (int i = 0; i < robot_num; i++) {
     int temp_goods = 0;
     scanf("%d%d%d%d", &temp_goods, &robot[i].x, &robot[i].y, &robot[i].status);
@@ -245,7 +232,8 @@ void InputController::Input() {
     // 第一帧更新机器人可达的泊位、区号
     if (id == 1) {
       robot[i].id_ = i;  // 初始化robot的id
-      robot[i].area_id = FindArea(robot[i].x * n + robot[i].y);
+      robot[i].area_id =
+          MapController::GetInstance()->FindArea(robot[i].x * n + robot[i].y);
       robot[i].InitAccessedBerth();
     }
   }
@@ -272,30 +260,4 @@ void InputController::Input() {
 #ifdef DEBUG
   fprintf(debug_command_file, "%s\n", okk);
 #endif
-}
-
-// 初始化坐标映射到泊位id的map
-void InputController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
-  for (int i = 0; i < 4; ++i) {
-    for (int j = 0; j < 4; ++j) {
-      location_to_berth_id[Location(berth_x + i, berth_y + j)] = berth_id;
-    }
-  }
-}
-
-// 用并查集分区
-// 找集合
-int InputController::FindArea(int id) {
-  if (parent[id] != id) {
-    parent[id] = FindArea(parent[id]);
-  }
-  return parent[id];
-}
-// 合并集合
-void InputController::MergeArea(int id_1, int id_2) {
-  int root_1 = FindArea(id_1);
-  int root_2 = FindArea(id_2);
-  if (root_1 != root_2) {
-    parent[root_2] = root_1;
-  }
 }
