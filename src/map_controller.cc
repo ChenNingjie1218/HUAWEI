@@ -26,7 +26,14 @@ void MapController::MergeArea(int id_1, int id_2) {
 // 机器人可达
 bool MapController::CanRobotReach(int x, int y) {
   return ch[x][y] == '>' || ch[x][y] == 'R' || ch[x][y] == 'B' ||
-         ch[x][y] == 'C' || ch[x][y] == 'c';
+         ch[x][y] == 'C' || ch[x][y] == 'c' || ch[x][y] == '.';
+}
+
+// 船可达
+bool MapController::CanBoatReach(int x, int y) {
+  return ch[x][y] == '~' || ch[x][y] == '*' || ch[x][y] == 'S' ||
+         ch[x][y] == 'B' || ch[x][y] == 'K' || ch[x][y] == 'C' ||
+         ch[x][y] == 'c' || ch[x][y] == 'T';
 }
 
 // 初始化坐标映射到泊位id的map

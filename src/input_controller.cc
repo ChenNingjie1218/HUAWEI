@@ -62,11 +62,18 @@ void InputController::Init() {
 
   for (int i = 1; i <= n; ++i) {
     for (int j = 1; j <= n; ++j) {
-      if (ch[i][j] == '.' || ch[i][j] == 'A' || ch[i][j] == 'B') {
-        if (ch[i - 1][j] == '.' || ch[i - 1][j] == 'A' || ch[i - 1][j] == 'B') {
+      if (MapController::GetInstance()->CanRobotReach(i, j)) {
+        if (MapController::GetInstance()->CanRobotReach(i - 1, j)) {
           MapController::GetInstance()->MergeArea(i * n + j, (i - 1) * n + j);
         }
-        if (ch[i][j - 1] == '.' || ch[i][j - 1] == 'A' || ch[i][j - 1] == 'B') {
+        if (MapController::GetInstance()->CanRobotReach(i, j - 1)) {
+          MapController::GetInstance()->MergeArea(i * n + j, i * n + j - 1);
+        }
+      } else if (MapController::GetInstance()->CanBoatReach(i, j)) {
+        if (MapController::GetInstance()->CanBoatReach(i - 1, j)) {
+          MapController::GetInstance()->MergeArea(i * n + j, (i - 1) * n + j);
+        }
+        if (MapController::GetInstance()->CanBoatReach(i, j - 1)) {
           MapController::GetInstance()->MergeArea(i * n + j, i * n + j - 1);
         }
       }
@@ -76,11 +83,11 @@ void InputController::Init() {
   // 泊位数据
   int& berth_num = MapController::GetInstance()->berth_num;
   std::vector<Berth>& berth = MapController::GetInstance()->berth;
+  scanf("%d", &berth_num);
   for (int i = 0; i < berth_num; i++) {
     int id;
     scanf("%d", &id);
-    scanf("%d%d%d%d", &berth[id].x, &berth[id].y, &berth[id].transport_time,
-          &berth[id].loading_speed);
+    scanf("%d%d%d", &berth[id].x, &berth[id].y, &berth[id].loading_speed);
     ++berth[id].x;
     ++berth[id].y;
     MapController::GetInstance()->InitBerthMap(id, berth[id].x, berth[id].y);
