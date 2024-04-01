@@ -19,7 +19,8 @@ struct MapController {
   int parent[N * N];               // 并查集区域
   int busy_point[N][N];            // 堵车点
   Goods *gds[N][N] = {{nullptr}};  // 货物地图
-  Berth berth[berth_num + 10];     // 泊位数据
+  int berth_num;                   // 泊位数量
+  std::vector<Berth> berth;        // 泊位数据
   /*
    * - · 空地
    * - * 海洋
