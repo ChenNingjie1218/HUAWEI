@@ -139,14 +139,7 @@ void DecisionManager::DecisionRobot() {
         robot[i].target_goods->robot_id = i;
 
         // 还原first_free_goods指针
-        Goods *head_goods = GoodsManager::GetInstance()->head_goods;
-        GoodsManager::GetInstance()->first_free_goods = head_goods->next;
-        while (GoodsManager::GetInstance()->first_free_goods->next !=
-                   head_goods &&
-               GoodsManager::GetInstance()->first_free_goods->robot_id > -1) {
-          GoodsManager::GetInstance()->first_free_goods =
-              GoodsManager::GetInstance()->first_free_goods->next;
-        }
+        GoodsManager::GetInstance()->ResetFirstFreeGoods();
 
 #ifdef DEBUG
         std::cerr << "robot " << i << " 装路过的高价货：(" << robot[i].x << ","
@@ -406,14 +399,7 @@ void DecisionManager::DecisionRobot() {
         robot[robot_id].target_goods->robot_id = -1;
         robot[robot_id].target_goods = nullptr;
         // 还原first_free_goods指针
-        Goods *head_goods = GoodsManager::GetInstance()->head_goods;
-        GoodsManager::GetInstance()->first_free_goods = head_goods->next;
-        while (GoodsManager::GetInstance()->first_free_goods->next !=
-                   head_goods &&
-               GoodsManager::GetInstance()->first_free_goods->robot_id > -1) {
-          GoodsManager::GetInstance()->first_free_goods =
-              GoodsManager::GetInstance()->first_free_goods->next;
-        }
+        GoodsManager::GetInstance()->ResetFirstFreeGoods();
 
         // 找新的目标货物
         robot[robot_id].path.clear();
@@ -431,4 +417,21 @@ void DecisionManager::DecisionRobot() {
       }
     }
   }
+}
+
+/*
+ * 决策购买
+ */
+void DecisionManager::DecisionPurchase() {
+  // 决策买机器人
+  auto &robot_purchase_point =
+      MapController::GetInstance()->robot_purchase_point;
+  auto size = robot_purchase_point.size();
+#ifdef DEBUG
+  std::cerr << "当前机器人购买点数量：" << size << std::endl;
+#endif
+  for (std::vector<Location>::size_type i = 0; i < size; ++i) {
+    RentController::GetInstance()->RentRobot(i);
+  }
+  // 决策买船
 }

@@ -44,6 +44,9 @@ struct GoodsManager {
   // 更新价值域值
   void UpdateValueValve(bool is_plus);
 
+  // 重置first_free_goods
+  void ResetFirstFreeGoods();
+
   // 货物链表头节点
   Goods *head_goods = new Goods();
 

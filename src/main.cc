@@ -33,6 +33,7 @@ int main() {
     // --------- 决策阶段 ----------
     DecisionManager::GetInstance()->DecisionRobot();
     DecisionManager::GetInstance()->DecisionBoat();
+    DecisionManager::GetInstance()->DecisionPurchase();
 
     // --------- 输出阶段 ----------
     OutputController::GetInstance()->Output();

@@ -106,3 +106,12 @@ void GoodsManager::UpdateValueValve(bool is_plus) {
     value_valve = DynamicParam::GetInstance()->GetGoodsValueValve();
   }
 }
+
+// 重置first_free_goods
+void GoodsManager::ResetFirstFreeGoods() {
+  first_free_goods = head_goods->next;
+  while (first_free_goods->next != head_goods &&
+         first_free_goods->robot_id > -1) {
+    first_free_goods = first_free_goods->next;
+  }
+}

@@ -127,34 +127,49 @@ void OutputController::Output() {
     switch (next_decision.type) {
       case DECISION_TYPE_ROBOT_BUY:
         SendBuyRobot(next_decision.id, next_decision.param);
+#ifdef DEBUG
+        fprintf(debug_command_file, "lbot %d %d\n", next_decision.id,
+                next_decision.param);
+#endif
+        break;
       case DECISION_TYPE_ROBOT_MOVE:
         SendMove(next_decision.id, next_decision.param);
+        break;
+
 #ifdef DEBUG
         fprintf(debug_command_file, "move %d %d\n", next_decision.id,
                 next_decision.param);
 #endif
+
         break;
       case DECISION_TYPE_ROBOT_GET:
         SendGet(next_decision.id);
+
 #ifdef DEBUG
         fprintf(debug_command_file, "get %d\n", next_decision.id);
 #endif
+
         break;
       case DECISION_TYPE_ROBOT_PULL:
         SendPull(next_decision.id);
+
 #ifdef DEBUG
         fprintf(debug_command_file, "pull %d\n", next_decision.id);
 #endif
+
         break;
       case DECISION_TYPE_BOAT_BUY:
         SendBuyBoat(next_decision.id, next_decision.param);
+        break;
       case DECISION_TYPE_BOAT_RESET:
         SendReset(next_decision.id);
+        break;
       case DECISION_TYPE_BOAT_SHIP:
         SendDock(next_decision.id);
         break;
       case DECISION_TYPE_BOAT_ROTATE:
         SendRotate(next_decision.id, next_decision.param);
+        break;
       case DECISION_TYPE_BOAT_FORWARD:
         SendForward(next_decision.id);
         break;

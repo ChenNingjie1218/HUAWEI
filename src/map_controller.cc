@@ -58,8 +58,11 @@ void MapController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
     for (int i = 0; i < 4; ++i) {
       int x = temp.x + DIRS[i].x;
       int y = temp.y + DIRS[i].y;
-      if (ch[x][y] == 'B') {
-        q.push(Location(x, y));
+      Location new_point(x, y);
+      if (x > 0 && x <= n && y > 0 && y <= n &&
+          location_to_berth_id.find(new_point) == location_to_berth_id.end() &&
+          ch[x][y] == 'B') {
+        q.push(new_point);
       }
     }
   }
@@ -71,11 +74,11 @@ void MapController::InitMapData() {
     for (int j = 1; j <= n; ++j) {
       // 记录购买点、交货点
       if (ch[i][j] == 'R') {
-        robot_purchase_point.push_back(std::make_pair(i, j));
+        robot_purchase_point.push_back(Location(i, j));
       } else if (ch[i][j] == 'S') {
-        boat_purchase_point.push_back(std::make_pair(i, j));
+        boat_purchase_point.push_back(Location(i, j));
       } else if (ch[i][j] == 'T') {
-        delivery_point.push_back(std::make_pair(i, j));
+        delivery_point.push_back(Location(i, j));
       }
       // 初始化堵车标记
       busy_point[i][j] = 0;
@@ -98,7 +101,8 @@ void MapController::InitMapData() {
         if (CanRobotReach(i, j - 1)) {
           MergeArea(i * n + j, i * n + j - 1);
         }
-      } else if (CanBoatReach(i, j)) {  // 船区域分区
+      }
+      if (CanBoatReach(i, j)) {  // 船区域分区
         if (CanBoatReach(i - 1, j)) {
           MergeArea(i * n + j, (i - 1) * n + j, false);
         }
@@ -118,9 +122,11 @@ void MapController::InitNearestBerth(std::queue<std::pair<Location, int>>& q) {
     for (int i = 0; i < 4; ++i) {
       int x = temp.first.x + DIRS[i].x;
       int y = temp.first.y + DIRS[i].y;
-      if (nearest_berth[x][y] == -1 && CanRobotReach(x, y)) {
-        nearest_berth[x][y] = temp.second;
-        q.push(std::make_pair(Location(x, y), temp.second));
+      if (x > 0 && x <= n && y > 0 && y <= n) {
+        if (nearest_berth[x][y] == -1 && CanRobotReach(x, y)) {
+          nearest_berth[x][y] = temp.second;
+          q.push(std::make_pair(Location(x, y), temp.second));
+        }
       }
     }
   }

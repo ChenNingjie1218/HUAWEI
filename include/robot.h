@@ -20,9 +20,6 @@ struct Robot {
   // 手里拿的物品的价值
   int goods_money;
 
-  // 是否是正常运行状态
-  int status;
-
   // A*的深度
   int astar_deep = DEFAULT_A_STAR_DEEP;
 

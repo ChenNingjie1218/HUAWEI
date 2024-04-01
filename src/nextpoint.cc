@@ -140,14 +140,7 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
         gds[x][y]->robot_id = robot_id;
 
         // 还原first_free_goods指针
-        Goods *head_goods = GoodsManager::GetInstance()->head_goods;
-        GoodsManager::GetInstance()->first_free_goods = head_goods->next;
-        while (GoodsManager::GetInstance()->first_free_goods->next !=
-                   head_goods &&
-               GoodsManager::GetInstance()->first_free_goods->robot_id > -1) {
-          GoodsManager::GetInstance()->first_free_goods =
-              GoodsManager::GetInstance()->first_free_goods->next;
-        }
+        GoodsManager::GetInstance()->ResetFirstFreeGoods();
 
 #ifdef DEBUG
         std::cerr << "robot " << robot_id << " 移动后装路过的高价货：(" << x

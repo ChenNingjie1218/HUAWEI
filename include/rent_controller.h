@@ -17,11 +17,10 @@ class RentController {
   static RentController *&GetInstance();
 
   // 租船
-  void RentBoat(int &id, int &goods_num, int &x, int &y, int &direction,
-                int &status);
+  void RentBoat(int purchase_point_id);
 
   // 租机器人
-  void RentRobot(int &id, int &goods, int &x, int &y);
+  void RentRobot(int purchase_point_id);
 
   std::vector<Robot> robot;  // 当前的机器人
 

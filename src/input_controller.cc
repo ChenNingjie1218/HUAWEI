@@ -29,6 +29,7 @@ void InputController::Init() {
   char(&ch)[N][N] = MapController::GetInstance()->ch;
   // 地图数据
   for (int i = 1; i <= n; i++) scanf("%s", ch[i] + 1);
+
 #ifdef DEBUG
   for (int i = 1; i <= n; i++) {
     for (int j = 1; j <= n; j++) {
@@ -37,7 +38,9 @@ void InputController::Init() {
     fprintf(debug_map_file, "\n");
   }
 #endif
+
   MapController::GetInstance()->InitMapData();
+
 #ifdef DEBUG
   fprintf(debug_map_file, "初始化地图数据完毕！\n");
 #endif
@@ -47,15 +50,16 @@ void InputController::Init() {
   std::queue<std::pair<Location, int>> q;
   int berth_num;
   scanf("%d", &berth_num);
-  for (int i = 0; i < berth_num; i++) {
+  for (int i = 0; i < berth_num; ++i) {
     int id, x, y, loading_speed;
     scanf("%d%d%d%d", &id, &x, &y, &loading_speed);
     berth.push_back(Berth(id, ++x, ++y, loading_speed));
-    MapController::GetInstance()->InitBerthMap(id, berth[id].x, berth[id].y);
+    MapController::GetInstance()->InitBerthMap(id, x, y);
 
     // 处理nearest_berth
     MapController::GetInstance()->nearest_berth[x][y] = id;
     q.push(std::make_pair(Location(x, y), id));
+
 #ifdef DEBUG
     fprintf(debug_map_file,
             "泊位 %d: x = %d, y = %d, loading_speed = "
@@ -64,8 +68,16 @@ void InputController::Init() {
 #endif
   }
 
+#ifdef DEBUG
+  fprintf(debug_map_file, "泊位数据处理完毕！\n");
+#endif
+
   // 初始化离每个点最近的泊位id
   MapController::GetInstance()->InitNearestBerth(q);
+
+#ifdef DEBUG
+  fprintf(debug_map_file, "最近泊位处理完毕！\n");
+#endif
 
   // 船容积
   scanf("%d", &Boat::boat_capacity);
@@ -106,32 +118,33 @@ void InputController::Input() {
   // 计算往船上装了多少货物
   std::vector<Boat>& boat = RentController::GetInstance()->boat;
   int dis_id = temp_id - id;
-  for (int i = 0; i < 10; i++) {
-#ifdef DEBUG
-    if (!berth[i].q_boat.empty() && boat[berth[i].q_boat.front()].status == 1 &&
-        berth[i].goods_num == 0) {
-      std::cerr << i << "空等" << std::endl;
-    }
-#endif
+  //   for (int i = 0; i < 10; i++) {
+  // #ifdef DEBUG
+  //     if (!berth[i].q_boat.empty() && boat[berth[i].q_boat.front()].status ==
+  //     1 &&
+  //         berth[i].goods_num == 0) {
+  //       std::cerr << i << "空等" << std::endl;
+  //     }
+  // #endif
 
-    if (!berth[i].q_boat.empty() && berth[i].goods_num > 0 &&
-        boat[berth[i].q_boat.front()].status == 1) {
-      int load_num = berth[i].loading_speed * dis_id;
-      if (load_num >= berth[i].goods_num) {
-        boat[berth[i].q_boat.front()].num += berth[i].goods_num;
-        berth[i].goods_num = 0;
-      } else {
-        boat[berth[i].q_boat.front()].num += load_num;
-        berth[i].goods_num -= load_num;
-      }
-      if (boat[berth[i].q_boat.front()].num > Boat::boat_capacity) {
-        // 装载速度大于1的时候出现超额
-        berth[i].goods_num +=
-            boat[berth[i].q_boat.front()].num - Boat::boat_capacity;
-        boat[berth[i].q_boat.front()].num = Boat::boat_capacity;
-      }
-    }
-  }
+  //     if (!berth[i].q_boat.empty() && berth[i].goods_num > 0 &&
+  //         boat[berth[i].q_boat.front()].status == 1) {
+  //       int load_num = berth[i].loading_speed * dis_id;
+  //       if (load_num >= berth[i].goods_num) {
+  //         boat[berth[i].q_boat.front()].num += berth[i].goods_num;
+  //         berth[i].goods_num = 0;
+  //       } else {
+  //         boat[berth[i].q_boat.front()].num += load_num;
+  //         berth[i].goods_num -= load_num;
+  //       }
+  //       if (boat[berth[i].q_boat.front()].num > Boat::boat_capacity) {
+  //         // 装载速度大于1的时候出现超额
+  //         berth[i].goods_num +=
+  //             boat[berth[i].q_boat.front()].num - Boat::boat_capacity;
+  //         boat[berth[i].q_boat.front()].num = Boat::boat_capacity;
+  //       }
+  //     }
+  //   }
 
   // 跳帧
 #ifdef DEBUG
@@ -184,6 +197,11 @@ void InputController::Input() {
   int(&busy_point)[N][N] = MapController::GetInstance()->busy_point;
   int robot_num;
   scanf("%d", &robot_num);
+
+#ifdef DEBUG
+  fprintf(debug_command_file, "robot num:  %d\n", robot_num);
+#endif
+
   for (int i = 0; i < robot_num; i++) {
     int temp_goods = 0, x, y;
     scanf("%d%d%d", &temp_goods, &x, &y);
@@ -198,12 +216,9 @@ void InputController::Input() {
     }
     ++busy_point[robot[i].x][robot[i].y];
 #ifdef DEBUG
-    fprintf(debug_command_file,
-            "robot %d info: goods = %d, x = %d, y = %d, status = %d\n", i,
-            temp_goods, robot[i].x, robot[i].y, robot[i].status);
-    if (!robot[i].status) {
-      fprintf(debug_command_file, "碰撞\n");
-    }
+    fprintf(debug_command_file, "robot %d info: goods = %d, x = %d, y = %d\n",
+            i, temp_goods, robot[i].x, robot[i].y);
+
 #endif
     // 放置成功港口货物加一
     if (robot[i].pre_goods - temp_goods == 1) {
@@ -217,6 +232,11 @@ void InputController::Input() {
   // 船的实时数据
   int boat_num;
   scanf("%d", &boat_num);
+
+#ifdef DEBUG
+  fprintf(debug_command_file, "boat num:  %d\n", boat_num);
+#endif
+
   for (int i = 0; i < boat_num; i++) {
     int id, goods_num, x, y, direction, temp_status;
     scanf("%d%d%d%d%d%d\n", &id, &goods_num, &x, &y, &direction, &temp_status);

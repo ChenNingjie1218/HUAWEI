@@ -46,6 +46,11 @@ struct DecisionManager {
    */
   void DecisionRobot();
 
+  /*
+   * 决策购买
+   */
+  void DecisionPurchase();
+
   // 决策队列
   std::queue<Decision> q_decision;
 };
