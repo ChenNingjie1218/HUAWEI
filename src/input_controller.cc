@@ -37,67 +37,25 @@ void InputController::Init() {
     fprintf(debug_map_file, "\n");
   }
 #endif
-  int(&busy_point)[N][N] = MapController::GetInstance()->busy_point;
-  int(&parent)[N * N] = MapController::GetInstance()->parent;
-  for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n; ++j) {
-      // 记录购买点、交货点
-      if (ch[i][j] == 'R')
-        MapController::GetInstance()->robot_purchase_point.push_back(
-            std::make_pair(i, j));
-      else if (ch[i][j] == 'S')
-        MapController::GetInstance()->boat_purchase_point.push_back(
-            std::make_pair(i, j));
-      else if (ch[i][j] == 'T')
-        MapController::GetInstance()->delivery_point.push_back(
-            std::make_pair(i, j));
-
-      // 初始化堵车标记
-      busy_point[i][j] = 0;
-
-      // 初始化区域号
-      parent[i * n + j] = i * n + j;
-    }
-  }
+  MapController::GetInstance()->InitMapData();
 #ifdef DEBUG
   fprintf(debug_map_file, "初始化地图数据完毕！\n");
-#endif
-  for (int i = 1; i <= n; ++i) {
-    for (int j = 1; j <= n; ++j) {
-      if (MapController::GetInstance()->CanRobotReach(i, j)) {
-        if (MapController::GetInstance()->CanRobotReach(i - 1, j)) {
-          MapController::GetInstance()->MergeArea(i * n + j, (i - 1) * n + j);
-        }
-        if (MapController::GetInstance()->CanRobotReach(i, j - 1)) {
-          MapController::GetInstance()->MergeArea(i * n + j, i * n + j - 1);
-        }
-      } else if (MapController::GetInstance()->CanBoatReach(i, j)) {
-        if (MapController::GetInstance()->CanBoatReach(i - 1, j)) {
-          MapController::GetInstance()->MergeArea(i * n + j, (i - 1) * n + j);
-        }
-        if (MapController::GetInstance()->CanBoatReach(i, j - 1)) {
-          MapController::GetInstance()->MergeArea(i * n + j, i * n + j - 1);
-        }
-      }
-    }
-  }
-
-#ifdef DEBUG
-  fprintf(debug_map_file, "分区处理完毕\n");
 #endif
 
   // 泊位数据
   std::vector<Berth>& berth = MapController::GetInstance()->berth;
+  std::queue<std::pair<Location, int>> q;
   int berth_num;
   scanf("%d", &berth_num);
   for (int i = 0; i < berth_num; i++) {
     int id, x, y, loading_speed;
     scanf("%d%d%d%d", &id, &x, &y, &loading_speed);
-    if (i >= berth.size()) {
-      berth.push_back(Berth(id, ++x, ++y, loading_speed));
-    }
+    berth.push_back(Berth(id, ++x, ++y, loading_speed));
     MapController::GetInstance()->InitBerthMap(id, berth[id].x, berth[id].y);
 
+    // 处理nearest_berth
+    MapController::GetInstance()->nearest_berth[x][y] = id;
+    q.push(std::make_pair(Location(x, y), id));
 #ifdef DEBUG
     fprintf(debug_map_file,
             "泊位 %d: x = %d, y = %d, loading_speed = "
@@ -105,6 +63,9 @@ void InputController::Init() {
             id, berth[id].x, berth[id].y, berth[id].loading_speed);
 #endif
   }
+
+  // 初始化离每个点最近的泊位id
+  MapController::GetInstance()->InitNearestBerth(q);
 
   // 船容积
   scanf("%d", &Boat::boat_capacity);

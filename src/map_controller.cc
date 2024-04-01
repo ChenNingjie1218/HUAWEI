@@ -8,18 +8,29 @@ MapController*& MapController::GetInstance() {
 }
 // 用并查集分区
 // 找集合
-int MapController::FindArea(int id) {
-  if (parent[id] != id) {
-    parent[id] = FindArea(parent[id]);
+int MapController::FindArea(int id, bool is_land) {
+  if (is_land) {
+    if (land_area[id] != id) {
+      land_area[id] = FindArea(land_area[id]);
+    }
+    return land_area[id];
+  } else {
+    if (sea_area[id] != id) {
+      sea_area[id] = FindArea(sea_area[id]);
+    }
+    return sea_area[id];
   }
-  return parent[id];
 }
 // 合并集合
-void MapController::MergeArea(int id_1, int id_2) {
-  int root_1 = FindArea(id_1);
-  int root_2 = FindArea(id_2);
+void MapController::MergeArea(int id_1, int id_2, bool is_land) {
+  int root_1 = FindArea(id_1, is_land);
+  int root_2 = FindArea(id_2, is_land);
   if (root_1 != root_2) {
-    parent[root_2] = root_1;
+    if (is_land) {
+      land_area[root_2] = root_1;
+    } else {
+      sea_area[root_2] = root_1;
+    }
   }
 }
 
@@ -49,6 +60,67 @@ void MapController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
       int y = temp.y + DIRS[i].y;
       if (ch[x][y] == 'B') {
         q.push(Location(x, y));
+      }
+    }
+  }
+}
+
+// 初始化各项数据
+void MapController::InitMapData() {
+  for (int i = 1; i <= n; ++i) {
+    for (int j = 1; j <= n; ++j) {
+      // 记录购买点、交货点
+      if (ch[i][j] == 'R') {
+        robot_purchase_point.push_back(std::make_pair(i, j));
+      } else if (ch[i][j] == 'S') {
+        boat_purchase_point.push_back(std::make_pair(i, j));
+      } else if (ch[i][j] == 'T') {
+        delivery_point.push_back(std::make_pair(i, j));
+      }
+      // 初始化堵车标记
+      busy_point[i][j] = 0;
+
+      // 初始化区域号
+      land_area[i * n + j] = i * n + j;
+      sea_area[i * n + j] = i * n + j;
+
+      // 初始化最近泊位id
+      nearest_berth[i][j] = -1;
+    }
+  }
+
+  for (int i = 1; i <= n; ++i) {
+    for (int j = 1; j <= n; ++j) {
+      if (CanRobotReach(i, j)) {  // 陆地区域分区
+        if (CanRobotReach(i - 1, j)) {
+          MergeArea(i * n + j, (i - 1) * n + j);
+        }
+        if (CanRobotReach(i, j - 1)) {
+          MergeArea(i * n + j, i * n + j - 1);
+        }
+      } else if (CanBoatReach(i, j)) {  // 船区域分区
+        if (CanBoatReach(i - 1, j)) {
+          MergeArea(i * n + j, (i - 1) * n + j, false);
+        }
+        if (CanBoatReach(i, j - 1)) {
+          MergeArea(i * n + j, i * n + j - 1, false);
+        }
+      }
+    }
+  }
+}
+
+// 初始化nearest_berth
+void MapController::InitNearestBerth(std::queue<std::pair<Location, int>>& q) {
+  while (!q.empty()) {
+    std::pair<Location, int> temp = q.front();
+    q.pop();
+    for (int i = 0; i < 4; ++i) {
+      int x = temp.first.x + DIRS[i].x;
+      int y = temp.first.y + DIRS[i].y;
+      if (nearest_berth[x][y] == -1 && CanRobotReach(x, y)) {
+        nearest_berth[x][y] = temp.second;
+        q.push(std::make_pair(Location(x, y), temp.second));
       }
     }
   }

@@ -6,7 +6,6 @@
 #include "berth.h"
 #include "boat.h"
 #include "goods.h"
-#include "input_controller.h"
 #include "map_controller.h"
 #include "param.h"
 #include "rent_controller.h"
@@ -164,52 +163,11 @@ bool Robot::UpdateTargetGoods(int robot_id) {
 
 // 存在移动后找泊位，这里不能直接用机器人的位置
 void Robot::FindBerth(int start_x, int start_y) {
-  int min_man_id = 0;  // 曼哈顿最小距离泊位id
-  std::vector<Location> route;
-  double min_man = 99999, cal_man;  // 曼哈顿距离
-  bool is_final_sprint =
-      id > 15000 - CHANGE_BERTH_TIME -
-               DynamicParam::GetInstance()->GetFinalTolerantTime();
-  // 寻找最近的泊位
-  int size = berth_accessed.size();
-  std::vector<Berth> &berth = MapController::GetInstance()->berth;
-  for (int j = 0; j < size; ++j) {
-    if (is_final_sprint) {
-      if (berth[berth_accessed[j]].boat_id == -1) {
-        // 不需要往之后没船来的泊位送货
-        continue;
-      }
-      if (!berth[berth_accessed[j]].q_boat.empty() &&
-          berth[berth_accessed[j]].goods_num >=
-              Boat::boat_capacity -
-                  RentController::GetInstance()
-                      ->boat[berth[berth_accessed[j]].q_boat.front()]
-                      .num) {
-        // 该泊位有船，且自己能装满后离开，不需要再往这儿送货
-        continue;
-      }
-    }
-#ifdef ONE_ROBOT_ONE_BERTH
-    if (berth[berth_accessed[j]].robot_id != -1 && !is_final_sprint) {
-      // 有机器人往这个泊位送，放弃该泊位
-      // 冲刺阶段不这样
-      continue;
-    }
-#endif
-    cal_man = std::fabs(x - berth[berth_accessed[j]].x - 1.5) +
-              std::fabs(y - berth[berth_accessed[j]].y - 1.5);
-    if (min_man > cal_man) {
-      min_man_id = berth_accessed[j];
-      min_man = cal_man;
-    }
-  }
-  if (min_man != 99999) {
-    Astar astar(start_x, start_y, berth[min_man_id].x + 1,
-                berth[min_man_id].y + 1);
-    astar.AstarSearch(path, min_man_id, is_final_sprint);
-    berth_id = min_man_id;
-    // astar.AstarSearch(path, berth_id, false);
-  }
+  auto &berth = MapController::GetInstance()->berth;
+  berth_id = MapController::GetInstance()->nearest_berth[start_x][start_y];
+  bool is_final_sprint = false;
+  Astar astar(start_x, start_y, berth[berth_id].x, berth[berth_id].y);
+  astar.AstarSearch(path, berth_id, is_final_sprint);
 }
 
 /*

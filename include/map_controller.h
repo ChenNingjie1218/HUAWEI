@@ -16,9 +16,11 @@ struct MapController {
  public:
   static MapController *&GetInstance();
 
-  int parent[N * N];               // 并查集区域
+  int land_area[N * N];            // 陆地区域
+  int sea_area[N * N];             // 海洋区域
   int busy_point[N][N];            // 堵车点
   Goods *gds[N][N] = {{nullptr}};  // 货物地图
+  int nearest_berth[N][N];         // 距离该点最近的泊位id
   int berth_num;                   // 泊位数量
   std::vector<Berth> berth;        // 泊位数据
   /*
@@ -47,6 +49,11 @@ struct MapController {
                                   Location(0, 1),
                                   Location(0, -1)};  // 上下左右方位
 
+  // 初始化各项数据
+  void InitMapData();
+
+  // 初始化nearest_berth
+  void InitNearestBerth(std::queue<std::pair<Location, int>> &q);
   // 机器人可达
   bool CanRobotReach(int x, int y);
 
@@ -58,9 +65,9 @@ struct MapController {
 
   // 用并查集分区
   // 找集合
-  int FindArea(int id);
+  int FindArea(int id, bool is_land = true);
   // 合并集合
-  void MergeArea(int id_1, int id_2);
+  void MergeArea(int id_1, int id_2, bool is_land = true);
 };
 
 #endif
