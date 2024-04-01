@@ -141,7 +141,8 @@ void DecisionManager::DecisionRobot() {
   std::vector<int> not_move_id;
   auto &robot = RentController::GetInstance()->robot;
   auto &ch = MapController::GetInstance()->ch;
-  for (int i = 0; i < 10; ++i) {
+  auto robot_num = robot.size();
+  for (int i = 0; i < robot_num; ++i) {
     // --------- 移动前动作 ---------
     // if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B' &&
     //     !berth[robot[i].berth_id].q_boat.empty()) {
