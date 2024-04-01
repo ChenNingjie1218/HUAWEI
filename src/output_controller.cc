@@ -22,7 +22,7 @@ OutputController*& OutputController::GetInstance() {
  * @param x - 机器人的x坐标
  * @param y - 机器人的y坐标
  */
-void OutputController::BuyRobot(int x, int y) {
+void OutputController::SendBuyRobot(int x, int y) {
   printf("lbot %d %d\n", x, y);
   fflush(stdout);
 }
@@ -65,7 +65,7 @@ void OutputController::SendPull(int robot_id) {
  * @param x - 船的x坐标
  * @param y - 船的y坐标
  */
-void OutputController::BuyBoat(int x, int y){
+void OutputController::SendBuyBoat(int x, int y){
   printf("lboat %d %d\n", x, y);
   fflush(stdout);
 
@@ -127,7 +127,7 @@ void OutputController::Output() {
     DecisionManager::GetInstance()->q_decision.pop();
     switch (next_decision.type) {
       case DECISION_TYPE_ROBOT_BUY:
-        BuyRobot(next_decision.id, next_decision.param);
+        SendBuyRobot(next_decision.id, next_decision.param);
       case DECISION_TYPE_ROBOT_MOVE:
         SendMove(next_decision.id, next_decision.param);
 #ifdef DEBUG
@@ -148,7 +148,7 @@ void OutputController::Output() {
 #endif
         break;
       case DECISION_TYPE_BOAT_BUY:
-        BuyBoat(next_decision.id, next_decision.param);
+        SendBuyBoat(next_decision.id, next_decision.param);
       case DECISION_TYPE_BOAT_RESET:
         SendReset(next_decision.id);
       case DECISION_TYPE_BOAT_SHIP:

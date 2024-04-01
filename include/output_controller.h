@@ -17,7 +17,7 @@ struct OutputController {
     * @param x - 机器人的x坐标
     * @param y - 机器人的y坐标
   */
-  void BuyRobot(int x, int y);
+  void SendBuyRobot(int x, int y);
 
   /**
     * @brief 机器人如何移动
@@ -46,7 +46,7 @@ struct OutputController {
     * @param x - 船的x坐标
     * @param y - 船的y坐标
     */
-  void BuyBoat(int x, int y);
+  void SendBuyBoat(int x, int y);
 
   /**
     * @brief 尝试将对应船位置重置到主航道上，会导致船进入恢复状态。
