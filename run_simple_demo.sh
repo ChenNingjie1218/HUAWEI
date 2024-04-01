@@ -1,1 +1,1 @@
-./PreliminaryJudge ./build/src/main -m ./doc/map1.txt
+./SemiFinalJudge ./Demo/main -m ./maps/map1.txt
