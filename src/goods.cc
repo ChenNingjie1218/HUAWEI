@@ -2,11 +2,10 @@
 
 #include <iostream>
 
-#include "robot.h"
+#include "rent_controller.h"
 
 Goods *gds[N][N] = {{nullptr}};
 extern int id;
-extern Robot robot[robot_num + 10];
 GoodsManager *GoodsManager::instance_ = nullptr;
 Goods::Goods() {
   this->pre = this;
@@ -45,6 +44,20 @@ void GoodsManager::PushGoods(Goods *new_goods) {
     new_goods->next = head_goods;
   }
 };
+
+// 移除过期货物
+void GoodsManager::RemoveExpiredGoods(int &x, int &y) {
+  Goods *cur = head_goods->next;
+  while (cur != head_goods) {
+    if (cur->x == x && cur->y == y) {
+      Goods *temp = cur->next;
+      DeleteGoods(cur, true);
+      cur = temp;
+      break;
+    }
+    cur = cur->next;
+  }
+}
 // 删除货物
 void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
 #ifdef GOODS_FILTER
@@ -68,7 +81,8 @@ void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
     std::cerr << "货物失效 robot " << goods->robot_id << "失去目标"
               << std::endl;
 #endif
-    robot[goods->robot_id].target_goods = nullptr;
+    RentController::GetInstance()->robot[goods->robot_id].target_goods =
+        nullptr;
   }
   delete goods;
   if (goods == first_free_goods) {
@@ -82,21 +96,6 @@ void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
     std::cerr << "货物链表空了" << std::endl;
   }
 #endif
-}
-
-// 刷新货物链表
-void GoodsManager::FreshGoodsLists() {
-  Goods *cur = head_goods->next;
-  while (cur != head_goods) {
-    if (id - cur->birth >= LIFETIME) {
-      Goods *temp = cur->next;
-      DeleteGoods(cur, true);
-      cur = temp;
-    } else {
-      // 剪枝
-      break;
-    }
-  }
 }
 
 // 更新价值域值

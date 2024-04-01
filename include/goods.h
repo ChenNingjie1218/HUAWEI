@@ -38,8 +38,8 @@ struct GoodsManager {
   // 删除货物
   void DeleteGoods(Goods *&goods, bool is_timeout = false);
 
-  // 刷新货物链表
-  void FreshGoodsLists();
+  // 移除过期货物
+  void RemoveExpiredGoods(int &x, int &y);
 
   // 更新价值域值
   void UpdateValueValve(bool is_plus);

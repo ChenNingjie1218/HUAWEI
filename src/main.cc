@@ -31,8 +31,7 @@ int main() {
     // #endif
     InputController::GetInstance()->Input();
     // --------- 准备阶段 ----------
-    GoodsManager::GetInstance()->FreshGoodsLists();  // 刷新货物链表
-    DecisionManager::GetInstance()->ClearQueue();    // 清空决策队列
+    DecisionManager::GetInstance()->ClearQueue();  // 清空决策队列
 
     // --------- 决策阶段 ----------
     DecisionManager::GetInstance()->DecisionRobot();
