@@ -2,6 +2,12 @@
 #define BOAT_H_
 // 船
 struct Boat {
+  // 船id
+  int id_;
+
+  // 货物数量
+  int num;
+
   // 核心点坐标
   int x, y;
 
@@ -13,9 +19,6 @@ struct Boat {
    * - 3 下
    */
   int direction;
-
-  // 货物数量
-  int num;
 
   // 目标泊位，虚拟点为-1
   int pos;
@@ -33,7 +36,7 @@ struct Boat {
   int status;
 
   Boat();
-  Boat(int x, int y);
+  Boat(int &id, int &goods_num, int &x, int &y, int &direction, int &status);
 
   // version:3.0: 选择固定的两个泊位
   void ChooseBerth3(int boat_id);

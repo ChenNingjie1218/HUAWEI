@@ -52,9 +52,7 @@ bool Point::CanReach() {
       DynamicParam::GetInstance()->GetBusyValve()) {
     return false;
   }
-  if (MapController::GetInstance()->ch[loc.x][loc.y] == '.' ||
-      MapController::GetInstance()->ch[loc.x][loc.y] == 'A' ||
-      MapController::GetInstance()->ch[loc.x][loc.y] == 'B') {
+  if (MapController::GetInstance()->CanRobotReach(loc.x, loc.y)) {
     return true;
   }
   return false;
@@ -173,7 +171,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
   frontier.put(start, 0);
   came_from[start] = start;
   cost_so_far[start] = 0;
-
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
   while (!frontier.empty()) {
     Location current = frontier.get();
     if (MapController::GetInstance()->ch[current.x][current.y] == 'B') {
@@ -183,19 +181,15 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
           MapController::GetInstance()->location_to_berth_id[current];
       // InputController::GetInstance()->location_to_berth_id[current];
       bool can_finish = !is_urgent;
-      if (is_urgent &&
-          MapController::GetInstance()->berth[temp_berth_id].boat_id != -1) {
-        if (MapController::GetInstance()->berth[temp_berth_id].q_boat.empty()) {
+      if (is_urgent && berth[temp_berth_id].boat_id != -1) {
+        if (berth[temp_berth_id].q_boat.empty()) {
           // 船即将到该泊位
           can_finish = true;
-        } else if (MapController::GetInstance()
-                       ->berth[temp_berth_id]
-                       .goods_num <
-                   Boat::boat_capacity - RentController::GetInstance()
-                                             ->boat[MapController::GetInstance()
-                                                        ->berth[temp_berth_id]
-                                                        .q_boat.front()]
-                                             .num) {
+        } else if (berth[temp_berth_id].goods_num <
+                   Boat::boat_capacity -
+                       RentController::GetInstance()
+                           ->boat[berth[temp_berth_id].q_boat.front()]
+                           .num) {
           // 该泊位有船，且泊位上的货物装不满船
           can_finish = true;
         }

@@ -219,13 +219,21 @@ void InputController::Input() {
 
   // 机器人实时数据
   std::vector<Robot>& robot = RentController::GetInstance()->robot;
-  int robot_num = RentController::GetInstance()->robot.size();
   int(&busy_point)[N][N] = MapController::GetInstance()->busy_point;
+  int robot_num;
+  scanf("%d", &robot_num);
   for (int i = 0; i < robot_num; i++) {
-    int temp_goods = 0;
-    scanf("%d%d%d%d", &temp_goods, &robot[i].x, &robot[i].y, &robot[i].status);
-    ++robot[i].x;
-    ++robot[i].y;
+    int temp_goods = 0, x, y;
+    scanf("%d%d%d", &temp_goods, &x, &y);
+    if (i >= robot.size()) {
+      // 新增机器人
+      RentController::GetInstance()->RentRobot(i, temp_goods, ++x, ++y);
+      robot[i].InitAccessedBerth();
+    } else {
+      // 旧机器人更新坐标
+      robot[i].x = ++x;
+      robot[i].y = ++y;
+    }
     ++busy_point[robot[i].x][robot[i].y];
 #ifdef DEBUG
     fprintf(debug_command_file,
@@ -239,25 +247,26 @@ void InputController::Input() {
     if (robot[i].pre_goods - temp_goods == 1) {
       berth[robot[i].berth_id].goods_num++;
       robot[i].berth_id = -1;
-      // boat[berth[robot[i].berth_id].q_boat.front()].num++;
     }
     robot[i].goods = temp_goods;
     robot[i].pre_goods = temp_goods;
-
-    // 第一帧更新机器人可达的泊位、区号
-    if (id == 1) {
-      robot[i].id_ = i;  // 初始化robot的id
-      robot[i].area_id =
-          MapController::GetInstance()->FindArea(robot[i].x * n + robot[i].y);
-      robot[i].InitAccessedBerth();
-    }
   }
 
   // 船的实时数据
-  for (int i = 0; i < 5; i++) {
-    int temp_status = 0;
-    scanf("%d%d\n", &temp_status, &boat[i].pos);
-
+  int boat_num;
+  scanf("%d", &boat_num);
+  for (int i = 0; i < boat_num; i++) {
+    int id, goods_num, x, y, direction, temp_status;
+    scanf("%d%d%d%d%d%d\n", &id, &goods_num, &x, &y, &direction, &temp_status);
+    if (i > RentController::GetInstance()->boat.size()) {
+      RentController::GetInstance()->RentBoat(id, goods_num, ++x, ++y,
+                                              direction, temp_status);
+    } else {
+      boat[i].x = ++x;
+      boat[i].y = ++y;
+      boat[i].num = goods_num;
+      boat[i].direction = direction;
+    }
     // 到达泊位入队
     if (temp_status != boat[i].status && temp_status == 0 &&
         boat[i].pos != -1) {

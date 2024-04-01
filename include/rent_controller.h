@@ -10,17 +10,18 @@
 class RentController {
  private:
   RentController() = default;
-  RentController(const RentController& other) = default;
-  static RentController* instance_;
+  RentController(const RentController &other) = default;
+  static RentController *instance_;
 
  public:
-  static RentController*& GetInstance();
+  static RentController *&GetInstance();
 
   // 租船
-  void RentBoat(int x, int y);
+  void RentBoat(int &id, int &goods_num, int &x, int &y, int &direction,
+                int &status);
 
   // 租机器人
-  void RentRobot(int x, int y);
+  void RentRobot(int &id, int &goods, int &x, int &y);
 
   std::vector<Robot> robot;  // 当前的机器人
 

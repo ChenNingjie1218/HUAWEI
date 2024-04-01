@@ -12,9 +12,9 @@
 #include "rent_controller.h"
 extern int id;
 extern std::array<Location, 4> DIRS;
-Robot::Robot(int startX, int startY) {
-  x = startX;
-  y = startY;
+Robot::Robot(int &id, int &goods, int &startX, int &startY)
+    : id_(id), x(startX), y(startY), goods(goods) {
+  area_id = MapController::GetInstance()->FindArea(x * n + y);
 }
 
 // 删除path的第一个点

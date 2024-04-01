@@ -12,7 +12,13 @@ int Boat::boat_capacity = 0;
 extern int id;
 
 Boat::Boat() { num = 0; }
-Boat::Boat(int x, int y){};
+Boat::Boat(int &id, int &goods_num, int &x, int &y, int &direction, int &status)
+    : id_(id),
+      num(goods_num),
+      x(x),
+      y(y),
+      direction(direction),
+      status(status) {}
 
 /*
  * version:3.0
@@ -22,7 +28,7 @@ Boat::Boat(int x, int y){};
 void Boat::ChooseBerth3(int boat_id) {
   int max_goods = 0;
   int target_pos = -1;
-  std::vector<Berth>& berth = MapController::GetInstance()->berth;
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
   for (int i = 0; i < 10; ++i) {
     // 剩余装载时间
     int time = 15000 - id -
@@ -57,7 +63,7 @@ void Boat::ChooseBerth3(int boat_id) {
  * 3 正在前往该泊位的机器人数量 ？
  */
 bool Boat::LeaveCond() {
-  std::vector<Berth>& berth = MapController::GetInstance()->berth;
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
   if (pos != -1 &&
       id > 15000 - berth[pos].transport_time -
                DynamicParam::GetInstance()->GetTolerantLeaveTime()) {
@@ -85,7 +91,7 @@ bool Boat::LeaveCond() {
  * 3 另一个泊位的货物数量
  */
 bool Boat::ChangeBerth3(int boat_id, bool force) {
-  std::vector<Berth>& berth = MapController::GetInstance()->berth;
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
   if (berth[pos].goods_num > 0 && !force) {
     return false;
   }

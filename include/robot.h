@@ -7,9 +7,9 @@
 
 // 机器人
 struct Robot {
-  int x, y;
-
   int id_;
+
+  int x, y;
 
   // 是否携带货物
   int goods;
@@ -32,7 +32,7 @@ struct Robot {
   // 所处区号
   int area_id;
   Robot() = default;
-  Robot(int startX, int startY);
+  Robot(int &id, int &goods, int &startX, int &startY);
 
   Goods *target_goods;
   std::vector<Location> path;
