@@ -65,45 +65,44 @@ void OutputController::SendPull(int robot_id) {
  * @param x - 船的x坐标
  * @param y - 船的y坐标
  */
-void OutputController::SendBuyBoat(int x, int y){
+void OutputController::SendBuyBoat(int x, int y) {
   printf("lboat %d %d\n", x, y);
   fflush(stdout);
-
 }
 
 /**
-  * @brief 尝试将对应船位置重置到主航道上，会导致船进入恢复状态。
-  * @param boat_id - 船的id
-  */
-void OutputController::SendReset(int boat_id){
+ * @brief 尝试将对应船位置重置到主航道上，会导致船进入恢复状态。
+ * @param boat_id - 船的id
+ */
+void OutputController::SendReset(int boat_id) {
   printf("reset %d\n", boat_id);
   fflush(stdout);
 }
 
 /**
-  * @brief 尝试将对应船靠泊到泊位上，会导致船进入恢复状态。
-  * @param boat_id - 船的id 
-*/
-void OutputController::SendDock(int boat_id){
+ * @brief 尝试将对应船靠泊到泊位上，会导致船进入恢复状态。
+ * @param boat_id - 船的id
+ */
+void OutputController::SendDock(int boat_id) {
   printf("dock %d\n", boat_id);
   fflush(stdout);
 }
 
 /**
-  * @brief 船的旋转
-  * @param boat_id - 船的id
-  * @param rotate_tag - 旋转的方向 0:顺时针 1:逆时针
-*/
-void OutputController::SendRotate(int boat_id, int rotate_tag){
+ * @brief 船的旋转
+ * @param boat_id - 船的id
+ * @param rotate_tag - 旋转的方向 0:顺时针 1:逆时针
+ */
+void OutputController::SendRotate(int boat_id, int rotate_tag) {
   printf("rotate %d %d\n", boat_id, rotate_tag);
   fflush(stdout);
 }
 
 /**
-  *@brief 向正方向前进1格（主航道）
-  *@param boat_id - 船的id
-*/
-void OutputController::SendForward(int boat_id){
+ *@brief 向正方向前进1格（主航道）
+ *@param boat_id - 船的id
+ */
+void OutputController::SendForward(int boat_id) {
   printf("forward %d\n", boat_id);
   fflush(stdout);
 }

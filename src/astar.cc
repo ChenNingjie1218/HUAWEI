@@ -51,7 +51,7 @@ Point::Point(Location loc) {
 }
 
 bool Point::CanReach() {
-  if (busy_point[loc.x][loc.y] > BUSY_VALVE) {
+  if (busy_point[loc.x][loc.y] > DynamicParam::GetInstance()->GetBusyValve()) {
     return false;
   }
   if (ch[loc.x][loc.y] == '.' || ch[loc.x][loc.y] == 'A' ||
@@ -105,9 +105,11 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
     if (gds[current.x][current.y] &&
         gds[current.x][current.y]->robot_id == -1 &&
         cost_so_far[current] <
-            LIFETIME - id + gds[current.x][current.y]->birth - TOLERANT_TIME) {
+            LIFETIME - id + gds[current.x][current.y]->birth -
+                DynamicParam::GetInstance()->GetTolerantTime()) {
 #ifdef CHANGE_CLOSED_GOODS
-      if (gds[current.x][current.y]->money > VALUEABLE_GOODS_VALVE) {
+      if (gds[current.x][current.y]->money >
+          DynamicParam::GetInstance()->GetValueableGoodsValve()) {
         // 只换值钱的货物
         find_goods = gds[current.x][current.y];
       }

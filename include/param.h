@@ -43,31 +43,54 @@ const int N = 210;
 #define CHANGE_CLOSED_GOODS      // 开关 A*是否切换更近的货物
 // #define SAVE_OLD_PATH            // 开关 A*是否存取算过的路径
 
-#define TOLERANT_TIME 40  // 参数 机器人找货物容忍步数
-
-#define TOLERANT_LEAVE_TIME 5  // 参数 船最后走可容忍时间的
-
-#define TOLERANT_WAIT_TIME 1000  // 参数 船在港口停留时间
-
 /*
  * 是否开启货物筛选机制
  * 开启后将按照 GOODS_VALUE_VALVE 筛选货物
  * 当货物数量超过 GOODS_FILTER_VALVE_NUM 将会按照 VALUEABLE_GOODS_VALVE 筛选货物
  */
-#define GOODS_FILTER               // 开关 货物过滤机制
-#define GOODS_VALUE_VALVE 20       // 参数 货物筛选域值
-#define GOODS_FILTER_VALVE_NUM 30  // 参数 货物筛选数量域值
-#define VALUEABLE_GOODS_VALVE 80   // 参数 贵重货物域值
+#define GOODS_FILTER  // 开关 货物过滤机制
 
-#define FINAL_TOLERANT_TIME 200  // 参数 最后冲刺阶段的容忍时间
+class DynamicParam {
+ public:
+  static DynamicParam* GetInstance() {
+    if (instance_ == nullptr) {
+      instance_ = new DynamicParam();
+    }
+    return instance_;
+  }
 
-#define BUSY_VALVE 5  // 参数 判断该点拥堵的域值
+  int GetTolerantTime() { return TOLERANT_TIME; }
+  int GetTolerantLeaveTime() { return TOLERANT_LEAVE_TIME; }
+  int GetGoodsValueValve() { return GOODS_VALUE_VALVE; }
+  int GetGoodsFilterValveNum() { return GOODS_FILTER_VALVE_NUM; }
+  int GetValueableGoodsValve() { return VALUEABLE_GOODS_VALVE; }
+  int GetFinalTolerantTime() { return FINAL_TOLERANT_TIME; }
+  int GetBusyValve() { return BUSY_VALVE; }
+  int GetBoatCapacityReduce() { return BOAT_CAPACITY_REDUCE; }
 
-#define BERTH_DIVISOR 10  // 参数 判断泊位值不值得过去 boat_capacity / 该值
+  void SetTolerantTime(int val) { TOLERANT_TIME = val; }
+  void SetTolerantLeaveTime(int val) { TOLERANT_LEAVE_TIME = val; }
+  void SetGoodsValueValve(int val) { GOODS_VALUE_VALVE = val; }
+  void SetGoodsFilterValveNum(int val) { GOODS_FILTER_VALVE_NUM = val; }
+  void SetValueableGoodsValve(int val) { VALUEABLE_GOODS_VALVE = val; }
+  void SetFinalTolerantTime(int val) { FINAL_TOLERANT_TIME = val; }
+  void SetBusyValve(int val) { BUSY_VALVE = val; }
+  void SetBoatCapacityReduce(int val) { BOAT_CAPACITY_REDUCE = val; }
 
-// #define CAN_GRAB_GOODS  // 开关 是否允许路上抢占别人货物
+ private:
+  int TOLERANT_TIME = 40;  // 参数 机器人找货物容忍步数
 
-// #define ONE_ROBOT_ONE_BERTH  // 开关 一个机器人一个泊位
+  int TOLERANT_LEAVE_TIME = 5;      // 参数 船最后走可容忍时间的
+  int GOODS_VALUE_VALVE = 20;       // 参数 货物筛选域值
+  int GOODS_FILTER_VALVE_NUM = 30;  // 参数 货物筛选数量域值
+  int VALUEABLE_GOODS_VALVE = 80;   // 参数 贵重货物域值
 
-#define BOAT_CAPACITY_REDUCE 0  // 参数 改变船容量
+  int FINAL_TOLERANT_TIME = 200;  // 参数 最后冲刺阶段的容忍时间
+
+  int BUSY_VALVE = 5;  // 参数 判断该点拥堵的域值
+
+  int BOAT_CAPACITY_REDUCE = 0;  // 参数 改变船容量
+
+  static DynamicParam* instance_;
+};
 #endif

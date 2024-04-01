@@ -57,6 +57,6 @@ struct GoodsManager {
 #endif
 
   // 收入货物链表的价值域值
-  int value_valve = GOODS_VALUE_VALVE;
+  int value_valve = DynamicParam::GetInstance()->GetGoodsValueValve();
 };
 #endif
