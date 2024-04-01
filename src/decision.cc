@@ -13,7 +13,6 @@
 #include "robot.h"
 // extern int busy_point[N][N];
 extern int id;
-extern std::array<Location, 4> DIRS;
 bool can_find_goods = true;  // 每次决策只找一次物品
 DecisionManager *DecisionManager::instance_ = nullptr;
 

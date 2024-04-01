@@ -38,9 +38,18 @@ bool MapController::CanBoatReach(int x, int y) {
 
 // 初始化坐标映射到泊位id的map
 void MapController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
-  for (int i = 0; i < 4; ++i) {
-    for (int j = 0; j < 4; ++j) {
-      location_to_berth_id[Location(berth_x + i, berth_y + j)] = berth_id;
+  std::queue<Location> q;
+  q.push(Location(berth_x, berth_y));
+  while (!q.empty()) {
+    Location temp = q.front();
+    q.pop();
+    location_to_berth_id[temp] = berth_id;
+    for (int i = 0; i < 4; ++i) {
+      int x = temp.x + DIRS[i].x;
+      int y = temp.y + DIRS[i].y;
+      if (ch[x][y] == 'B') {
+        q.push(Location(x, y));
+      }
     }
   }
 }

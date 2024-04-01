@@ -11,7 +11,6 @@
 #include "param.h"
 #include "rent_controller.h"
 extern int id;
-extern std::array<Location, 4> DIRS;
 Robot::Robot(int &id, int &goods, int &startX, int &startY)
     : id_(id), x(startX), y(startY), goods(goods) {
   area_id = MapController::GetInstance()->FindArea(x * n + y);
@@ -242,6 +241,7 @@ int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
 
   // 看周围有没有不被占用的空位
   int first_dir;
+  std::array<Location, 4> &DIRS = MapController::GetInstance()->DIRS;
   for (first_dir = 0; first_dir < 4; ++first_dir) {
     if (ignore_x + DIRS[first_dir].x == x &&
         ignore_y + DIRS[first_dir].y == y) {

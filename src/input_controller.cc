@@ -228,7 +228,7 @@ void InputController::Input() {
     scanf("%d%d%d", &temp_goods, &x, &y);
     if (i >= robot.size()) {
       // 新增机器人
-      RentController::GetInstance()->RentRobot(i, temp_goods, ++x, ++y);
+      robot.push_back(Robot(i, temp_goods, ++x, ++y));
       robot[i].InitAccessedBerth();
     } else {
       // 旧机器人更新坐标
@@ -260,8 +260,7 @@ void InputController::Input() {
     int id, goods_num, x, y, direction, temp_status;
     scanf("%d%d%d%d%d%d\n", &id, &goods_num, &x, &y, &direction, &temp_status);
     if (i > RentController::GetInstance()->boat.size()) {
-      RentController::GetInstance()->RentBoat(id, goods_num, ++x, ++y,
-                                              direction, temp_status);
+      boat.push_back(Boat(id, goods_num, ++x, ++y, direction, temp_status));
     } else {
       boat[i].x = ++x;
       boat[i].y = ++y;
