@@ -179,12 +179,74 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
 
 // 顺时针旋转
 void Boat::ClockwiseRotation() {
-  Decision decision(DECISION_TYPE_BOAT_ROT, id_, 0);
+  Decision decision(DECISION_TYPE_BOAT_ROT, id_, DECISION_BOAT_ROT_CLOCKWISE);
   DecisionManager::GetInstance()->q_decision.push(decision);
 }
 
 // 逆时针旋转
 void Boat::CounterclockwiseRotation() {
-  Decision decision(DECISION_TYPE_BOAT_ROT, id_, 1);
+  Decision decision(DECISION_TYPE_BOAT_ROT, id_,
+                    DECISION_BOAT_ROT_COUNTERCLOCKWISE);
   DecisionManager::GetInstance()->q_decision.push(decision);
+}
+
+CollisionBox::CollisionBox(int core_x, int core_y, int direction) {
+  switch (direction) {
+    case BOAT_DIRECTION_RIGHT:
+      l_x = core_x;
+      l_y = core_y;
+      r_x = core_x + 1;
+      r_y = core_y + 2;
+      break;
+    case BOAT_DIRECTION_LEFT:
+      l_x = core_x - 1;
+      l_y = core_y - 2;
+      r_x = core_x;
+      r_y = core_y;
+      break;
+    case BOAT_DERECTION_UP:
+      l_x = core_x - 2;
+      l_y = core_y;
+      r_x = core_x;
+      r_y = core_y + 1;
+      break;
+    case BOAT_DERECTION_DOWN:
+      l_x = core_x;
+      l_y = core_y - 1;
+      r_x = core_x + 2;
+      r_y = core_y;
+      break;
+    default:
+#ifdef DEBUG
+      std::cerr << "创建CollisionBox对象:错误的direction" << direction
+                << std::endl;
+#endif
+      break;
+  }
+}
+
+// 是否撞边界
+bool CollisionBox::IsCollision() {
+  if (l_x < 1 || l_y < 1 || r_x > n || r_y > n) {
+    // 出界了
+    return true;
+  }
+  for (int i = l_x; i <= r_x; ++i) {
+    for (int j = l_y; j <= r_y; ++j) {
+      if (!MapController::GetInstance()->CanBoatReach(i, j)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// 两个对象是否相撞
+bool CollisionBox::JudgeCollision(const CollisionBox &first,
+                                  const CollisionBox &second) {
+  if (first.l_x > second.r_x || first.r_x < second.l_x ||
+      first.l_y > second.r_y || first.r_y < second.l_y) {
+    return false;
+  }
+  return true;
 }

@@ -31,6 +31,11 @@ const int N = 210;
 #define DECISION_BOAT_ROT_CLOCKWISE 0
 #define DECISION_BOAT_ROT_COUNTERCLOCKWISE 1
 
+#define BOAT_DIRECTION_RIGHT 0
+#define BOAT_DIRECTION_LEFT 1
+#define BOAT_DERECTION_UP 2
+#define BOAT_DERECTION_DOWN 4
+
 // A*算法深度
 // #define CUT_A_STAR               // 开关 A*是否剪枝
 #define DEFAULT_A_STAR_DEEP 150  // 参数 默认A*剪枝深度
