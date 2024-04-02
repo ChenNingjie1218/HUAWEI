@@ -17,7 +17,7 @@ struct OutputController {
    * @param x - 机器人的x坐标
    * @param y - 机器人的y坐标
    */
-  void SendBuyRobot(int x, int y);
+  void SendLbot(int x, int y);
 
   /**
    * @brief 机器人如何移动
@@ -46,32 +46,32 @@ struct OutputController {
    * @param x - 船的x坐标
    * @param y - 船的y坐标
    */
-  void SendBuyBoat(int x, int y);
+  void SendLboat(int x, int y);
 
   /**
    * @brief 尝试将对应船位置重置到主航道上，会导致船进入恢复状态。
    * @param boat_id - 船的id
    */
-  void SendReset(int boat_id);
+  void SendDept(int boat_id);
 
   /**
    * @brief 尝试将对应船靠泊到泊位上，会导致船进入恢复状态。
    * @param boat_id - 船的id
    */
-  void SendDock(int boat_id);
+  void SendBerth(int boat_id);
 
   /**
    * @brief 船的旋转
    * @param boat_id - 船的id
    * @param rotate_tag - 旋转的方向 0:顺时针 1:逆时针
    */
-  void SendRotate(int boat_id, int rotate_tag);
+  void SendRot(int boat_id, int rotate_tag);
 
   /**
    *@brief 向正方向前进1格（主航道）
    *@param boat_id - 船的id
    */
-  void SendForward(int boat_id);
+  void SendShip(int boat_id);
 
   // 将决策发送给判题器
   void Output();

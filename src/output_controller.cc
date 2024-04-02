@@ -22,7 +22,7 @@ OutputController*& OutputController::GetInstance() {
  * @param x - 机器人的x坐标
  * @param y - 机器人的y坐标
  */
-void OutputController::SendBuyRobot(int x, int y) {
+void OutputController::SendLbot(int x, int y) {
   printf("lbot %d %d\n", x, y);
   fflush(stdout);
 }
@@ -65,7 +65,7 @@ void OutputController::SendPull(int robot_id) {
  * @param x - 船的x坐标
  * @param y - 船的y坐标
  */
-void OutputController::SendBuyBoat(int x, int y) {
+void OutputController::SendLboat(int x, int y) {
   printf("lboat %d %d\n", x, y);
   fflush(stdout);
 }
@@ -74,7 +74,7 @@ void OutputController::SendBuyBoat(int x, int y) {
  * @brief 尝试将对应船位置重置到主航道上，会导致船进入恢复状态。
  * @param boat_id - 船的id
  */
-void OutputController::SendReset(int boat_id) {
+void OutputController::SendDept(int boat_id) {
   printf("dept %d\n", boat_id);
   fflush(stdout);
 }
@@ -83,7 +83,7 @@ void OutputController::SendReset(int boat_id) {
  * @brief 尝试将对应船靠泊到泊位上，会导致船进入恢复状态。
  * @param boat_id - 船的id
  */
-void OutputController::SendDock(int boat_id) {
+void OutputController::SendBerth(int boat_id) {
   printf("berth %d\n", boat_id);
   fflush(stdout);
 }
@@ -93,7 +93,7 @@ void OutputController::SendDock(int boat_id) {
  * @param boat_id - 船的id
  * @param rotate_tag - 旋转的方向 0:顺时针 1:逆时针
  */
-void OutputController::SendRotate(int boat_id, int rotate_tag) {
+void OutputController::SendRot(int boat_id, int rotate_tag) {
   printf("rot %d %d\n", boat_id, rotate_tag);
   fflush(stdout);
 }
@@ -102,7 +102,7 @@ void OutputController::SendRotate(int boat_id, int rotate_tag) {
  *@brief 向正方向前进1格（主航道）
  *@param boat_id - 船的id
  */
-void OutputController::SendForward(int boat_id) {
+void OutputController::SendShip(int boat_id) {
   printf("ship %d\n", boat_id);
   fflush(stdout);
 }
@@ -125,8 +125,8 @@ void OutputController::Output() {
     Decision next_decision = DecisionManager::GetInstance()->q_decision.front();
     DecisionManager::GetInstance()->q_decision.pop();
     switch (next_decision.type) {
-      case DECISION_TYPE_ROBOT_BUY:
-        SendBuyRobot(next_decision.param_1, next_decision.param_2);
+      case DECISION_TYPE_ROBOT_LBOT:
+        SendLbot(next_decision.param_1, next_decision.param_2);
 #ifdef DEBUG
         fprintf(debug_command_file, "lbot %d %d\n", next_decision.param_1,
                 next_decision.param_2);
@@ -156,8 +156,8 @@ void OutputController::Output() {
 #endif
 
         break;
-      case DECISION_TYPE_BOAT_BUY:
-        SendBuyBoat(next_decision.param_1, next_decision.param_2);
+      case DECISION_TYPE_BOAT_LBOAT:
+        SendLboat(next_decision.param_1, next_decision.param_2);
 
 #ifdef DEBUG
         fprintf(debug_command_file, "lboat %d %d\n", next_decision.param_1,
@@ -165,24 +165,24 @@ void OutputController::Output() {
 #endif
 
         break;
-      case DECISION_TYPE_BOAT_RESET:
-        SendReset(next_decision.param_1);
+      case DECISION_TYPE_BOAT_DEPT:
+        SendDept(next_decision.param_1);
 
 #ifdef DEBUG
         fprintf(debug_command_file, "dept %d\n", next_decision.param_1);
 #endif
 
         break;
-      case DECISION_TYPE_BOAT_SHIP:
-        SendDock(next_decision.param_1);
+      case DECISION_TYPE_BOAT_BERTH:
+        SendBerth(next_decision.param_1);
 
 #ifdef DEBUG
         fprintf(debug_command_file, "berth %d\n", next_decision.param_1);
 #endif
 
         break;
-      case DECISION_TYPE_BOAT_ROTATE:
-        SendRotate(next_decision.param_1, next_decision.param_2);
+      case DECISION_TYPE_BOAT_ROT:
+        SendRot(next_decision.param_1, next_decision.param_2);
 
 #ifdef DEBUG
         fprintf(debug_command_file, "rot %d %d\n", next_decision.param_1,
@@ -190,8 +190,8 @@ void OutputController::Output() {
 #endif
 
         break;
-      case DECISION_TYPE_BOAT_FORWARD:
-        SendForward(next_decision.param_1);
+      case DECISION_TYPE_BOAT_SHIP:
+        SendShip(next_decision.param_1);
 
 #ifdef DEBUG
         fprintf(debug_command_file, "ship %d\n", next_decision.param_1);
