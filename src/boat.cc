@@ -204,13 +204,13 @@ CollisionBox::CollisionBox(int core_x, int core_y, int direction) {
       r_x = core_x;
       r_y = core_y;
       break;
-    case BOAT_DERECTION_UP:
+    case BOAT_DIRECTION_UP:
       l_x = core_x - 2;
       l_y = core_y;
       r_x = core_x;
       r_y = core_y + 1;
       break;
-    case BOAT_DERECTION_DOWN:
+    case BOAT_DIRECTION_DOWN:
       l_x = core_x;
       l_y = core_y - 1;
       r_x = core_x + 2;

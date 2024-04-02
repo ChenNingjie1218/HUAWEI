@@ -1,6 +1,6 @@
 #ifndef BOAT_H_
 #define BOAT_H_
-
+#include <vector>
 /*
  * AABB最小边界框
  *
@@ -54,6 +54,9 @@ struct Boat {
    * - 2 装载状态
    */
   int status;
+
+  // 船的路径，只用存方向
+  std::vector<int> path;
 
   Boat();
   Boat(int &id, int &goods_num, int &x, int &y, int &direction, int &status);

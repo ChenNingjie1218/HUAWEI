@@ -33,8 +33,8 @@ const int N = 210;
 
 #define BOAT_DIRECTION_RIGHT 0
 #define BOAT_DIRECTION_LEFT 1
-#define BOAT_DERECTION_UP 2
-#define BOAT_DERECTION_DOWN 4
+#define BOAT_DIRECTION_UP 2
+#define BOAT_DIRECTION_DOWN 3
 
 // A*算法深度
 // #define CUT_A_STAR               // 开关 A*是否剪枝
