@@ -190,6 +190,24 @@ void Boat::DoCounterclockwiseRotate() {
   DecisionManager::GetInstance()->q_decision.push(decision);
 }
 
+// 往前走
+void Boat::DoShip() {
+  Decision decision(DECISION_TYPE_BOAT_SHIP, id_);
+  DecisionManager::GetInstance()->q_decision.push(decision);
+}
+
+// 靠泊
+void Boat::DoBerth() {
+  Decision decision(DECISION_TYPE_BOAT_BERTH, id_);
+  DecisionManager::GetInstance()->q_decision.push(decision);
+}
+
+// 重置到主航道
+void Boat::DoDept() {
+  Decision decision(DECISION_TYPE_BOAT_DEPT, id_);
+  DecisionManager::GetInstance()->q_decision.push(decision);
+}
+
 CollisionBox::CollisionBox(int core_x, int core_y, int direction) {
   switch (direction) {
     case BOAT_DIRECTION_RIGHT:

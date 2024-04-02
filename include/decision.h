@@ -21,7 +21,7 @@ struct Decision {
 
   // 第二参数
   int param_2;
-  Decision(int type, int param_1, int param_2);
+  Decision(int type, int param_1, int param_2 = -1);
 };
 
 // 决策管理
