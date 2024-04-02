@@ -38,8 +38,13 @@ struct Boat {
   Boat();
   Boat(int &id, int &goods_num, int &x, int &y, int &direction, int &status);
 
-  // version:3.0: 选择固定的两个泊位
   void ChooseBerth3(int boat_id);
+
+  // 顺时针旋转
+  void ClockwiseRotation();
+
+  // 逆时针旋转
+  void CounterclockwiseRotation();
 
   // 离开港口的条件
   bool LeaveCond();

@@ -98,7 +98,7 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
   // 先看有没有船舶能让自己填满
   int target_pos = pos;
   for (int i = 0; i < 10; ++i) {
-    int time = 15000 - id - berth[i].transport_time - CHANGE_BERTH_TIME -
+    int time = 15000 - id - berth[i].transport_time -
                DynamicParam::GetInstance()->GetTolerantLeaveTime();
     int goods_num = std::min(time * berth[i].loading_speed, berth[i].goods_num);
     if (i != pos && goods_num >= boat_capacity - num) {
@@ -124,7 +124,7 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
     int max_goods = berth[pos].goods_num;
     for (int i = 0; i < 10; ++i) {
       if (i != pos && berth[i].boat_id == -1) {
-        int time = 15000 - id - berth[i].transport_time - CHANGE_BERTH_TIME -
+        int time = 15000 - id - berth[i].transport_time -
                    DynamicParam::GetInstance()->GetTolerantLeaveTime();
         int can_load =
             std::min(time * berth[i].transport_time, berth[i].goods_num);
@@ -163,11 +163,6 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
     return false;
   }
 
-  // if (id > 15000 - berth[target_pos].transport_time - CHANGE_BERTH_TIME -
-  //              TOLERANT_LEAVE_TIME) {
-  //   // 防止船换泊位后，不能回虚拟点了
-  //   return false;
-  // }
 #ifdef DEBUG
   std::cerr << boat_id << " 船更换泊位 " << pos << " -> " << target_pos
             << " 当前货物数量：" << num << std::endl;

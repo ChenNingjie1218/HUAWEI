@@ -2,8 +2,6 @@
 #define PARAM_H_
 #define DEBUG
 
-const int k_Cost1 = 0;
-const int k_Cost2 = 2;
 #define COL 210
 #define ROW 210
 // 货物生存周期
@@ -12,9 +10,6 @@ const int LIFETIME = 1000;
 // 地图长度
 const int n = 200;
 const int N = 210;
-
-// 船换泊位耗时
-#define CHANGE_BERTH_TIME 500
 
 // 决策类型
 #define DECISION_TYPE_ROBOT_BUY 0
