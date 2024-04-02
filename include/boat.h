@@ -1,5 +1,25 @@
 #ifndef BOAT_H_
 #define BOAT_H_
+
+/*
+ * AABB最小边界框
+ *
+ */
+class CollisionBox {
+ public:
+  CollisionBox() = delete;
+  CollisionBox(int core_x, int core_y, int direction);
+  // 是否撞边界
+  bool IsCollision();
+  // 两个对象是否相撞
+  static bool JudgeCollision(const CollisionBox &first,
+                             const CollisionBox &second);
+
+ private:
+  int l_x, l_y;  // 左上角坐标
+  int r_x, r_y;  // 右上角坐标
+};
+
 // 船
 struct Boat {
   // 船id
