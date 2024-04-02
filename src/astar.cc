@@ -87,7 +87,8 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
   while (!frontier.empty()) {
     Location current = frontier.get();
     if (current != start &&
-        MapController::GetInstance()->busy_point[current.x][current.y]) {
+        MapController::GetInstance()->busy_point[current.x][current.y] >
+            DynamicParam::GetInstance()->GetBusyValve()) {
       continue;
     }
 // 超过深度剪枝
@@ -103,11 +104,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
     // 如果是找货物
     if (MapController::GetInstance()->gds[current.x][current.y] &&
         MapController::GetInstance()->gds[current.x][current.y]->robot_id ==
-            -1 &&
-        cost_so_far[current] <
-            LIFETIME - id +
-                MapController::GetInstance()->gds[current.x][current.y]->birth -
-                DynamicParam::GetInstance()->GetTolerantTime()) {
+            -1) {
 #ifdef CHANGE_CLOSED_GOODS
       if (MapController::GetInstance()->gds[current.x][current.y]->money >
           DynamicParam::GetInstance()->GetValueableGoodsValve()) {
@@ -248,10 +245,6 @@ void Astar::AstarSearch(std::vector<int> &path) {
   Location debug_point(198, 5, BOAT_DIRECTION_LEFT);
   while (!frontier.empty()) {
     Location current = frontier.get();
-    if (current == debug_point) {
-      int a = 10;
-      a++;
-    }
     if (current == end) {
       Location temp = current;
       path.clear();
@@ -353,7 +346,7 @@ Location Location::CounterClockwise() {
     case BOAT_DIRECTION_UP:
       return Location(x - 1, y + 1, BOAT_DIRECTION_LEFT);
     case BOAT_DIRECTION_DOWN:
-      return Location(x - 1, y - 1, BOAT_DIRECTION_RIGHT);
+      return Location(x + 1, y - 1, BOAT_DIRECTION_RIGHT);
     default:
       return Location();
       break;
