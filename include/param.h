@@ -33,7 +33,8 @@ const int N = 210;
 #define DECISION_ROBOT_UP 2
 #define DECISION_ROBOT_DOWN 3
 
-#define BERTH_WEIGHT_AFTER_BOAT_CHOOSE 1  // 参数 船选择泊位后，泊位权重的减少
+#define DECISION_BOAT_ROT_CLOCKWISE 0
+#define DECISION_BOAT_ROT_COUNTERCLOCKWISE 1
 
 // A*算法深度
 // #define CUT_A_STAR               // 开关 A*是否剪枝
