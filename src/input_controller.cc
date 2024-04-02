@@ -206,7 +206,7 @@ void InputController::Input() {
   for (int i = 0; i < robot_num; i++) {
     int robot_id, temp_goods, x, y;
     scanf("%d%d%d%d", &robot_id, &temp_goods, &x, &y);
-    if (i >= robot.size()) {
+    if (i >= static_cast<int>(robot.size())) {
       // 新增机器人
       robot.push_back(Robot(robot_id, temp_goods, ++x, ++y));
       robot[i].InitAccessedBerth();
@@ -242,7 +242,7 @@ void InputController::Input() {
     int boat_id, goods_num, x, y, direction, temp_status;
     scanf("%d%d%d%d%d%d\n", &boat_id, &goods_num, &x, &y, &direction,
           &temp_status);
-    if (i > RentController::GetInstance()->boat.size()) {
+    if (i > static_cast<int>(RentController::GetInstance()->boat.size())) {
       boat.push_back(
           Boat(boat_id, goods_num, ++x, ++y, direction, temp_status));
     } else {
