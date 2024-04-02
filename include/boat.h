@@ -64,19 +64,19 @@ struct Boat {
   void ChooseBerth3(int boat_id);
 
   // 顺时针旋转
-  void ClockwiseRotation();
+  void DoClockwiseRotate();
 
   // 逆时针旋转
-  void CounterclockwiseRotation();
+  void DoCounterclockwiseRotate();
 
   // 往前走
-  void Ship();
+  void DoShip();
 
   // 靠泊
-  void Berth();
+  void DoBerth();
 
   // 重置到主航道
-  void Dept();
+  void DoDept();
 
   // 离开港口的条件
   bool LeaveCond();

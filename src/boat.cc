@@ -178,13 +178,13 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
 }
 
 // 顺时针旋转
-void Boat::ClockwiseRotation() {
+void Boat::DoClockwiseRotate() {
   Decision decision(DECISION_TYPE_BOAT_ROT, id_, DECISION_BOAT_ROT_CLOCKWISE);
   DecisionManager::GetInstance()->q_decision.push(decision);
 }
 
 // 逆时针旋转
-void Boat::CounterclockwiseRotation() {
+void Boat::DoCounterclockwiseRotate() {
   Decision decision(DECISION_TYPE_BOAT_ROT, id_,
                     DECISION_BOAT_ROT_COUNTERCLOCKWISE);
   DecisionManager::GetInstance()->q_decision.push(decision);
