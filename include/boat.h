@@ -66,6 +66,15 @@ struct Boat {
   // 逆时针旋转
   void CounterclockwiseRotation();
 
+  // 往前走
+  void Ship();
+
+  // 靠泊
+  void Berth();
+
+  // 重置到主航道
+  void Dept();
+
   // 离开港口的条件
   bool LeaveCond();
 
