@@ -176,3 +176,15 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
   berth[target_pos].boat_id = boat_id;
   return true;
 }
+
+// 顺时针旋转
+void Boat::ClockwiseRotation() {
+  Decision decision(DECISION_TYPE_BOAT_ROT, id_, 0);
+  DecisionManager::GetInstance()->q_decision.push(decision);
+}
+
+// 逆时针旋转
+void Boat::CounterclockwiseRotation() {
+  Decision decision(DECISION_TYPE_BOAT_ROT, id_, 1);
+  DecisionManager::GetInstance()->q_decision.push(decision);
+}
