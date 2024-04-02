@@ -12,19 +12,20 @@
 #include "rent_controller.h"
 extern int id;
 // 方向数组
-std::array<Location, 4> DIRS = {Location(1, 0), Location(-1, 0), Location(0, 1),
-                                Location(0, -1)};
+std::array<Location, 4> DIRS = {Location(0, 1), Location(0, -1),
+                                Location(-1, 0), Location(1, 0)};
 #ifdef SAVE_OLD_PATH
 std::map<std::pair<Location, Location>, std::vector<Location>> Astar::old_path;
 #endif
 
-Location::Location(int x, int y) {
-  this->x = x;
-  this->y = y;
-}
+Location::Location(int x, int y, int direction)
+    : x(x), y(y), boat_direction(direction) {}
 
 bool operator==(const Location &a, const Location &b) {
-  return a.x == b.x && a.y == b.y;
+  if (a.boat_direction == -1 || b.boat_direction == -1) {
+    return a.x == b.x && a.y == b.y;
+  }
+  return a.x == b.x && a.y == b.y && a.boat_direction == b.boat_direction;
 }
 bool operator!=(const Location &a, const Location &b) { return !(a == b); }
 
@@ -62,8 +63,8 @@ inline double heuristic(Location a, Location b) {
   return std::abs(a.x - b.x) + std::abs(a.y - b.y);
 }
 
-Astar::Astar(int start_x, int start_y, int end_x, int end_y)
-    : start(start_x, start_y), end(end_x, end_y) {}
+Astar::Astar(int start_x, int start_y, int end_x, int end_y, int direction)
+    : start(start_x, start_y, direction), end(end_x, end_y) {}
 
 // 找货物A*
 bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
@@ -179,7 +180,6 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
       // 紧急   需要该泊位有船
       int temp_berth_id =
           MapController::GetInstance()->location_to_berth_id[current];
-      // InputController::GetInstance()->location_to_berth_id[current];
       bool can_finish = !is_urgent;
       if (is_urgent && berth[temp_berth_id].boat_id != -1) {
         if (berth[temp_berth_id].q_boat.empty()) {
@@ -235,4 +235,127 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &berth_id,
     }
   }
   return false;
+}
+
+// 船
+void Astar::AstarSearch(std::vector<int> &path) {
+  PriorityQueue<Location, double> frontier;
+  std::unordered_map<Location, Location> came_from;
+  std::unordered_map<Location, double> cost_so_far;
+  frontier.put(start, 0);
+  came_from[start] = start;
+  cost_so_far[start] = 0;
+  Location debug_point(198, 5, BOAT_DIRECTION_LEFT);
+  while (!frontier.empty()) {
+    Location current = frontier.get();
+    if (current == debug_point) {
+      int a = 10;
+      a++;
+    }
+    if (current == end) {
+      Location temp = current;
+      path.clear();
+      // int count = 0;
+      while (temp != start) {
+        // std::cerr << "(" << temp.x << "," << temp.y << ")" << std::endl;
+        path.push_back(temp.boat_direction);
+        temp = came_from[temp];
+        // ++count;
+      }
+      // std::cerr << count << std::endl;
+      std::reverse(path.begin(), path.end());
+      return;
+    }
+
+    // 直行
+    Location next(current.x + DIRS[current.boat_direction].x,
+                  current.y + DIRS[current.boat_direction].y,
+                  current.boat_direction);
+    if (!CollisionBox(next.x, next.y, next.boat_direction).IsCollision()) {
+      double new_cost = cost_so_far[current] + 1;
+      auto it = cost_so_far.find(next);
+      if (it == cost_so_far.end() || new_cost < cost_so_far[next]) {
+        cost_so_far[next] = new_cost;
+        double priority = new_cost + heuristic(next, end);
+        frontier.put(next, priority);
+        came_from[next] = current;
+      } else if (it->first.boat_direction != next.boat_direction) {
+        cost_so_far[next] = new_cost;
+        double priority = new_cost + heuristic(next, end);
+        frontier.put(next, priority);
+        came_from[next] = current;
+      }
+    }
+
+    // 顺时针转
+    next = current.Clockwise();
+    if (!CollisionBox(next.x, next.y, next.boat_direction).IsCollision()) {
+      double new_cost = cost_so_far[current] + 1;
+      auto it = cost_so_far.find(next);
+      if (it == cost_so_far.end() || new_cost < cost_so_far[next]) {
+        cost_so_far[next] = new_cost;
+        double priority = new_cost + heuristic(next, end);
+        frontier.put(next, priority);
+        came_from[next] = current;
+      } else if (it->first.boat_direction != next.boat_direction) {
+        cost_so_far[next] = new_cost;
+        double priority = new_cost + heuristic(next, end);
+        frontier.put(next, priority);
+        came_from[next] = current;
+      }
+    }
+
+    // 逆时针转
+    next = current.CounterClockwise();
+    if (!CollisionBox(next.x, next.y, next.boat_direction).IsCollision()) {
+      double new_cost = cost_so_far[current] + 1;
+      auto it = cost_so_far.find(next);
+      if (it == cost_so_far.end() || new_cost < cost_so_far[next]) {
+        cost_so_far[next] = new_cost;
+        double priority = new_cost + heuristic(next, end);
+        frontier.put(next, priority);
+        came_from[next] = current;
+      } else if (it->first.boat_direction != next.boat_direction) {
+        cost_so_far[next] = new_cost;
+        double priority = new_cost + heuristic(next, end);
+        frontier.put(next, priority);
+        came_from[next] = current;
+      }
+    }
+  }
+  // std::cerr << "没路径" << std::endl;
+}
+
+// 顺时针转动
+Location Location::Clockwise() {
+  switch (boat_direction) {
+    case BOAT_DIRECTION_RIGHT:
+      return Location(x, y + 2, BOAT_DIRECTION_DOWN);
+    case BOAT_DIRECTION_LEFT:
+      return Location(x, y - 2, BOAT_DIRECTION_UP);
+    case BOAT_DIRECTION_UP:
+      return Location(x - 2, y, BOAT_DIRECTION_RIGHT);
+    case BOAT_DIRECTION_DOWN:
+      return Location(x + 2, y, BOAT_DIRECTION_LEFT);
+    default:
+      return Location();
+      break;
+  }
+}
+
+// 逆时针转动
+Location Location::CounterClockwise() {
+  switch (boat_direction) {
+    case BOAT_DIRECTION_RIGHT:
+      return Location(x + 1, y + 1, BOAT_DIRECTION_UP);
+    case BOAT_DIRECTION_LEFT:
+      return Location(x - 1, y - 1, BOAT_DIRECTION_DOWN);
+    case BOAT_DIRECTION_UP:
+      return Location(x - 1, y + 1, BOAT_DIRECTION_LEFT);
+    case BOAT_DIRECTION_DOWN:
+      return Location(x - 1, y - 1, BOAT_DIRECTION_RIGHT);
+    default:
+      return Location();
+      break;
+  }
 }

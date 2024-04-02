@@ -8,11 +8,18 @@
 
 struct Location {
   int x, y;
+  int boat_direction;
   Location() = default;
-  Location(int x, int y);
+  Location(int x, int y, int direction = -1);
   friend bool operator==(const Location &a, const Location &b);
   friend bool operator!=(const Location &a, const Location &b);
   friend bool operator<(Location a, Location b);
+
+  // 顺时针转动
+  Location Clockwise();
+
+  // 逆时针转动
+  Location CounterClockwise();
 };
 
 namespace std {
@@ -63,13 +70,16 @@ struct Astar {
   Location start;  // 起点坐标
   Location end;    // 终点坐标
   // Astar() = default;
-  Astar(int start_x, int start_y, int end_x, int end_y);
+  Astar(int start_x, int start_y, int end_x, int end_y, int direction = -1);
 
   // 找货物A*
   bool AstarSearch(std::vector<Location> &path, int &astar_deep,
                    Goods *&find_goods);
   // 找泊位A*
   bool AstarSearch(std::vector<Location> &path, int &berth_id, int is_urgent);
+
+  // 船
+  void AstarSearch(std::vector<int> &path);
 
 #ifdef SAVE_OLD_PATH
   // 将算过的A*路径存起来

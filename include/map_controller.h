@@ -45,9 +45,9 @@ struct MapController {
   // 坐标映射到泊位id
   std::map<Location, int> location_to_berth_id;
 
-  std::array<Location, 4> DIRS = {Location(1, 0), Location(-1, 0),
-                                  Location(0, 1),
-                                  Location(0, -1)};  // 上下左右方位
+  std::array<Location, 4> DIRS = {Location(0, 1), Location(0, -1),
+                                  Location(-1, 0),
+                                  Location(1, 0)};  // 右左上下方位
 
   // 初始化各项数据
   void InitMapData();
