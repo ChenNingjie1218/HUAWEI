@@ -112,9 +112,7 @@ bool Robot::UpdateTargetGoods(int robot_id) {
       continue;
     }
     int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
-    if (min_man > cal_man &&
-        cal_man < LIFETIME - id + p_goods->birth -
-                      DynamicParam::GetInstance()->GetTolerantTime()) {
+    if (min_man > cal_man) {
       min_man = cal_man;
       find_goods = p_goods;
     }
@@ -165,9 +163,15 @@ bool Robot::UpdateTargetGoods(int robot_id) {
 void Robot::FindBerth(int start_x, int start_y) {
   auto &berth = MapController::GetInstance()->berth;
   berth_id = MapController::GetInstance()->nearest_berth[start_x][start_y];
-  bool is_final_sprint = false;
-  Astar astar(start_x, start_y, berth[berth_id].x, berth[berth_id].y);
-  astar.AstarSearch(path, berth_id, is_final_sprint);
+  if (berth_id != -1) {
+    Astar astar(start_x, start_y, berth[berth_id].x, berth[berth_id].y);
+    astar.AstarSearch(path, berth_id);
+    std::cerr << "berth_id:" << berth_id << std::endl;
+  } else {
+#ifdef DEBUG
+    std::cerr << "机器人找目标泊位id不合法" << berth_id << std::endl;
+#endif
+  }
 }
 
 /*
@@ -208,7 +212,7 @@ int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
   }
 
 #ifdef DEBUG
-  std::vector<std::string> dir_string = {"下", "上", "右", "左"};
+  std::vector<std::string> dir_string = {"右", "左", "上", "下"};
 #endif
   char(&ch)[N][N] = MapController::GetInstance()->ch;
   for (int i = 1; i <= 4; ++i) {
@@ -260,14 +264,4 @@ int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
             << std::endl;
 #endif
   return -1;
-}
-
-//  初始化berth_accessed数组
-void Robot::InitAccessedBerth() {
-  std::vector<Berth> &berth = MapController::GetInstance()->berth;
-  for (int i = 0; i < 10; ++i) {
-    if (area_id == berth[i].area_id) {
-      berth_accessed.push_back(i);
-    }
-  }
 }

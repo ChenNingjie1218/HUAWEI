@@ -120,9 +120,6 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
         std::cerr << "robot " << robot_id << " 移动后装目标货：(" << x << ","
                   << y << ")" << std::endl;
 #endif
-        // } else if (robot[robot_id].target_goods &&
-        //            gds[x][y]->money > VALUEABLE_GOODS_VALVE &&
-        //            gds[x][y]->robot_id == -1) {
       }
 #ifdef CAN_GRAB_GOODS
       else if (robot[robot_id].target_goods &&
@@ -155,7 +152,7 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
 
         // 决策更新目标泊位和泊位权重
         robot[robot_id].FindBerth(x, y);
-        // berth_weight[robot[i].berth_id]++;
+
 #ifdef DEBUG
         std::cerr << "成功更新目标泊位" << std::endl;
 #endif

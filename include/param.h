@@ -2,11 +2,6 @@
 #define PARAM_H_
 #define DEBUG
 
-#define COL 210
-#define ROW 210
-// 货物生存周期
-const int LIFETIME = 1000;
-
 // 地图长度
 const int n = 200;
 const int N = 210;
@@ -36,6 +31,10 @@ const int N = 210;
 #define BOAT_DIRECTION_UP 2
 #define BOAT_DIRECTION_DOWN 3
 
+#define BOAT_STATUS_MOVING 0
+#define BOAT_STATUS_RESTORING 1
+#define BOAT_STATUS_LOADING 2
+
 // A*算法深度
 // #define CUT_A_STAR               // 开关 A*是否剪枝
 #define DEFAULT_A_STAR_DEEP 150  // 参数 默认A*剪枝深度
@@ -47,7 +46,7 @@ const int N = 210;
  * 开启后将按照 GOODS_VALUE_VALVE 筛选货物
  * 当货物数量超过 GOODS_FILTER_VALVE_NUM 将会按照 VALUEABLE_GOODS_VALVE 筛选货物
  */
-#define GOODS_FILTER  // 开关 货物过滤机制
+// #define GOODS_FILTER  // 开关 货物过滤机制
 
 class DynamicParam {
  public:

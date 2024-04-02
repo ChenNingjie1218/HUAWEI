@@ -170,7 +170,7 @@ void InputController::Input() {
     fprintf(debug_command_file, "货物 %d 信息: x = %d, y = %d, money = %d\n", i,
             x, y, val);
 #endif
-    if (money > 0 && MapController::GetInstance()->CanRobotReach(x, y)) {
+    if (val > 0 && MapController::GetInstance()->CanRobotReach(x, y)) {
 #ifdef GOODS_FILTER
       if (val < GoodsManager::GetInstance()->value_valve) {
 #ifdef DEBUG
@@ -184,7 +184,7 @@ void InputController::Input() {
       Goods* new_goods = new Goods(x, y, val, id);
       GoodsManager::GetInstance()->PushGoods(new_goods);
       new_goods->area_id = MapController::GetInstance()->FindArea(x * n + y);
-    } else if (!money) {
+    } else if (!val) {
       GoodsManager::GetInstance()->RemoveExpiredGoods(x, y);
     }
   }
@@ -205,7 +205,6 @@ void InputController::Input() {
     if (i >= static_cast<int>(robot.size())) {
       // 新增机器人
       robot.push_back(Robot(robot_id, temp_goods, ++x, ++y));
-      robot[i].InitAccessedBerth();
     } else {
       // 旧机器人更新坐标
       robot[i].x = ++x;
@@ -238,12 +237,19 @@ void InputController::Input() {
     int boat_id, goods_num, x, y, direction, temp_status;
     scanf("%d%d%d%d%d%d\n", &boat_id, &goods_num, &x, &y, &direction,
           &temp_status);
-    if (i > static_cast<int>(RentController::GetInstance()->boat.size())) {
+    if (i >= static_cast<int>(RentController::GetInstance()->boat.size())) {
       boat.push_back(
           Boat(boat_id, goods_num, ++x, ++y, direction, temp_status));
     } else {
       boat[i].x = ++x;
       boat[i].y = ++y;
+      if (boat[i].pos != -1) {
+        berth[boat[i].pos].goods_num -= (goods_num - boat[i].num);
+#ifdef DEBUG
+        std::cerr << boat[i].pos << " 泊位更新货物数量："
+                  << berth[boat[i].pos].goods_num << std::endl;
+#endif
+      }
       boat[i].num = goods_num;
       boat[i].direction = direction;
     }
@@ -256,10 +262,9 @@ void InputController::Input() {
     boat[i].status = temp_status;
 #ifdef DEBUG
     fprintf(debug_command_file,
-            "船 %d 信息: goods_num=%d,x=%d,y=%d,direction=%d,status = %d, pos "
-            "= %d\n",
-            boat_id, goods_num, boat[i].x, boat[i].y, direction, temp_status,
-            boat[i].pos);
+            "boat %d info: goods_num = %d, x = %d, y = %d, direction = %s, "
+            "status = %d\n",
+            boat_id, goods_num, x, y, Boat::dir_str[direction], temp_status);
 #endif
   }
   char okk[100];

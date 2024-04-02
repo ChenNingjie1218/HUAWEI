@@ -49,10 +49,8 @@ void GoodsManager::RemoveExpiredGoods(int &x, int &y) {
   Goods *cur = head_goods->next;
   while (cur != head_goods) {
     if (cur->x == x && cur->y == y) {
-      Goods *temp = cur->next;
       DeleteGoods(cur, true);
-      cur = temp;
-      break;
+      return;
     }
     cur = cur->next;
   }

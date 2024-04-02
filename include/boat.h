@@ -1,6 +1,8 @@
 #ifndef BOAT_H_
 #define BOAT_H_
 #include <vector>
+
+#include "param.h"
 /*
  * AABB最小边界框
  *
@@ -40,8 +42,15 @@ struct Boat {
    */
   int direction;
 
+  // 所处区号
+  int area_id;
+
+#ifdef DEBUG
+  static char dir_str[4][10];
+#endif
+
   // 目标泊位，虚拟点为-1
-  int pos;
+  int pos = -1;
 
   // 船的最大容量
   static int boat_capacity;
@@ -83,6 +92,9 @@ struct Boat {
 
   // 判断是否更换港口
   bool ChangeBerth3(int boat_id, bool force = false);
+
+  // 删除path的第一个点
+  void RemoveFirst();
 };
 
 #endif

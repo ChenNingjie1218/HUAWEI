@@ -9,6 +9,9 @@
 #include "param.h"
 #include "rent_controller.h"
 int Boat::boat_capacity = 0;
+#ifdef DEBUG
+char Boat::dir_str[4][10] = {"右", "左", "上", "下"};
+#endif
 extern int id;
 
 Boat::Boat() { num = 0; }
@@ -18,7 +21,9 @@ Boat::Boat(int &id, int &goods_num, int &x, int &y, int &direction, int &status)
       x(x),
       y(y),
       direction(direction),
-      status(status) {}
+      status(status) {
+  area_id = MapController::GetInstance()->FindArea(x * n + y, false);
+}
 
 /*
  * version:3.0
@@ -181,6 +186,10 @@ bool Boat::ChangeBerth3(int boat_id, bool force) {
 void Boat::DoClockwiseRotate() {
   Decision decision(DECISION_TYPE_BOAT_ROT, id_, DECISION_BOAT_ROT_CLOCKWISE);
   DecisionManager::GetInstance()->q_decision.push(decision);
+  RemoveFirst();
+#ifdef DEBUG
+  std::cerr << id_ << " 船顺时针旋转" << std::endl;
+#endif
 }
 
 // 逆时针旋转
@@ -188,24 +197,40 @@ void Boat::DoCounterclockwiseRotate() {
   Decision decision(DECISION_TYPE_BOAT_ROT, id_,
                     DECISION_BOAT_ROT_COUNTERCLOCKWISE);
   DecisionManager::GetInstance()->q_decision.push(decision);
+  RemoveFirst();
+#ifdef DEBUG
+  std::cerr << id_ << " 船逆时针旋转" << std::endl;
+#endif
 }
 
 // 往前走
 void Boat::DoShip() {
   Decision decision(DECISION_TYPE_BOAT_SHIP, id_);
   DecisionManager::GetInstance()->q_decision.push(decision);
+  RemoveFirst();
+#ifdef DEBUG
+  std::cerr << id_ << " 船往前走(向" << dir_str[direction] << ")" << std::endl;
+#endif
 }
 
 // 靠泊
 void Boat::DoBerth() {
   Decision decision(DECISION_TYPE_BOAT_BERTH, id_);
   DecisionManager::GetInstance()->q_decision.push(decision);
+  path.clear();
+#ifdef DEBUG
+  std::cerr << id_ << " 船靠泊：" << pos << std::endl;
+#endif
 }
 
 // 重置到主航道
 void Boat::DoDept() {
   Decision decision(DECISION_TYPE_BOAT_DEPT, id_);
   DecisionManager::GetInstance()->q_decision.push(decision);
+  path.clear();
+#ifdef DEBUG
+  std::cerr << id_ << " 船重置到主航道" << std::endl;
+#endif
 }
 
 CollisionBox::CollisionBox(int core_x, int core_y, int direction) {
@@ -267,4 +292,11 @@ bool CollisionBox::JudgeCollision(const CollisionBox &first,
     return false;
   }
   return true;
+}
+
+// 删除path的第一个点
+void Boat::RemoveFirst() {
+  if (!path.empty()) {
+    path.erase(path.begin());
+  }
 }

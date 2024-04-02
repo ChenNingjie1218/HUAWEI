@@ -45,6 +45,148 @@ void DecisionManager::DecisionBoat() {
                "--------------------------"
             << std::endl;
 #endif
+  auto &boat = RentController::GetInstance()->boat;
+  int size = boat.size();
+  for (int i = 0; i < size; ++i) {
+    if (boat[i].status == BOAT_STATUS_RESTORING) {
+// 恢复状态不决策
+#ifdef DEBUG
+      std::cerr << boat[i].id_ << " 船处于恢复状态" << std::endl;
+#endif
+      continue;
+    }
+    if (!boat[i].path.empty()) {
+      // 靠泊
+      if (boat[i].status != BOAT_STATUS_LOADING &&
+          MapController::GetInstance()->ch[boat[i].x][boat[i].y] == 'K' &&
+          boat[i].num < Boat::boat_capacity &&
+          boat[i].pos ==
+              MapController::GetInstance()
+                  ->location_to_berth_id[Location(boat[i].x, boat[i].y)]) {
+        boat[i].DoBerth();
+        continue;
+      }
+
+      // 继续走
+      if (boat[i].direction == boat[i].path[0]) {
+        boat[i].DoShip();
+      } else {
+        switch (boat[i].direction) {
+          case BOAT_DIRECTION_RIGHT:
+            if (boat[i].path[0] == BOAT_DIRECTION_UP) {
+              boat[i].DoCounterclockwiseRotate();
+            } else if (boat[i].path[0] == BOAT_DIRECTION_DOWN) {
+              boat[i].DoClockwiseRotate();
+            } else {
+#ifdef DEBUG
+              std::cerr << "方向错了" << std::endl;
+#endif
+            }
+            break;
+          case BOAT_DIRECTION_LEFT:
+            if (boat[i].path[0] == BOAT_DIRECTION_DOWN) {
+              boat[i].DoCounterclockwiseRotate();
+            } else if (boat[i].path[0] == BOAT_DIRECTION_UP) {
+              boat[i].DoClockwiseRotate();
+            } else {
+#ifdef DEBUG
+              std::cerr << "方向错了" << std::endl;
+#endif
+            }
+            break;
+          case BOAT_DIRECTION_UP:
+            if (boat[i].path[0] == BOAT_DIRECTION_LEFT) {
+              boat[i].DoCounterclockwiseRotate();
+            } else if (boat[i].path[0] == BOAT_DIRECTION_RIGHT) {
+              boat[i].DoClockwiseRotate();
+            } else {
+#ifdef DEBUG
+              std::cerr << "方向错了" << std::endl;
+#endif
+            }
+            break;
+          case BOAT_DIRECTION_DOWN:
+            if (boat[i].path[0] == BOAT_DIRECTION_RIGHT) {
+              boat[i].DoCounterclockwiseRotate();
+            } else if (boat[i].path[0] == BOAT_DIRECTION_LEFT) {
+              boat[i].DoClockwiseRotate();
+            } else {
+#ifdef DEBUG
+              std::cerr << "方向错了" << std::endl;
+#endif
+            }
+            break;
+        }
+      }
+#ifdef DEBUG
+      std::cerr << boat[i].id_ << " 船path size:" << boat[i].path.size()
+                << std::endl;
+#endif
+    } else {
+      auto &berth = MapController::GetInstance()->berth;
+      if (boat[i].status == BOAT_STATUS_LOADING &&
+          berth[boat[i].pos].goods_num && boat[i].num < Boat::boat_capacity) {
+#ifdef DEBUG
+        std::cerr << boat[i].id_ << " 船正在装货" << std::endl;
+#endif
+        continue;
+      }
+
+      if (boat[i].num == Boat::boat_capacity) {
+        // 去交货
+        auto &delivery_point = MapController::GetInstance()->delivery_point;
+        int delivery_id = MapController::GetInstance()
+                              ->nearest_delivery[boat[i].x][boat[i].y];
+        Astar astar(boat[i].x, boat[i].y, delivery_point[delivery_id].x,
+                    delivery_point[delivery_id].y, boat[i].direction);
+        astar.AstarSearch(boat[i].path);
+        if (boat[i].pos != -1) {
+          // 重置老泊位
+          berth[boat[i].pos].boat_id = -1;
+        }
+        boat[i].pos = -1;
+#ifdef DEBUG
+        std::cerr << boat[i].id_ << " 船准备去 ("
+                  << delivery_point[delivery_id].x << ","
+                  << delivery_point[delivery_id].y
+                  << ") 交货, path size:" << boat[i].path.size() << std::endl;
+#endif
+
+      } else {
+        // 找船舶上货
+        auto &berth = MapController::GetInstance()->berth;
+        int size = berth.size();
+        int berth_id = -1;
+        int max_goods_num = 0;
+        for (int j = 0; j < size; ++j) {
+          if (berth[j].area_id != boat[i].area_id || berth[j].boat_id != -1 ||
+              !berth[j].goods_num) {
+            continue;
+          }
+          // 选货物最多的
+          if (berth[j].goods_num > max_goods_num) {
+            max_goods_num = berth[j].goods_num;
+            berth_id = j;
+          }
+        }
+        if (berth_id > -1) {
+          Astar astar(boat[i].x, boat[i].y, berth[berth_id].x,
+                      berth[berth_id].y, boat[i].direction);
+          astar.AstarSearch(boat[i].path);
+          if (boat[i].pos != -1) {
+            // 重置老泊位
+            berth[boat[i].pos].boat_id = -1;
+          }
+          berth[berth_id].boat_id = i;
+          boat[i].pos = berth[berth_id].id_;
+#ifdef DEBUG
+          std::cerr << boat[i].id_ << " 船寻路去泊位 " << boat[i].pos
+                    << ", path size:" << boat[i].path.size() << std::endl;
+#endif
+        }
+      }
+    }
+  }
 }
 
 /*
@@ -65,7 +207,7 @@ void DecisionManager::DecisionRobot() {
   std::vector<int> not_move_id;
   auto &robot = RentController::GetInstance()->robot;
   auto &ch = MapController::GetInstance()->ch;
-  auto robot_num = robot.size();
+  int robot_num = robot.size();
   for (int i = 0; i < robot_num; ++i) {
     // --------- 移动前动作 ---------
     if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B') {
@@ -427,11 +569,25 @@ void DecisionManager::DecisionPurchase() {
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
-#ifdef DEBUG
-  std::cerr << "当前机器人购买点数量：" << size << std::endl;
-#endif
-  for (std::vector<Location>::size_type i = 0; i < size; ++i) {
-    RentController::GetInstance()->RentRobot(i);
+  if (RentController::GetInstance()->robot.size() < 7) {
+    for (std::vector<Location>::size_type i = 0; i < size; ++i) {
+      RentController::GetInstance()->RentRobot(i);
+    }
   }
+
   // 决策买船
+
+  // auto &boat_purchase_point =
+  // MapController::GetInstance()->boat_purchase_point; size =
+  // boat_purchase_point.size();
+
+  // #ifdef DEBUG
+  //   std::cerr << "当前船购买点数量：" << size << std::endl;
+  // #endif
+
+  // for (std::vector<Location>::size_type i = 0; i < size; ++i) {
+  if (RentController::GetInstance()->boat.empty()) {
+    RentController::GetInstance()->RentBoat(0);
+  }
+  // }
 }

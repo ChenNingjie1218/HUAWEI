@@ -61,7 +61,7 @@ void MapController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
       Location new_point(x, y);
       if (x > 0 && x <= n && y > 0 && y <= n &&
           location_to_berth_id.find(new_point) == location_to_berth_id.end() &&
-          ch[x][y] == 'B') {
+          (ch[x][y] == 'B' || ch[x][y] == 'K')) {
         q.push(new_point);
       }
     }
@@ -89,8 +89,14 @@ void MapController::InitMapData() {
 
       // 初始化最近泊位id
       nearest_berth[i][j] = -1;
+
+      // 初始化最近交货点id
+      nearest_delivery[i][j] = -1;
     }
   }
+
+  // 初始化nearest_delivery
+  InitNearestDelivery();
 
   for (int i = 1; i <= n; ++i) {
     for (int j = 1; j <= n; ++j) {
@@ -125,6 +131,29 @@ void MapController::InitNearestBerth(std::queue<std::pair<Location, int>>& q) {
       if (x > 0 && x <= n && y > 0 && y <= n) {
         if (nearest_berth[x][y] == -1 && CanRobotReach(x, y)) {
           nearest_berth[x][y] = temp.second;
+          q.push(std::make_pair(Location(x, y), temp.second));
+        }
+      }
+    }
+  }
+}
+
+// 初始化nearest_delivery
+void MapController::InitNearestDelivery() {
+  std::queue<std::pair<Location, int>> q;
+  int size = delivery_point.size();
+  for (int i = 0; i < size; ++i) {
+    q.push(std::make_pair(delivery_point[i], i));
+  }
+  while (!q.empty()) {
+    std::pair<Location, int> temp = q.front();
+    q.pop();
+    for (int i = 0; i < 4; ++i) {
+      int x = temp.first.x + DIRS[i].x;
+      int y = temp.first.y + DIRS[i].y;
+      if (x > 0 && x <= n && y > 0 && y <= n) {
+        if (nearest_delivery[x][y] == -1 && CanBoatReach(x, y)) {
+          nearest_delivery[x][y] = temp.second;
           q.push(std::make_pair(Location(x, y), temp.second));
         }
       }

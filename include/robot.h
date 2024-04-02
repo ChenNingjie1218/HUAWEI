@@ -34,9 +34,6 @@ struct Robot {
   Goods *target_goods = nullptr;
   std::vector<Location> path;
 
-  // 可到达的港口
-  std::vector<int> berth_accessed;
-
   // 更新目标货物
   bool UpdateTargetGoods(int robot_id);
 
@@ -79,9 +76,6 @@ struct Robot {
    */
   int GetAway(std::vector<NextPoint> &next_points, int ignore_id,
               std::vector<int> &not_move_id);
-
-  //  初始化berth_accessed数组
-  void InitAccessedBerth();
 };
 
 #endif
