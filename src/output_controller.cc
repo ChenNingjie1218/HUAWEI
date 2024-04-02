@@ -75,7 +75,7 @@ void OutputController::SendBuyBoat(int x, int y) {
  * @param boat_id - 船的id
  */
 void OutputController::SendReset(int boat_id) {
-  printf("reset %d\n", boat_id);
+  printf("dept %d\n", boat_id);
   fflush(stdout);
 }
 
@@ -84,7 +84,7 @@ void OutputController::SendReset(int boat_id) {
  * @param boat_id - 船的id
  */
 void OutputController::SendDock(int boat_id) {
-  printf("dock %d\n", boat_id);
+  printf("berth %d\n", boat_id);
   fflush(stdout);
 }
 
@@ -94,7 +94,7 @@ void OutputController::SendDock(int boat_id) {
  * @param rotate_tag - 旋转的方向 0:顺时针 1:逆时针
  */
 void OutputController::SendRotate(int boat_id, int rotate_tag) {
-  printf("rotate %d %d\n", boat_id, rotate_tag);
+  printf("rot %d %d\n", boat_id, rotate_tag);
   fflush(stdout);
 }
 
@@ -103,7 +103,7 @@ void OutputController::SendRotate(int boat_id, int rotate_tag) {
  *@param boat_id - 船的id
  */
 void OutputController::SendForward(int boat_id) {
-  printf("forward %d\n", boat_id);
+  printf("ship %d\n", boat_id);
   fflush(stdout);
 }
 
