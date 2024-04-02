@@ -75,10 +75,6 @@ void InputController::Init() {
   // 初始化离每个点最近的泊位id
   MapController::GetInstance()->InitNearestBerth(q);
 
-#ifdef DEBUG
-  fprintf(debug_map_file, "最近泊位处理完毕！\n");
-#endif
-
   // 船容积
   scanf("%d", &Boat::boat_capacity);
 #ifdef DEBUG
@@ -109,7 +105,7 @@ void InputController::Input() {
     fclose(debug_command_file);
 
     // 泊位上残留货物数量
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < berth.size(); ++i) {
       std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
     }
 #endif
@@ -163,7 +159,7 @@ void InputController::Input() {
   int num;
   scanf("%d", &num);
 #ifdef DEBUG
-  fprintf(debug_command_file, "change goods num = %d\n", num);
+  fprintf(debug_command_file, "变化货物数量 = %d\n", num);
 #endif
   for (int i = 1; i <= num; i++) {
     int x, y, val;
@@ -171,8 +167,8 @@ void InputController::Input() {
     ++x;
     ++y;
 #ifdef DEBUG
-    fprintf(debug_command_file, "goods %d info: x = %d, y = %d, money = %d\n",
-            i, x, y, val);
+    fprintf(debug_command_file, "货物 %d 信息: x = %d, y = %d, money = %d\n", i,
+            x, y, val);
 #endif
     if (money > 0 && MapController::GetInstance()->CanRobotReach(x, y)) {
 #ifdef GOODS_FILTER
@@ -200,7 +196,7 @@ void InputController::Input() {
   scanf("%d", &robot_num);
 
 #ifdef DEBUG
-  fprintf(debug_command_file, "robot num:  %d\n", robot_num);
+  fprintf(debug_command_file, "机器人 数量:  %d\n", robot_num);
 #endif
 
   for (int i = 0; i < robot_num; i++) {
@@ -217,7 +213,7 @@ void InputController::Input() {
     }
     ++busy_point[robot[i].x][robot[i].y];
 #ifdef DEBUG
-    fprintf(debug_command_file, "robot %d info: goods = %d, x = %d, y = %d\n",
+    fprintf(debug_command_file, "机器人 %d 信息: goods = %d, x = %d, y = %d\n",
             robot_id, temp_goods, robot[i].x, robot[i].y);
 
 #endif
@@ -259,8 +255,11 @@ void InputController::Input() {
 
     boat[i].status = temp_status;
 #ifdef DEBUG
-    fprintf(debug_command_file, "boat %d info: status = %d, pos = %d\n", i,
-            temp_status, boat[i].pos);
+    fprintf(debug_command_file,
+            "船 %d 信息: goods_num=%d,x=%d,y=%d,direction=%d,status = %d, pos "
+            "= %d\n",
+            boat_id, goods_num, boat[i].x, boat[i].y, direction, temp_status,
+            boat[i].pos);
 #endif
   }
   char okk[100];
