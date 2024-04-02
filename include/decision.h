@@ -4,15 +4,15 @@
 // 决策
 struct Decision {
   /*
-   * - 0 机器人buy
+   * - 0 机器人lbot
    * - 1 机器人move
    * - 2 机器人get
    * - 3 机器人pull
-   * - 4 船buy
-   * - 5 船reset
-   * - 6 船ship
-   * - 7 船rotate
-   * - 8 船forward
+   * - 4 船lboat
+   * - 5 船dept
+   * - 6 船berth
+   * - 7 船rot
+   * - 8 船ship
    */
   int type;
 
