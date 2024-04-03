@@ -161,7 +161,6 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
 
         //当前持有货物
         robot[robot_id].goods = true;
-        robot[robot_id].pre_goods = true;
 #ifdef ONE_ROBOT_ONE_BERTH
         if (!robot[robot_id].path.empty()) {
           berth[robot[robot_id].berth_id].robot_id = robot_id;

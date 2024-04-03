@@ -119,8 +119,9 @@ void DecisionManager::DecisionBoat() {
         }
       }
 #ifdef DEBUG
-      std::cerr << boat[i].id_ << " 船path size:" << boat[i].path.size()
-                << std::endl;
+      std::cerr << "*************** " << boat[i].id_
+                << " 船 path size:" << boat[i].path.size()
+                << "*****************" << std::endl;
 #endif
     } else {
       auto &berth = MapController::GetInstance()->berth;
@@ -316,7 +317,6 @@ void DecisionManager::DecisionRobot() {
 
         //当前持有货物
         robot[i].goods = true;
-        robot[i].pre_goods = true;
 #ifdef ONE_ROBOT_ONE_BERTH
         if (!robot[i].path.empty()) {
           berth[robot[i].berth_id].robot_id = i;
@@ -337,7 +337,9 @@ void DecisionManager::DecisionRobot() {
     if (!robot[i].target_goods && !robot[i].goods) {
       robot[i].path.clear();
 #ifdef DEBUG
-      std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
+      if (can_find_goods) {
+        std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
+      }
 #endif
       if (can_find_goods && robot[i].UpdateTargetGoods(i)) {
         can_find_goods = false;
@@ -506,10 +508,10 @@ void DecisionManager::DecisionRobot() {
     int robot_id = not_move_id[i];
     MapController::GetInstance()
         ->busy_point[robot[robot_id].x][robot[robot_id].y]++;
-    // busy_point[robot[robot_id].x][robot[robot_id].y]++;
-    if (MapController::GetInstance()
-            ->busy_point[robot[robot_id].x][robot[robot_id].y] >
-        DynamicParam::GetInstance()->GetBusyValve()) {
+    if (can_find_goods &&
+        MapController::GetInstance()
+                ->busy_point[robot[robot_id].x][robot[robot_id].y] >
+            DynamicParam::GetInstance()->GetBusyValve()) {
 #ifdef DEBUG
       std::cerr << "机器人原地罚站超时" << std::endl;
 #endif
@@ -569,7 +571,7 @@ void DecisionManager::DecisionPurchase() {
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
-  if (RentController::GetInstance()->robot.size() < 7) {
+  if (RentController::GetInstance()->robot.size() < 20) {
     for (std::vector<Location>::size_type i = 0; i < size; ++i) {
       RentController::GetInstance()->RentRobot(i);
     }
@@ -586,7 +588,7 @@ void DecisionManager::DecisionPurchase() {
   // #endif
 
   // for (std::vector<Location>::size_type i = 0; i < size; ++i) {
-  if (RentController::GetInstance()->boat.empty()) {
+  if (RentController::GetInstance()->boat.size() < 2) {
     RentController::GetInstance()->RentBoat(0);
   }
   // }
