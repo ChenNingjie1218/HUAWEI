@@ -101,11 +101,6 @@ bool Robot::UpdateTargetGoods(int robot_id) {
       p_goods = p_goods->next;
       continue;
     }
-    if (!p_goods->reachable[robot_id]) {
-      // 该货物不可达
-      p_goods = p_goods->next;
-      continue;
-    }
     if (p_goods->area_id != area_id) {
       // 不在一个分区
       p_goods = p_goods->next;
@@ -118,8 +113,7 @@ bool Robot::UpdateTargetGoods(int robot_id) {
     }
     p_goods = p_goods->next;
   }
-  if (min_man < 500 && find_goods->robot_id == -1 &&
-      find_goods->reachable[robot_id]) {
+  if (min_man < 500 && find_goods->robot_id == -1) {
 #ifdef DEBUG
     std::cerr << "------- start astar -------" << std::endl;
     std::cerr << "(" << x << "," << y << ")---->(" << find_goods->x << ","
@@ -131,8 +125,6 @@ bool Robot::UpdateTargetGoods(int robot_id) {
 #ifdef DEBUG
       std::cerr << "route empty" << std::endl;
 #endif
-      //  该货物不可达
-      find_goods->reachable[robot_id] = false;
     } else {
       target_goods = temp_goods;
 #ifdef DEBUG
