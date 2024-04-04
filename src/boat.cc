@@ -360,3 +360,17 @@ void Boat::FindBerth() {
 #endif
   }
 }
+
+// 判断是否处于主航道
+bool CollisionBox::IsLocatedOnMainRoute() {
+  auto &ch = MapController::GetInstance()->ch;
+  for (int i = l_x; i <= r_x; ++i) {
+    for (int j = l_y; j <= r_y; ++j) {
+      if (ch[i][j] == '~' || ch[i][j] == 'c' || ch[i][j] == 'T' ||
+          ch[i][j] == 'K') {
+        return true;
+      }
+    }
+  }
+  return false;
+}

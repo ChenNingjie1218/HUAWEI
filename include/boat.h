@@ -13,6 +13,8 @@ class CollisionBox {
   CollisionBox(int core_x, int core_y, int direction);
   // 是否撞边界
   bool IsCollision();
+  // 判断是否处于主航道
+  bool IsLocatedOnMainRoute();
   // 两个对象是否相撞
   static bool JudgeCollision(const CollisionBox &first,
                              const CollisionBox &second);
