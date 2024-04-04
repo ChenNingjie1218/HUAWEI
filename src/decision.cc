@@ -174,9 +174,6 @@ void DecisionManager::DecisionRobot() {
       Decision decision(DECISION_TYPE_ROBOT_PULL, i, -1);
       q_decision.push(decision);
 
-#ifdef ONE_ROBOT_ONE_BERTH
-      berth[robot->berth_id].robot_id = -1;
-#endif
       // 下货的位置可能不是计算的位置，path里面还有内容
       robot[i].path.clear();
       // 决策，更新目标货物, 当前不持有货物
@@ -237,30 +234,16 @@ void DecisionManager::DecisionRobot() {
 
         // 决策更新目标泊位和泊位权重
         robot[i].FindBerth(robot[i].x, robot[i].y);
-        // berth_weight[robot[i].berth_id]++;
 #ifdef DEBUG
         std::cerr << "成功更新目标泊位" << std::endl;
 #endif
-        // 捡到货物将其从链表删除
-        GoodsManager::GetInstance()->DeleteGoods(robot[i].target_goods);
-
         //当前持有货物
         robot[i].goods = true;
-#ifdef ONE_ROBOT_ONE_BERTH
-        if (!robot[i].path.empty()) {
-          berth[robot[i].berth_id].robot_id = i;
-        }
-#endif
       }
     }
     if (robot[i].goods && robot[i].path.empty()) {
       // 如果有货物但是没路径
       robot[i].FindBerth(robot[i].x, robot[i].y);
-#ifdef ONE_ROBOT_ONE_BERTH
-      if (!robot[i].path.empty()) {
-        berth[robot[i].berth_id].robot_id = i;
-      }
-#endif
     }
     // 空闲机器人
     if (!robot[i].target_goods && !robot[i].goods) {
@@ -453,11 +436,6 @@ void DecisionManager::DecisionRobot() {
 #endif
         robot[robot_id].path.clear();
         robot[robot_id].FindBerth(robot[robot_id].x, robot[robot_id].y);
-#ifdef ONE_ROBOT_ONE_BERTH
-        if (!robot[robot_id].path.empty()) {
-          berth[robot[robot_id].berth_id].robot_id = robot_id;
-        }
-#endif
 
 #ifdef DEBUG
         std::cerr << "机器人更改完新的路线：" << robot[robot_id].path.size()
@@ -472,7 +450,9 @@ void DecisionManager::DecisionRobot() {
         robot[robot_id].target_goods->robot_id = -1;
         robot[robot_id].target_goods = nullptr;
         // 还原first_free_goods指针
-        GoodsManager::GetInstance()->ResetFirstFreeGoods();
+        MapController::GetInstance()
+            ->berth[robot[robot_id].berth_id]
+            .goods_manager.ResetFirstFreeGoods();
 
         // 找新的目标货物
         robot[robot_id].path.clear();
@@ -500,7 +480,7 @@ void DecisionManager::DecisionPurchase() {
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
-  if (RentController::GetInstance()->robot.size() < 20) {
+  if (RentController::GetInstance()->robot.size() < 10) {
     for (std::vector<Location>::size_type i = 0; i < size; ++i) {
       RentController::GetInstance()->RentRobot(i);
     }

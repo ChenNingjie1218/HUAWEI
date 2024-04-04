@@ -3,6 +3,7 @@
 #include <map>
 #include <queue>
 
+#include "goods.h"
 #include "param.h"
 // 泊位
 struct Berth {
@@ -32,10 +33,8 @@ struct Berth {
    */
   std::map<int, std::vector<int> > path;
 
-#ifdef ONE_ROBOT_ONE_BERTH
-  // 目标为这个泊位的机器人
-  int robot_id = -1;
-#endif
+  // 货物管理器
+  GoodsManager goods_manager;
 
   //到泊位的船队列
   std::queue<int> q_boat;

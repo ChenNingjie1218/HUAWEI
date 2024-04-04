@@ -88,13 +88,13 @@ int Robot::JudgePriority(Robot *first, Robot *second) {
  */
 
 bool Robot::UpdateTargetGoods(int robot_id) {
-  Goods *head_goods = GoodsManager::GetInstance()->head_goods;
-  Goods *p_goods = GoodsManager::GetInstance()->first_free_goods;
+  auto &berth = MapController::GetInstance()->berth;
+  Goods *head_goods = berth[berth_id].goods_manager.head_goods;
+  Goods *p_goods = berth[berth_id].goods_manager.first_free_goods;
   std::vector<Location> route;
   bool need_change_first_free_goods = true;
   Goods *find_goods = p_goods;
   int min_man = 99999;
-
   while (p_goods->next != head_goods) {
     if (p_goods->robot_id > -1) {
       // 该货物被选过了
@@ -136,13 +136,13 @@ bool Robot::UpdateTargetGoods(int robot_id) {
 #endif
       path = route;
       need_change_first_free_goods =
-          find_goods == GoodsManager::GetInstance()->first_free_goods;
+          target_goods == berth[berth_id].goods_manager.first_free_goods;
       if (need_change_first_free_goods) {
-        while (GoodsManager::GetInstance()->first_free_goods->next !=
+        while (berth[berth_id].goods_manager.first_free_goods->next !=
                    head_goods &&
-               GoodsManager::GetInstance()->first_free_goods->robot_id > -1) {
-          GoodsManager::GetInstance()->first_free_goods =
-              GoodsManager::GetInstance()->first_free_goods->next;
+               berth[berth_id].goods_manager.first_free_goods->robot_id > -1) {
+          berth[berth_id].goods_manager.first_free_goods =
+              berth[berth_id].goods_manager.first_free_goods->next;
         }
       }
       return true;
@@ -153,9 +153,8 @@ bool Robot::UpdateTargetGoods(int robot_id) {
 
 // 存在移动后找泊位，这里不能直接用机器人的位置
 void Robot::FindBerth(int start_x, int start_y) {
-  auto &berth = MapController::GetInstance()->berth;
-  berth_id = MapController::GetInstance()->nearest_berth[start_x][start_y];
   if (berth_id != -1) {
+    auto &berth = MapController::GetInstance()->berth;
 #ifdef DEBUG
     std::cerr << "------- start astar -------" << std::endl;
     std::cerr << "(" << x << "," << y << ")---->(" << berth[berth_id].x << ","

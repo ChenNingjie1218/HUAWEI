@@ -145,22 +145,26 @@ void InputController::Input() {
     fprintf(debug_command_file, "货物 %d 信息: x = %d, y = %d, money = %d\n", i,
             x, y, val);
 #endif
-    if (val > 0 && MapController::GetInstance()->CanRobotReach(x, y)) {
+    auto& nearest_berth = MapController::GetInstance()->nearest_berth;
+    if (nearest_berth[x][y] != -1 &&
+        MapController::GetInstance()->CanRobotReach(x, y)) {
+      if (val > 0) {
 #ifdef GOODS_FILTER
-      if (val < GoodsManager::GetInstance()->value_valve) {
+        if (val < berth[nearest_berth[x][y]].goods_manager.value_valve) {
 #ifdef DEBUG
-        std::cerr << "货物价值过低被抛弃: " << val << std::endl;
+          std::cerr << "货物价值过低被抛弃: " << val << std::endl;
 #endif
-        // 忽略不值钱的货物
-        continue;
-      }
+          // 忽略不值钱的货物
+          continue;
+        }
 #endif
 
-      Goods* new_goods = new Goods(x, y, val, id);
-      GoodsManager::GetInstance()->PushGoods(new_goods);
-      new_goods->area_id = MapController::GetInstance()->FindArea(x * n + y);
-    } else if (!val) {
-      GoodsManager::GetInstance()->RemoveExpiredGoods(x, y);
+        Goods* new_goods = new Goods(x, y, val, id);
+        berth[nearest_berth[x][y]].goods_manager.PushGoods(new_goods);
+        new_goods->area_id = MapController::GetInstance()->FindArea(x * n + y);
+      } else if (!val) {
+        berth[nearest_berth[x][y]].goods_manager.RemoveExpiredGoods(x, y);
+      }
     }
   }
 
@@ -180,6 +184,7 @@ void InputController::Input() {
     if (i >= static_cast<int>(robot.size())) {
       // 新增机器人
       robot.push_back(Robot(robot_id, temp_goods, ++x, ++y));
+      robot[robot_id].berth_id = robot_id % berth.size();
     } else {
       // 旧机器人更新坐标
       robot[i].x = ++x;
@@ -198,7 +203,6 @@ void InputController::Input() {
       std::cerr << robot[i].berth_id << " 泊位更新货物数量："
                 << berth[robot[i].berth_id].goods_num << std::endl;
 #endif
-      robot[i].berth_id = -1;
     }
     robot[i].goods = temp_goods;
     robot[i].pre_goods = temp_goods;

@@ -5,7 +5,6 @@
 #include "map_controller.h"
 #include "rent_controller.h"
 extern int id;
-GoodsManager *GoodsManager::instance_ = nullptr;
 Goods::Goods() {
   this->pre = this;
   this->next = this;

@@ -17,18 +17,9 @@ struct Goods {
 
 // 货物管理器
 struct GoodsManager {
- private:
+ public:
   GoodsManager() = default;
   GoodsManager(const GoodsManager &other) = default;
-  static GoodsManager *instance_;
-
- public:
-  static GoodsManager *&GetInstance() {
-    if (!instance_) {
-      instance_ = new GoodsManager();
-    }
-    return instance_;
-  }
   /*
    * 将货物放入链表
    */

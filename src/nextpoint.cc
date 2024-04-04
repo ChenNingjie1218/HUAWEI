@@ -100,10 +100,6 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
       // 卸货
       Decision decision(DECISION_TYPE_ROBOT_PULL, robot_id, -1);
       DecisionManager::GetInstance()->q_decision.push(decision);
-
-#ifdef ONE_ROBOT_ONE_BERTH
-      berth[robot[robot_id].berth_id].robot_id = -1;
-#endif
     } else if (!robot[robot_id].goods &&
                MapController::GetInstance()->gds[x][y]) {
 #ifdef DEBUG
@@ -128,20 +124,11 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
 
         // 决策更新目标泊位和泊位权重
         robot[robot_id].FindBerth(x, y);
-
 #ifdef DEBUG
         std::cerr << "成功更新目标泊位" << std::endl;
 #endif
-        // 捡到货物将其从链表删除
-        GoodsManager::GetInstance()->DeleteGoods(robot[robot_id].target_goods);
-
         //当前持有货物
         robot[robot_id].goods = true;
-#ifdef ONE_ROBOT_ONE_BERTH
-        if (!robot[robot_id].path.empty()) {
-          berth[robot[robot_id].berth_id].robot_id = robot_id;
-        }
-#endif
       }
     }
   }

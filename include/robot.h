@@ -21,7 +21,7 @@ struct Robot {
   int goods_money;
 
   // 目标港口
-  int berth_id = -1;
+  int berth_id;
 
   // 所处区号
   int area_id;
