@@ -156,9 +156,18 @@ void Robot::FindBerth(int start_x, int start_y) {
   auto &berth = MapController::GetInstance()->berth;
   berth_id = MapController::GetInstance()->nearest_berth[start_x][start_y];
   if (berth_id != -1) {
+#ifdef DEBUG
+    std::cerr << "------- start astar -------" << std::endl;
+    std::cerr << "(" << x << "," << y << ")---->(" << berth[berth_id].x << ","
+              << berth[berth_id].y << ")" << std::endl;
+#endif
     Astar astar(start_x, start_y, berth[berth_id].x, berth[berth_id].y);
     astar.AstarSearch(path, berth_id);
-    std::cerr << "berth_id:" << berth_id << std::endl;
+#ifdef DEBUG
+    std::cerr << "------- astar finished -------" << std::endl;
+    std::cerr << "目标泊位：" << berth_id << "path size:" << path.size()
+              << std::endl;
+#endif
   } else {
 #ifdef DEBUG
     std::cerr << "机器人找目标泊位id不合法" << berth_id << std::endl;
