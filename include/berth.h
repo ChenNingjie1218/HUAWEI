@@ -1,5 +1,6 @@
 #ifndef BERTH_H_
 #define BERTH_H_
+#include <map>
 #include <queue>
 
 #include "param.h"
@@ -9,8 +10,8 @@ struct Berth {
   int x;
   int y;
 
-  // 到虚拟点的时间
-  int transport_time;
+  // 到交货点的时间
+  int transport_time = 500;
 
   // 每帧可以装载的物品数
   int loading_speed;
@@ -23,6 +24,13 @@ struct Berth {
 
   // 所处区号
   int area_id = -1;
+
+  /*
+   * 已经算过的路径
+   * first: 泊位id，交货点是-1
+   * second: 路径
+   */
+  std::map<int, std::vector<int> > path;
 
 #ifdef ONE_ROBOT_ONE_BERTH
   // 目标为这个泊位的机器人

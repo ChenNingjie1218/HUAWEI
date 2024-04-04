@@ -105,45 +105,20 @@ void InputController::Input() {
     fclose(debug_command_file);
 
     // 泊位上残留货物数量
-    for (int i = 0; i < berth.size(); ++i) {
+    int size = berth.size();
+    for (int i = 0; i < size; ++i) {
       std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
+      std::cerr << "船泊transport time:" << berth[i].path[-1].size()
+                << std::endl;
+      // std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
     }
 #endif
     exit(0);
   }
-  // 计算往船上装了多少货物
-  std::vector<Boat>& boat = RentController::GetInstance()->boat;
-  int dis_id = temp_id - id;
-  //   for (int i = 0; i < 10; i++) {
-  // #ifdef DEBUG
-  //     if (!berth[i].q_boat.empty() && boat[berth[i].q_boat.front()].status ==
-  //     1 &&
-  //         berth[i].goods_num == 0) {
-  //       std::cerr << i << "空等" << std::endl;
-  //     }
-  // #endif
-
-  //     if (!berth[i].q_boat.empty() && berth[i].goods_num > 0 &&
-  //         boat[berth[i].q_boat.front()].status == 1) {
-  //       int load_num = berth[i].loading_speed * dis_id;
-  //       if (load_num >= berth[i].goods_num) {
-  //         boat[berth[i].q_boat.front()].num += berth[i].goods_num;
-  //         berth[i].goods_num = 0;
-  //       } else {
-  //         boat[berth[i].q_boat.front()].num += load_num;
-  //         berth[i].goods_num -= load_num;
-  //       }
-  //       if (boat[berth[i].q_boat.front()].num > Boat::boat_capacity) {
-  //         // 装载速度大于1的时候出现超额
-  //         berth[i].goods_num +=
-  //             boat[berth[i].q_boat.front()].num - Boat::boat_capacity;
-  //         boat[berth[i].q_boat.front()].num = Boat::boat_capacity;
-  //       }
-  //     }
-  //   }
 
   // 跳帧
 #ifdef DEBUG
+  int dis_id = temp_id - id;
   if (dis_id > 1) {
     std::cerr << "跳帧：" << dis_id << std::endl;
   }
@@ -218,7 +193,11 @@ void InputController::Input() {
 #endif
     // 放置成功港口货物加一
     if (robot[i].pre_goods - temp_goods == 1) {
-      berth[robot[i].berth_id].goods_num++;
+      ++berth[robot[i].berth_id].goods_num;
+#ifdef DEBUG
+      std::cerr << robot[i].berth_id << " 泊位更新货物数量："
+                << berth[robot[i].berth_id].goods_num << std::endl;
+#endif
       robot[i].berth_id = -1;
     }
     robot[i].goods = temp_goods;
@@ -232,7 +211,7 @@ void InputController::Input() {
 #ifdef DEBUG
   fprintf(debug_command_file, "boat num:  %d\n", boat_num);
 #endif
-
+  std::vector<Boat>& boat = RentController::GetInstance()->boat;
   for (int i = 0; i < boat_num; i++) {
     int boat_id, goods_num, x, y, direction, temp_status;
     scanf("%d%d%d%d%d%d\n", &boat_id, &goods_num, &x, &y, &direction,
