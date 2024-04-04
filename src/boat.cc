@@ -311,6 +311,15 @@ void Boat::FindDeliveryPoint() {
   // 去交货
   auto &delivery_point = MapController::GetInstance()->delivery_point;
   int delivery_id = MapController::GetInstance()->nearest_delivery[x][y];
+
+#ifdef DEBUG
+  std::cerr << "------- start astar -------" << std::endl;
+  std::cerr << "(" << x << "," << y << ")---->("
+            << delivery_point[delivery_id].x << ","
+            << delivery_point[delivery_id].y << ")"
+            << "方向:" << dir_str[direction] << std::endl;
+#endif
+
   Astar astar(x, y, delivery_point[delivery_id].x,
               delivery_point[delivery_id].y, direction);
   astar.AstarSearch(path);
@@ -319,8 +328,11 @@ void Boat::FindDeliveryPoint() {
     berth[pos].boat_id = -1;
   }
   pos = -1;
+
 #ifdef DEBUG
-  std::cerr << id_ << " 船准备去 (" << delivery_point[delivery_id].x << ","
+  std::cerr << id_ << " 船(" << x << "," << y << "),方向："
+            << dir_str[direction] << "，准备去 ("
+            << delivery_point[delivery_id].x << ","
             << delivery_point[delivery_id].y
             << ") 交货, path size:" << path.size() << std::endl;
 #endif
@@ -346,6 +358,13 @@ void Boat::FindBerth() {
     }
   }
   if (berth_id > -1) {
+#ifdef DEBUG
+    std::cerr << "------- start astar -------" << std::endl;
+    std::cerr << "(" << x << "," << y << ")---->(" << berth[berth_id].x << ","
+              << berth[berth_id].y << ")"
+              << "方向:" << Boat::dir_str[direction] << std::endl;
+#endif
+
     Astar astar(x, y, berth[berth_id].x, berth[berth_id].y, direction);
     astar.AstarSearch(path);
     if (pos != -1) {
@@ -354,6 +373,7 @@ void Boat::FindBerth() {
     }
     berth[berth_id].boat_id = id_;
     pos = berth_id;
+
 #ifdef DEBUG
     std::cerr << id_ << " 船寻路去泊位 " << pos << ", path size:" << path.size()
               << std::endl;
