@@ -36,10 +36,7 @@ const int N = 210;
 #define BOAT_STATUS_LOADING 2
 
 // A*算法深度
-// #define CUT_A_STAR               // 开关 A*是否剪枝
-#define DEFAULT_A_STAR_DEEP 150  // 参数 默认A*剪枝深度
-#define CHANGE_CLOSED_GOODS      // 开关 A*是否切换更近的货物
-// #define SAVE_OLD_PATH            // 开关 A*是否存取算过的路径
+#define CHANGE_CLOSED_GOODS  // 开关 A*是否切换更近的货物
 
 /*
  * 是否开启货物筛选机制

@@ -219,32 +219,7 @@ void DecisionManager::DecisionRobot() {
         // } else if (robot[i].target_goods &&
         //            gds[robot[i].x][robot[i].y]->money > VALUEABLE_GOODS_VALVE
         //            && gds[robot[i].x][robot[i].y]->robot_id == -1) {
-      }
-#ifdef CAN_GRAB_GOODS
-      else if (robot[i].target_goods &&
-               gds[robot[i].x][robot[i].y]->money > VALUEABLE_GOODS_VALVE) {
-        // 有目标货物的情况下，路过的地上有贵重货物
-        is_get = true;
-        // 放弃原目标货物
-        if (gds[robot[i].x][robot[i].y]->robot_id != -1) {
-          // 有机器人选了这个目标货物
-          // 给他抢了
-          robot[gds[robot[i].x][robot[i].y]->robot_id].target_goods = nullptr;
-        }
-        robot[i].target_goods->robot_id = -1;
-        robot[i].target_goods = gds[robot[i].x][robot[i].y];
-        robot[i].target_goods->robot_id = i;
-
-        // 还原first_free_goods指针
-        GoodsManager::GetInstance()->ResetFirstFreeGoods();
-
-#ifdef DEBUG
-        std::cerr << "robot " << i << " 装路过的高价货：(" << robot[i].x << ","
-                  << robot[i].y << ")" << std::endl;
-#endif
-      }
-#endif
-      else if (!robot[i].target_goods) {
+      } else if (!robot[i].target_goods) {
         // 机器人没目标货物，且该帧刚好生成了一个货物在脚底下
         is_get = true;
         robot[i].target_goods =

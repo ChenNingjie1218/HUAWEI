@@ -121,30 +121,6 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
                   << y << ")" << std::endl;
 #endif
       }
-#ifdef CAN_GRAB_GOODS
-      else if (robot[robot_id].target_goods &&
-               gds[x][y]->money > VALUEABLE_GOODS_VALVE) {
-        // 有目标货物的情况下，路过的地上有贵重货物
-        is_get = true;
-        // 放弃原目标货物
-        if (gds[x][y]->robot_id != -1) {
-          // 有机器人选了这个目标货物
-          // 给他抢了
-          robot[gds[x][y]->robot_id].target_goods = nullptr;
-        }
-        robot[robot_id].target_goods->robot_id = -1;
-        robot[robot_id].target_goods = gds[x][y];
-        gds[x][y]->robot_id = robot_id;
-
-        // 还原first_free_goods指针
-        GoodsManager::GetInstance()->ResetFirstFreeGoods();
-
-#ifdef DEBUG
-        std::cerr << "robot " << robot_id << " 移动后装路过的高价货：(" << x
-                  << "," << y << ")" << std::endl;
-#endif
-      }  // 区别于移动前动作，这里只有这两种情况
-#endif
       if (is_get) {
         // 装货
         Decision decision(DECISION_TYPE_ROBOT_GET, robot_id, -1);

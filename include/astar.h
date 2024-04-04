@@ -73,19 +73,12 @@ struct Astar {
   Astar(int start_x, int start_y, int end_x, int end_y, int direction = -1);
 
   // 找货物A*
-  bool AstarSearch(std::vector<Location> &path, int &astar_deep,
-                   Goods *&find_goods);
+  bool AstarSearch(std::vector<Location> &path, Goods *&find_goods);
   // 找泊位A*
   bool AstarSearch(std::vector<Location> &path, const int &berth_id);
 
   // 船
   void AstarSearch(std::vector<int> &path);
-
-#ifdef SAVE_OLD_PATH
-  // 将算过的A*路径存起来
-  static std::map<std::pair<Location, Location>, std::vector<Location>>
-      old_path;
-#endif
 };
 
 #endif

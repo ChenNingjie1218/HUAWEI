@@ -72,8 +72,6 @@ struct Boat {
   Boat();
   Boat(int &id, int &goods_num, int &x, int &y, int &direction, int &status);
 
-  void ChooseBerth3(int boat_id);
-
   // 顺时针旋转
   void DoClockwiseRotate();
 
@@ -88,12 +86,6 @@ struct Boat {
 
   // 重置到主航道
   void DoDept();
-
-  // 离开港口的条件
-  bool LeaveCond();
-
-  // 判断是否更换港口
-  bool ChangeBerth3(int boat_id, bool force = false);
 
   // 删除path的第一个点
   void RemoveFirst();

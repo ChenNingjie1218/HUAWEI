@@ -14,9 +14,6 @@ extern int id;
 // 方向数组
 std::array<Location, 4> DIRS = {Location(0, 1), Location(0, -1),
                                 Location(-1, 0), Location(1, 0)};
-#ifdef SAVE_OLD_PATH
-std::map<std::pair<Location, Location>, std::vector<Location>> Astar::old_path;
-#endif
 
 Location::Location(int x, int y, int direction)
     : x(x), y(y), boat_direction(direction) {}
@@ -68,16 +65,7 @@ Astar::Astar(int start_x, int start_y, int end_x, int end_y, int direction)
     : start(start_x, start_y, direction), end(end_x, end_y) {}
 
 // 找货物A*
-bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
-                        Goods *&find_goods) {
-#ifdef SAVE_OLD_PATH
-  std::pair<Location, Location> route = std::make_pair(start, end);
-  if (old_path.find(route) != old_path.end()) {
-    // 已经算过了
-    path = old_path[std::make_pair(start, end)];
-    return true;
-  }
-#endif
+bool Astar::AstarSearch(std::vector<Location> &path, Goods *&find_goods) {
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
   frontier.put(start, 0);
@@ -92,15 +80,6 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
             DynamicParam::GetInstance()->GetBusyValve()) {
       continue;
     }
-// 超过深度剪枝
-#ifdef CUT_A_STAR
-    if (cost_so_far[current] > astar_deep) {
-      if (astar_deep < LIFETIME - 50) {
-        astar_deep += 50;
-      }
-      return false;
-    }
-#endif
 
     // 如果是找货物
     if (MapController::GetInstance()->gds[current.x][current.y] &&
@@ -116,11 +95,6 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 
       if (find_goods->x == current.x && find_goods->y == current.y) {
         // 到达目标货物
-#ifdef CUT_A_STAR
-        if (astar_deep > DEFAULT_A_STAR_DEEP) {
-          astar_deep -= 50;
-        }
-#endif
         Location temp = current;
         path.clear();
         // int count = 0;
@@ -132,9 +106,6 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
         }
         // std::cerr << count << std::endl;
         std::reverse(path.begin(), path.end());
-#ifdef SAVE_OLD_PATH
-        old_path[route] = path;
-#endif
         return true;
       }
     }
@@ -155,14 +126,6 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 
 // 找泊位A*
 bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
-#ifdef SAVE_OLD_PATH
-  std::pair<Location, Location> route = std::make_pair(start, end);
-  if (old_path.find(route) != old_path.end()) {
-    // 已经算过了
-    path = old_path[route];
-    return true;
-  }
-#endif
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
   frontier.put(start, 0);
@@ -190,9 +153,6 @@ bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
 
       std::cerr << count << std::endl;
       std::reverse(path.begin(), path.end());
-#ifdef SAVE_OLD_PATH
-      old_path[route] = path;
-#endif
       return true;
     }
     for (auto next : Point(current).neighbors) {

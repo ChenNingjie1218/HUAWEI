@@ -121,7 +121,7 @@ bool Robot::UpdateTargetGoods(int robot_id) {
 #endif
     Astar astar(x, y, find_goods->x, find_goods->y);
     Goods *temp_goods = find_goods;
-    if (!astar.AstarSearch(route, astar_deep, temp_goods)) {
+    if (!astar.AstarSearch(route, temp_goods)) {
 #ifdef DEBUG
       std::cerr << "route empty" << std::endl;
 #endif
