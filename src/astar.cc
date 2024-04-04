@@ -49,11 +49,12 @@ Point::Point(Location loc) {
 }
 
 bool Point::CanReach() {
-  if (MapController::GetInstance()->busy_point[loc.x][loc.y] >
+  auto &map_instance = MapController::GetInstance();
+  if (map_instance->busy_point[loc.x][loc.y] >
       DynamicParam::GetInstance()->GetBusyValve()) {
     return false;
   }
-  if (MapController::GetInstance()->CanRobotReach(loc.x, loc.y)) {
+  if (map_instance->CanRobotReach(loc.x, loc.y)) {
     return true;
   }
   return false;
@@ -79,13 +80,13 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
 #endif
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
-  std::unordered_map<Location, double> cost_so_far;
   frontier.put(start, 0);
   came_from[start] = start;
-  cost_so_far[start] = 0;
-
+  double *cost_so_far = new double[1000000];
+  cost_so_far[start.x * 1000 + start.y] = 1;
   while (!frontier.empty()) {
     Location current = frontier.get();
+    int cur_hash_index = current.x * 1000 + current.y;
     if (current != start &&
         MapController::GetInstance()->busy_point[current.x][current.y] >
             DynamicParam::GetInstance()->GetBusyValve()) {
@@ -139,10 +140,10 @@ bool Astar::AstarSearch(std::vector<Location> &path, int &astar_deep,
     }
 
     for (auto next : Point(current).neighbors) {
-      double new_cost = cost_so_far[current] + 1;
-      if (cost_so_far.find(next) == cost_so_far.end() ||
-          new_cost < cost_so_far[next]) {
-        cost_so_far[next] = new_cost;
+      double new_cost = cost_so_far[cur_hash_index] + 1;
+      int hash_index = next.x * 1000 + next.y;
+      if (!cost_so_far[hash_index]) {
+        cost_so_far[hash_index] = new_cost;
         double priority = new_cost + heuristic(next, end);
         frontier.put(next, priority);
         came_from[next] = current;
@@ -164,12 +165,16 @@ bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
 #endif
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
-  std::unordered_map<Location, double> cost_so_far;
   frontier.put(start, 0);
   came_from[start] = start;
-  cost_so_far[start] = 0;
+  double *cost_so_far = new double[1000000];
+  cost_so_far[start.x * 1000 + start.y] = 1;
+  int count = 0;
   while (!frontier.empty()) {
     Location current = frontier.get();
+    ++count;
+    // ++MapController::GetInstance()->astar_debug[current.x][current.y];
+    int cur_hash_index = current.x * 1000 + current.y;
     if (MapController::GetInstance()->ch[current.x][current.y] == 'B' &&
         berth_id ==
             MapController::GetInstance()->location_to_berth_id[current]) {
@@ -183,7 +188,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
         // ++count;
       }
 
-      // std::cerr << count << std::endl;
+      std::cerr << count << std::endl;
       std::reverse(path.begin(), path.end());
 #ifdef SAVE_OLD_PATH
       old_path[route] = path;
@@ -191,10 +196,10 @@ bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
       return true;
     }
     for (auto next : Point(current).neighbors) {
-      double new_cost = cost_so_far[current] + 1;
-      if (cost_so_far.find(next) == cost_so_far.end() ||
-          new_cost < cost_so_far[next]) {
-        cost_so_far[next] = new_cost;
+      double new_cost = cost_so_far[cur_hash_index] + 1;
+      int hash_index = next.x * 1000 + next.y;
+      if (!cost_so_far[hash_index]) {
+        cost_so_far[hash_index] = new_cost;
         double priority = new_cost + heuristic(next, end);
         frontier.put(next, priority);
         came_from[next] = current;
@@ -208,85 +213,92 @@ bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
 void Astar::AstarSearch(std::vector<int> &path) {
   PriorityQueue<Location, double> frontier;
   std::unordered_map<Location, Location> came_from;
-  std::unordered_map<Location, double> cost_so_far;
   frontier.put(start, 0);
   came_from[start] = start;
-  cost_so_far[start] = 0;
-  Location debug_point(198, 5, BOAT_DIRECTION_LEFT);
+  double *cost_so_far = new double[10000000];
+  cost_so_far[start.boat_direction * 1000000 + start.x * 1000 + start.y] = 1;
+  // int count = 0;
+  // 方位朝向不对加高代价
+  int located_left = end.y < start.y ? 1 : 0;  // 终点位于起点左边
+  int located_up = end.x < start.x ? 1 : 0;    // 终点位于起点上边
   while (!frontier.empty()) {
     Location current = frontier.get();
+    // ++count;
+    // ++MapController::GetInstance()->astar_debug[current.x][current.y];
+    int cur_hash_index =
+        current.boat_direction * 1000000 + current.x * 1000 + current.y;
     if (current == end) {
       Location temp = current;
       path.clear();
-      // int count = 0;
+      // int size = 0;
       while (temp != start) {
         // std::cerr << "(" << temp.x << "," << temp.y << ")" << std::endl;
         path.push_back(temp.boat_direction);
         temp = came_from[temp];
-        // ++count;
+        // ++size;
       }
       // std::cerr << count << std::endl;
+      // std::cerr << size << std::endl;
       std::reverse(path.begin(), path.end());
       return;
     }
-
     // 直行
     Location next(current.x + DIRS[current.boat_direction].x,
                   current.y + DIRS[current.boat_direction].y,
                   current.boat_direction);
-    if (!CollisionBox(next.x, next.y, next.boat_direction).IsCollision()) {
-      double new_cost = cost_so_far[current] + 1;
-      auto it = cost_so_far.find(next);
-      if (it == cost_so_far.end() || new_cost < cost_so_far[next]) {
-        cost_so_far[next] = new_cost;
-        double priority = new_cost + heuristic(next, end);
-        frontier.put(next, priority);
-        came_from[next] = current;
-      } else if (it->first.boat_direction != next.boat_direction) {
-        cost_so_far[next] = new_cost;
-        double priority = new_cost + heuristic(next, end);
-        frontier.put(next, priority);
-        came_from[next] = current;
+    for (int i = 0; i < 3; ++i) {
+      switch (i) {
+        case 1:
+          // 顺时针转
+          next = current.Clockwise();
+          break;
+        case 2:
+          // 逆时针转
+          next = current.CounterClockwise();
+          break;
+        default:
+          // 直行
+          break;
       }
-    }
+      CollisionBox boat_box = CollisionBox(next.x, next.y, next.boat_direction);
+      if (!boat_box.IsCollision()) {
+        double new_cost = cost_so_far[cur_hash_index] + 1;
+        if (i == 2) {
+          --new_cost;
+        }
+        int hash_index = next.boat_direction * 1000000 + next.x * 1000 + next.y;
+        if (!cost_so_far[hash_index]) {
+          // 主航道要减速
+          if (boat_box.IsLocatedOnMainRoute()) {
+            new_cost += 0.33;
+          }
 
-    // 顺时针转
-    next = current.Clockwise();
-    if (!CollisionBox(next.x, next.y, next.boat_direction).IsCollision()) {
-      double new_cost = cost_so_far[current] + 1;
-      auto it = cost_so_far.find(next);
-      if (it == cost_so_far.end() || new_cost < cost_so_far[next]) {
-        cost_so_far[next] = new_cost;
-        double priority = new_cost + heuristic(next, end);
-        frontier.put(next, priority);
-        came_from[next] = current;
-      } else if (it->first.boat_direction != next.boat_direction) {
-        cost_so_far[next] = new_cost;
-        double priority = new_cost + heuristic(next, end);
-        frontier.put(next, priority);
-        came_from[next] = current;
-      }
-    }
+          cost_so_far[hash_index] = new_cost;
+          double priority = new_cost + heuristic(next, end);
 
-    // 逆时针转
-    next = current.CounterClockwise();
-    if (!CollisionBox(next.x, next.y, next.boat_direction).IsCollision()) {
-      double new_cost = cost_so_far[current] + 1;
-      auto it = cost_so_far.find(next);
-      if (it == cost_so_far.end() || new_cost < cost_so_far[next]) {
-        cost_so_far[next] = new_cost;
-        double priority = new_cost + heuristic(next, end);
-        frontier.put(next, priority);
-        came_from[next] = current;
-      } else if (it->first.boat_direction != next.boat_direction) {
-        cost_so_far[next] = new_cost;
-        double priority = new_cost + heuristic(next, end);
-        frontier.put(next, priority);
-        came_from[next] = current;
+          // 往反方向走，代价加三
+          if (next.boat_direction == BOAT_DIRECTION_LEFT ||
+              next.boat_direction == BOAT_DIRECTION_RIGHT) {
+            if (located_left ^
+                (next.boat_direction == BOAT_DIRECTION_LEFT ? 1 : 0)) {
+              // 横向反方向走
+              priority += 3;
+            }
+          } else if (located_up ^
+                     (next.boat_direction == BOAT_DIRECTION_UP ? 1 : 0)) {
+            // 纵向反方向走
+            priority += 3;
+          }
+
+          frontier.put(next, priority);
+          came_from[next] = current;
+        }
       }
     }
   }
-  // std::cerr << "没路径" << std::endl;
+#ifdef DEBUG
+  std::cerr << "没路径" << std::endl;
+#endif
 }
 
 // 顺时针转动

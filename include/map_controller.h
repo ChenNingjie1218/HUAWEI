@@ -38,7 +38,8 @@ struct MapController {
    ‘c’ ： 海陆立体交通地块，同时为主干道和主航道
    ‘T’ ： 交货点
    */
-  char ch[N][N];                               // 地图数据
+  char ch[N][N];
+  // int astar_debug[N][N];                       // astar调试搜索点次数
   std::vector<Location> robot_purchase_point;  // 机器人购买点
   std::vector<Location> boat_purchase_point;   // 船购买点
   std::vector<Location> delivery_point;        // 交货点
