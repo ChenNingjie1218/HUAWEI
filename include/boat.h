@@ -95,6 +95,15 @@ struct Boat {
 
   // 删除path的第一个点
   void RemoveFirst();
+
+  // 判断交货条件
+  bool DeliveryCond();
+
+  // 寻找交货点
+  void FindDeliveryPoint();
+
+  // 寻找泊位
+  void FindBerth();
 };
 
 #endif

@@ -300,3 +300,63 @@ void Boat::RemoveFirst() {
     path.erase(path.begin());
   }
 }
+
+// 判断能否交货
+bool Boat::DeliveryCond() { return num == Boat::boat_capacity; }
+
+// 寻找交货点
+// 判断能否交货
+void Boat::FindDeliveryPoint() {
+  auto &berth = MapController::GetInstance()->berth;
+  // 去交货
+  auto &delivery_point = MapController::GetInstance()->delivery_point;
+  int delivery_id = MapController::GetInstance()->nearest_delivery[x][y];
+  Astar astar(x, y, delivery_point[delivery_id].x,
+              delivery_point[delivery_id].y, direction);
+  astar.AstarSearch(path);
+  if (pos != -1) {
+    // 重置老泊位
+    berth[pos].boat_id = -1;
+  }
+  pos = -1;
+#ifdef DEBUG
+  std::cerr << id_ << " 船准备去 (" << delivery_point[delivery_id].x << ","
+            << delivery_point[delivery_id].y
+            << ") 交货, path size:" << path.size() << std::endl;
+#endif
+}
+
+// 船找泊位
+void Boat::FindBerth() {
+  auto &berth = MapController::GetInstance()->berth;
+  int size = berth.size();
+  int berth_id = -1;
+  int max_goods_num = 0;
+
+  // 遍历泊位
+  for (int j = 0; j < size; ++j) {
+    if (berth[j].area_id != area_id || berth[j].boat_id != -1 ||
+        !berth[j].goods_num) {
+      continue;
+    }
+    // 选货物最多的
+    if (berth[j].goods_num > max_goods_num) {
+      max_goods_num = berth[j].goods_num;
+      berth_id = j;
+    }
+  }
+  if (berth_id > -1) {
+    Astar astar(x, y, berth[berth_id].x, berth[berth_id].y, direction);
+    astar.AstarSearch(path);
+    if (pos != -1) {
+      // 重置老泊位
+      berth[pos].boat_id = -1;
+    }
+    berth[berth_id].boat_id = id_;
+    pos = berth_id;
+#ifdef DEBUG
+    std::cerr << id_ << " 船寻路去泊位 " << pos << ", path size:" << path.size()
+              << std::endl;
+#endif
+  }
+}

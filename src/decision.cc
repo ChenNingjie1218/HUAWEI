@@ -133,58 +133,12 @@ void DecisionManager::DecisionBoat() {
         continue;
       }
 
-      if (boat[i].num == Boat::boat_capacity) {
+      if (boat[i].DeliveryCond()) {
         // 去交货
-        auto &delivery_point = MapController::GetInstance()->delivery_point;
-        int delivery_id = MapController::GetInstance()
-                              ->nearest_delivery[boat[i].x][boat[i].y];
-        Astar astar(boat[i].x, boat[i].y, delivery_point[delivery_id].x,
-                    delivery_point[delivery_id].y, boat[i].direction);
-        astar.AstarSearch(boat[i].path);
-        if (boat[i].pos != -1) {
-          // 重置老泊位
-          berth[boat[i].pos].boat_id = -1;
-        }
-        boat[i].pos = -1;
-#ifdef DEBUG
-        std::cerr << boat[i].id_ << " 船准备去 ("
-                  << delivery_point[delivery_id].x << ","
-                  << delivery_point[delivery_id].y
-                  << ") 交货, path size:" << boat[i].path.size() << std::endl;
-#endif
-
+        boat[i].FindDeliveryPoint();
       } else {
         // 找船舶上货
-        auto &berth = MapController::GetInstance()->berth;
-        int size = berth.size();
-        int berth_id = -1;
-        int max_goods_num = 0;
-        for (int j = 0; j < size; ++j) {
-          if (berth[j].area_id != boat[i].area_id || berth[j].boat_id != -1 ||
-              !berth[j].goods_num) {
-            continue;
-          }
-          // 选货物最多的
-          if (berth[j].goods_num > max_goods_num) {
-            max_goods_num = berth[j].goods_num;
-            berth_id = j;
-          }
-        }
-        if (berth_id > -1) {
-          Astar astar(boat[i].x, boat[i].y, berth[berth_id].x,
-                      berth[berth_id].y, boat[i].direction);
-          astar.AstarSearch(boat[i].path);
-          if (boat[i].pos != -1) {
-            // 重置老泊位
-            berth[boat[i].pos].boat_id = -1;
-          }
-          berth[berth_id].boat_id = i;
-          boat[i].pos = berth[berth_id].id_;
-#ifdef DEBUG
-          std::cerr << boat[i].id_ << " 船寻路去泊位 " << boat[i].pos
-                    << ", path size:" << boat[i].path.size() << std::endl;
-#endif
-        }
+        boat[i].FindBerth();
       }
     }
   }
