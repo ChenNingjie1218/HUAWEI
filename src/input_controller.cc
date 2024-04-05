@@ -225,6 +225,13 @@ void InputController::Input() {
       boat.push_back(
           Boat(boat_id, goods_num, ++x, ++y, direction, temp_status));
     } else {
+      // 判断船的指令是否执行成功
+      if (boat[i].x != (x + 1) || boat[i].y != (y + 1) ||
+          boat[i].direction != direction) {
+        // 指令执行成功
+        boat[i].RemoveFirst();
+      }
+
       boat[i].x = ++x;
       boat[i].y = ++y;
       if (goods_num - boat[i].num > 0 && boat[i].pos != -1) {

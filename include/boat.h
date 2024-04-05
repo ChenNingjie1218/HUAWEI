@@ -19,6 +19,9 @@ class CollisionBox {
   static bool JudgeCollision(const CollisionBox &first,
                              const CollisionBox &second);
 
+  // 判断某一个点是否在这个矩形内
+  bool IsPointInBox(int x, int y);
+
  private:
   int l_x, l_y;  // 左上角坐标
   int r_x, r_y;  // 右上角坐标
@@ -34,6 +37,9 @@ struct Boat {
 
   // 核心点坐标
   int x, y;
+
+  // 这一帧，船需不需要动
+  bool need_move = true;
 
   /*
    * 方向
@@ -71,6 +77,17 @@ struct Boat {
 
   Boat();
   Boat(int &id, int &goods_num, int &x, int &y, int &direction, int &status);
+  Boat operator=(const Boat &boat) {
+    this->id_ = boat.id_;
+    this->num = boat.num;
+    this->x = boat.x;
+    this->y = boat.y;
+    this->direction = boat.direction;
+    this->area_id = boat.area_id;
+    this->status = boat.status;
+    this->path = boat.path;
+    return *this;
+  }
 
   // 顺时针旋转
   void DoClockwiseRotate();
@@ -98,6 +115,16 @@ struct Boat {
 
   // 寻找泊位
   void FindBerth();
+
+  // 获取船的下一个位置, 返回Boat
+  Boat GetNextLocation();
+
+  // 判断船的左右两边是不是空的，返回int ,
+  // -1:表示左边是空的，1:表示右边是空的，0表示两边都不是空的
+  int JudgeLeftRight(std::vector<Boat> &boat);
+
+  // 船判断出可以让步之后，添加策略,flag 表示左边是空的还是右边是空的
+  void AddStrategyintoPath(int flag);
 };
 
 #endif
