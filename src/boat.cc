@@ -397,3 +397,35 @@ bool IsClockwise(int origin_direction, int next_direction) {
 #endif
   return true;
 }
+
+/*
+ * 解决碰撞
+ * @param q 解决步骤
+ * @param new_path 新路径
+ * @return 是否成功解决
+ */
+bool Boat::SolveCollision(std::queue<int> q, std::vector<int> &path) {
+  path.clear();
+  Location loc(x, y, direction);  // 初始位置
+  while (!q.empty()) {
+    int temp = q.front();
+    q.pop();
+    switch (temp) {
+      case DECISION_BOAT_ROT_CLOCKWISE:
+        loc = loc.Clockwise();
+        break;
+      case DECISION_BOAT_ROT_COUNTERCLOCKWISE:
+        loc = loc.CounterClockwise();
+        break;
+      case DECISION_BOAT_SHIP:
+        loc = loc.Ship();
+        break;
+    }
+    CollisionBox collisionbox(loc.x, loc.y, loc.boat_direction);
+    if (collisionbox.IsCollision()) {
+      return false;
+    }
+    path.push_back(loc.boat_direction);
+  }
+  return true;
+}

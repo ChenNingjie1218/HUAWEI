@@ -20,6 +20,9 @@ struct Location {
 
   // 逆时针转动
   Location CounterClockwise();
+
+  // 直行
+  Location Ship();
 };
 
 namespace std {

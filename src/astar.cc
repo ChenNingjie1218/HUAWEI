@@ -203,9 +203,7 @@ void Astar::AstarSearch(std::vector<int> &path) {
       return;
     }
     // 直行
-    Location next(current.x + DIRS[current.boat_direction].x,
-                  current.y + DIRS[current.boat_direction].y,
-                  current.boat_direction);
+    Location next = current.Ship();
     for (int i = 0; i < 3; ++i) {
       switch (i) {
         case 1:
@@ -293,4 +291,10 @@ Location Location::CounterClockwise() {
       return Location();
       break;
   }
+}
+
+// 直行
+Location Location::Ship() {
+  return Location(x + DIRS[boat_direction].x, y + DIRS[boat_direction].y,
+                  boat_direction);
 }

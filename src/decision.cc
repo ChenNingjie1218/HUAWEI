@@ -47,6 +47,7 @@ void DecisionManager::DecisionBoat() {
 #endif
   auto &boat = RentController::GetInstance()->boat;
   int size = boat.size();
+  std::vector<int> move_id;
   for (int i = 0; i < size; ++i) {
     if (boat[i].status == BOAT_STATUS_RESTORING) {
 // 恢复状态不决策
@@ -84,63 +85,175 @@ void DecisionManager::DecisionBoat() {
         boat[i].DoBerth();
         continue;
       }
+      move_id.push_back(i);
+    }
+#ifdef DEBUG
+    std::cerr << "*************** " << boat[i].id_
+              << " 船 path size:" << boat[i].path.size() << "*****************"
+              << std::endl;
+#endif
+  }
+  // 移动决策
+  size = move_id.size();
+  for (int i = 0; i < size; ++i) {
+    int first_id = move_id[i];
+    CollisionBox first_now(boat[first_id].x, boat[first_id].y,
+                           boat[first_id].direction);  // 第一艘船当前位置
+    CollisionBox first_next(boat[first_id].x, boat[first_id].y,
+                            boat[first_id].direction,
+                            boat[first_id].path[0]);  // 第一艘船下一步位置
+    for (int j = i + 1; j < size; ++j) {
+      int second_id = move_id[j];
+      CollisionBox second_now(boat[second_id].x, boat[second_id].y,
+                              boat[second_id].direction);  // 第二艘船当前位置
+      CollisionBox second_next(boat[second_id].x, boat[second_id].y,
+                               boat[second_id].direction,
+                               boat[second_id].path[0]);  // 第二艘船下一步位置
+      if (CollisionBox::JudgeCollision(first_next, second_now) &&
+          CollisionBox::JudgeCollision(first_now, second_next) &&
+          boat[first_id].path[0] / 2 == boat[second_id].path[0] / 2) {
+        // 会碰撞且方向互斥
+        int man = std::abs(boat[first_id].y - boat[second_id].y) +
+                  std::abs(boat[first_id].x -
+                           boat[second_id].x);  // 两船核心点的曼哈顿距离
+        std::vector<int> new_path;              // 解决路径
+        std::queue<int> q;                      // 解决方式队列
+        if (boat[first_id].direction == boat[first_id].path[0] &&
+            boat[second_id].direction == boat[second_id].path[0]) {
+          // 都是前行
 
-      // 继续走
-      if (boat[i].direction == boat[i].path[0]) {
-        boat[i].DoShip();
-      } else {
-        switch (boat[i].direction) {
-          case BOAT_DIRECTION_RIGHT:
-            if (boat[i].path[0] == BOAT_DIRECTION_UP) {
-              boat[i].DoCounterclockwiseRotate();
-            } else if (boat[i].path[0] == BOAT_DIRECTION_DOWN) {
-              boat[i].DoClockwiseRotate();
-            } else {
-#ifdef DEBUG
-              std::cerr << "方向错了" << std::endl;
-#endif
+          if (man == 5) {
+            // 错开的情况 1 其中一艘船顺、逆可解
+            q.push(DECISION_BOAT_ROT_CLOCKWISE);
+            q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+            if (boat[first_id].SolveCollision(q, new_path)) {
+              boat[first_id].path = new_path;
+              continue;
+            } else if (boat[second_id].SolveCollision(q, new_path)) {
+              boat[second_id].path = new_path;
+              continue;
             }
-            break;
-          case BOAT_DIRECTION_LEFT:
-            if (boat[i].path[0] == BOAT_DIRECTION_DOWN) {
-              boat[i].DoCounterclockwiseRotate();
-            } else if (boat[i].path[0] == BOAT_DIRECTION_UP) {
-              boat[i].DoClockwiseRotate();
-            } else {
-#ifdef DEBUG
-              std::cerr << "方向错了" << std::endl;
-#endif
+
+            // 不可解
+          } else if (man == 7) {
+            // 错开的情况 2 其中一艘船逆、顺可解
+            q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+            q.push(DECISION_BOAT_ROT_CLOCKWISE);
+            if (boat[first_id].SolveCollision(q, new_path)) {
+              boat[first_id].path = new_path;
+              continue;
+            } else if (boat[second_id].SolveCollision(q, new_path)) {
+              boat[second_id].path = new_path;
+              continue;
             }
-            break;
-          case BOAT_DIRECTION_UP:
-            if (boat[i].path[0] == BOAT_DIRECTION_LEFT) {
-              boat[i].DoCounterclockwiseRotate();
-            } else if (boat[i].path[0] == BOAT_DIRECTION_RIGHT) {
-              boat[i].DoClockwiseRotate();
-            } else {
-#ifdef DEBUG
-              std::cerr << "方向错了" << std::endl;
-#endif
+            // 不可解
+          } else if (man == 5) {
+            // 没有错开的情况
+
+            // 如果两艘船都能动 执行顺、逆可解
+            q.push(DECISION_BOAT_ROT_CLOCKWISE);
+            q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+            std::vector<int> new_path_2;  // 同时解，另一艘船的解决路径
+            if (boat[first_id].SolveCollision(q, new_path) &&
+                boat[second_id].SolveCollision(q, new_path_2)) {
+              boat[first_id].path = new_path;
+              boat[second_id].path = new_path_2;
+              continue;
             }
-            break;
-          case BOAT_DIRECTION_DOWN:
-            if (boat[i].path[0] == BOAT_DIRECTION_RIGHT) {
-              boat[i].DoCounterclockwiseRotate();
-            } else if (boat[i].path[0] == BOAT_DIRECTION_LEFT) {
-              boat[i].DoClockwiseRotate();
-            } else {
-#ifdef DEBUG
-              std::cerr << "方向错了" << std::endl;
-#endif
+
+            // 两艘船同时顺逆无法解开 一艘能动的船顺、前行、逆可解开
+            while (!q.empty()) {
+              q.pop();
             }
-            break;
+            q.push(DECISION_BOAT_ROT_CLOCKWISE);
+            q.push(DECISION_BOAT_SHIP);
+            q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+            if (boat[first_id].SolveCollision(q, new_path)) {
+              boat[first_id].path = new_path;
+              continue;
+            } else if (boat[second_id].SolveCollision(q, new_path)) {
+              boat[second_id].path = new_path;
+              continue;
+            }
+
+            // 无法解开
+
+          } else {
+#ifdef DEBUG
+            std::cerr << "船直行，核心点曼哈顿距离错误" << std::endl;
+#endif
+          }
+        } else if (boat[first_id].direction != boat[first_id].path[0] &&
+                   boat[second_id].direction != boat[second_id].path[0]) {
+          // 都是旋转
+
+        } else {
+          // 一个旋转 一个直行
+          int ship_id = boat[first_id].direction == boat[first_id].path[0]
+                            ? first_id
+                            : second_id;  // 直行的id
+          int rot_id = boat[first_id].direction != boat[first_id].path[0]
+                           ? first_id
+                           : second_id;  // 旋转的id
+          bool is_clockwise =
+              IsClockwise(boat[rot_id].direction, boat[rot_id].path[0]);
+
+          if (man == 6) {
+            if (is_clockwise) {
+              // 旋转的是顺时针的情况
+              // 直行的顺逆可解
+              q.push(DECISION_BOAT_ROT_CLOCKWISE);
+              q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+            } else {
+              // 旋转的是逆时针的情况
+              // 直行的逆顺可解
+              q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+              q.push(DECISION_BOAT_ROT_CLOCKWISE);
+            }
+            if (boat[ship_id].SolveCollision(q, new_path)) {
+              boat[ship_id].path = new_path;
+              continue;
+            }
+
+          } else if (man == 5) {
+            if (is_clockwise) {
+              // 旋转的是顺时针的情况
+              // 直行的逆、直、直可解
+              q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+            } else {
+              // 旋转的是逆时针的情况
+              // 直行的顺、直、直可解
+              q.push(DECISION_BOAT_ROT_CLOCKWISE);
+            }
+            q.push(DECISION_BOAT_SHIP);
+            q.push(DECISION_BOAT_SHIP);
+            if (boat[ship_id].SolveCollision(q, new_path)) {
+              boat[ship_id].path = new_path;
+              continue;
+            }
+          } else if (man == 4) {
+            if (is_clockwise) {
+              // 旋转的是顺时针的情况
+              // 直行的逆、直可解
+              q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+            } else {
+              // 旋转的是逆时针的情况
+              // 直行的顺、直可解
+              q.push(DECISION_BOAT_ROT_CLOCKWISE);
+            }
+            q.push(DECISION_BOAT_SHIP);
+            if (boat[ship_id].SolveCollision(q, new_path)) {
+              boat[ship_id].path = new_path;
+              continue;
+            }
+          } else {
+#ifdef DEBUG
+            std::cerr << "一船直行、另一船旋转，核心点曼哈顿距离错误"
+                      << std::endl;
+#endif
+          }
         }
       }
-#ifdef DEBUG
-      std::cerr << "*************** " << boat[i].id_
-                << " 船 path size:" << boat[i].path.size()
-                << "*****************" << std::endl;
-#endif
     }
   }
 }
@@ -522,7 +635,7 @@ void DecisionManager::DecisionPurchase() {
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
-  if (RentController::GetInstance()->robot.size() < 20) {
+  if (RentController::GetInstance()->robot.size() < 15) {
     for (std::vector<Location>::size_type i = 0; i < size; ++i) {
       RentController::GetInstance()->RentRobot(i);
     }

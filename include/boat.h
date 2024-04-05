@@ -1,5 +1,6 @@
 #ifndef BOAT_H_
 #define BOAT_H_
+#include <queue>
 #include <vector>
 
 #include "param.h"
@@ -102,6 +103,14 @@ struct Boat {
 
   // 给该船下移动指令
   void DoMove();
+
+  /*
+   * 解决碰撞
+   * @param q 解决步骤
+   * @param new_path 新路径
+   * @return 是否成功解决
+   */
+  bool SolveCollision(std::queue<int> q, std::vector<int> &path);
 };
 
 // 是否是顺时针变换
