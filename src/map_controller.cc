@@ -162,3 +162,14 @@ void MapController::InitNearestDelivery() {
     }
   }
 }
+
+// 是否是主干道
+bool MapController::IsMainRoad(int x, int y) {
+  return ch[x][y] == '>' || ch[x][y] == 'c' || ch[x][y] == 'R';
+}
+
+// 是否是主航道
+bool MapController::IsMainChannel(int x, int y) {
+  return ch[x][y] == '~' || ch[x][y] == 'c' || ch[x][y] == 'T' ||
+         ch[x][y] == 'K';
+}

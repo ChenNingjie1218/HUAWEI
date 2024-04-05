@@ -66,6 +66,12 @@ struct MapController {
   // 船可达
   bool CanBoatReach(int x, int y);
 
+  // 是否是主干道
+  bool IsMainRoad(int x, int y);
+
+  // 是否是主航道
+  bool IsMainChannel(int x, int y);
+
   // 初始化坐标映射到泊位id的map
   void InitBerthMap(int berth_id, int berth_x, int berth_y);
 
