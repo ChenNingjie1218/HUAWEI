@@ -129,7 +129,7 @@ void DecisionManager::DecisionBoat() {
 #ifdef DEBUG
           std::cerr << "都是前行" << std::endl;
 #endif
-          if (man == 5) {
+          if (man == 6) {
             // 错开的情况 1 其中一艘船顺、逆可解
 #ifdef DEBUG
             std::cerr << "错开的情况 1" << std::endl;
