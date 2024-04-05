@@ -186,7 +186,69 @@ void DecisionManager::DecisionBoat() {
         } else if (boat[first_id].direction != boat[first_id].path[0] &&
                    boat[second_id].direction != boat[second_id].path[0]) {
           // 都是旋转
-
+          bool is_clockwise =
+              IsClockwise(boat[first_id].direction, boat[first_id].path[0]);
+          if (is_clockwise) {
+            // 第一艘船是顺时针旋转，解决方案是逆时针旋转
+            q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+            if (boat[first_id].SolveCollision(q, new_path)) {
+              boat[first_id].path = new_path;
+              continue;
+            } else {
+              // 第一艘船逆时针解不开，用第二艘船解
+              // 判断第二艘船是不是顺时针旋转
+              if (IsClockwise(boat[second_id].direction,
+                              boat[second_id].path[0])) {
+                // 第二艘船是顺时针旋转，解决方案是逆时针旋转
+                q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+                if (boat[second_id].SolveCollision(q, new_path)) {
+                  boat[second_id].path = new_path;
+                  continue;
+                } else {
+                  // 两艘船都解不开
+                }
+              } else {
+                // 第二艘船是逆时针旋转，解决方案是顺时针旋转
+                q.push(DECISION_BOAT_ROT_CLOCKWISE);
+                if (boat[second_id].SolveCollision(q, new_path)) {
+                  boat[second_id].path = new_path;
+                  continue;
+                } else {
+                  // 两艘船都解不开
+                }
+              }
+            }
+          } else {
+            // 第一艘船是逆时针旋转，解决方案是顺时针旋转
+            q.push(DECISION_BOAT_ROT_CLOCKWISE);
+            if (boat[first_id].SolveCollision(q, new_path)) {
+              boat[first_id].path = new_path;
+              continue;
+            } else {
+              // 第一艘船顺时针解不开，用第二艘船解
+              // 判断第二艘船是不是顺时针旋转
+              if (IsClockwise(boat[second_id].direction,
+                              boat[second_id].path[0])) {
+                // 第二艘船是顺时针旋转，解决方案是逆时针旋转
+                q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
+                if (boat[second_id].SolveCollision(q, new_path)) {
+                  boat[second_id].path = new_path;
+                  continue;
+                } else {
+                  // 两艘船都解不开
+                }
+              } else {
+                // 第二艘船是逆时针旋转，解决方案是顺时针旋转
+                q.push(DECISION_BOAT_ROT_CLOCKWISE);
+                if (boat[second_id].SolveCollision(q, new_path)) {
+                  boat[second_id].path = new_path;
+                  continue;
+                } else {
+                  // 两艘船都解不开
+                }
+              }
+            }
+          }
         } else {
           // 一个旋转 一个直行
           int ship_id = boat[first_id].direction == boat[first_id].path[0]
