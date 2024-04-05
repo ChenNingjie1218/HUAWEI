@@ -113,6 +113,11 @@ struct Boat {
   bool SolveCollision(std::queue<int> q, std::vector<int> &path);
 };
 
-// 是否是顺时针变换
-bool IsClockwise(int origin_direction, int next_direction);
+/*
+ * 行动类型
+ * @param origin_direction 初始方向
+ * @param next_direction 下一步的方向
+ * @return 行动类型
+ */
+int MoveType(int origin_direction, int next_direction);
 #endif

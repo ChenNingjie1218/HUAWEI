@@ -114,11 +114,18 @@ CollisionBox::CollisionBox(int core_x, int core_y, int direction) {
 CollisionBox::CollisionBox(int core_x, int core_y, int direction,
                            int next_direction) {
   Location loc(core_x, core_y, direction);
-  if (IsClockwise(direction, next_direction)) {
-    loc = loc.Clockwise();
-  } else {
-    loc = loc.CounterClockwise();
+  switch (MoveType(direction, next_direction)) {
+    case DECISION_BOAT_SHIP:
+      loc.Ship();
+      break;
+    case DECISION_BOAT_ROT_CLOCKWISE:
+      loc.Clockwise();
+      break;
+    case DECISION_BOAT_ROT_COUNTERCLOCKWISE:
+      loc.CounterClockwise();
+      break;
   }
+
   CollisionBox(loc.x, loc.y, loc.boat_direction);
 }
 
@@ -349,53 +356,63 @@ bool CollisionBox::IsLocatedOnMainRoute() {
 // 给该船下移动指令
 void Boat::DoMove() {
   // 继续走
-  if (direction == path[0]) {
-    DoShip();
-  } else {
-    if (IsClockwise(direction, path[0])) {
+  switch (MoveType(direction, path[0])) {
+    case DECISION_BOAT_SHIP:
+      DoShip();
+      break;
+    case DECISION_BOAT_ROT_CLOCKWISE:
       DoClockwiseRotate();
-    } else {
+      break;
+    case DECISION_BOAT_ROT_COUNTERCLOCKWISE:
       DoCounterclockwiseRotate();
-    }
+      break;
   }
 }
 
-// 是否是顺时针变换
-bool IsClockwise(int origin_direction, int next_direction) {
+/*
+ * 行动类型
+ * @param origin_direction 初始方向
+ * @param next_direction 下一步的方向
+ * @return 行动类型
+ */
+int MoveType(int origin_direction, int next_direction) {
+  if (origin_direction == next_direction) {
+    return DECISION_BOAT_SHIP;
+  }
   switch (origin_direction) {
     case BOAT_DIRECTION_RIGHT:
       if (next_direction == BOAT_DIRECTION_DOWN) {
-        return true;
+        return DECISION_BOAT_ROT_CLOCKWISE;
       } else if (next_direction == BOAT_DIRECTION_UP) {
-        return false;
+        return DECISION_BOAT_ROT_COUNTERCLOCKWISE;
       }
       break;
     case BOAT_DIRECTION_LEFT:
       if (next_direction == BOAT_DIRECTION_UP) {
-        return true;
+        return DECISION_BOAT_ROT_CLOCKWISE;
       } else if (next_direction == BOAT_DIRECTION_DOWN) {
-        return false;
+        return DECISION_BOAT_ROT_COUNTERCLOCKWISE;
       }
       break;
     case BOAT_DIRECTION_UP:
       if (next_direction == BOAT_DIRECTION_RIGHT) {
-        return true;
+        return DECISION_BOAT_ROT_CLOCKWISE;
       } else if (next_direction == BOAT_DIRECTION_LEFT) {
-        return false;
+        return DECISION_BOAT_ROT_COUNTERCLOCKWISE;
       }
       break;
     case BOAT_DIRECTION_DOWN:
       if (next_direction == BOAT_DIRECTION_LEFT) {
-        return true;
+        return DECISION_BOAT_ROT_CLOCKWISE;
       } else if (next_direction == BOAT_DIRECTION_RIGHT) {
-        return false;
+        return DECISION_BOAT_ROT_COUNTERCLOCKWISE;
       }
       break;
   }
 #ifdef DEBUG
   std::cerr << "IsClockwise方向错误" << std::endl;
 #endif
-  return true;
+  return DECISION_BOAT_ROT_CLOCKWISE;
 }
 
 /*
