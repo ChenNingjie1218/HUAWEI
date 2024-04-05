@@ -311,8 +311,8 @@ void DecisionManager::DecisionRobot() {
   for (int i = 0; i < not_move_size; ++i) {
     // next_point的下标
     int block_id = -1;
-    if (MapController::GetInstance()->IsMainRoad(robot[not_move_size].x,
-                                                 robot[not_move_size].y)) {
+    if (MapController::GetInstance()->IsMainRoad(robot[not_move_id[i]].x,
+                                                 robot[not_move_id[i]].y)) {
       // 位于主干道不挡路
       continue;
     }
