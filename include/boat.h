@@ -11,6 +11,7 @@ class CollisionBox {
  public:
   CollisionBox() = delete;
   CollisionBox(int core_x, int core_y, int direction);
+  CollisionBox(int core_x, int core_y, int direction, int next_location);
   // 是否撞边界
   bool IsCollision();
   // 判断是否处于主航道
@@ -98,6 +99,11 @@ struct Boat {
 
   // 寻找泊位
   void FindBerth();
+
+  // 给该船下移动指令
+  void DoMove();
 };
 
+// 是否是顺时针变换
+bool IsClockwise(int origin_direction, int next_direction);
 #endif
