@@ -141,7 +141,11 @@ bool NextPoint::IsDeadLock(NextPoint &other_point) {
   int first_y = robot[list_robot[0]].y;
   int second_x = robot[other_point.list_robot[0]].x;
   int second_y = robot[other_point.list_robot[0]].y;
-
+  if (MapController::GetInstance()->IsMainChannel(first_x, first_y) &&
+      MapController::GetInstance()->IsMainChannel(second_x, second_y)) {
+    // 都位于主干道的
+    return false;
+  }
   if (count && other_point.count && x == second_x && y == second_y &&
       other_point.x == first_x && other_point.y == first_y) {
     return true;

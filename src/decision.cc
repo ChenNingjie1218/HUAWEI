@@ -55,6 +55,24 @@ void DecisionManager::DecisionBoat() {
 #endif
       continue;
     }
+    if (boat[i].path.empty()) {
+      auto &berth = MapController::GetInstance()->berth;
+      if (boat[i].status == BOAT_STATUS_LOADING &&
+          berth[boat[i].pos].goods_num && boat[i].num < Boat::boat_capacity) {
+#ifdef DEBUG
+        std::cerr << boat[i].id_ << " 船正在装货" << std::endl;
+#endif
+        continue;
+      }
+
+      if (boat[i].DeliveryCond()) {
+        // 去交货
+        boat[i].FindDeliveryPoint();
+      } else {
+        // 找船舶上货
+        boat[i].FindBerth();
+      }
+    }
     if (!boat[i].path.empty()) {
       // 靠泊
       if (boat[i].status != BOAT_STATUS_LOADING &&
@@ -123,23 +141,6 @@ void DecisionManager::DecisionBoat() {
                 << " 船 path size:" << boat[i].path.size()
                 << "*****************" << std::endl;
 #endif
-    } else {
-      auto &berth = MapController::GetInstance()->berth;
-      if (boat[i].status == BOAT_STATUS_LOADING &&
-          berth[boat[i].pos].goods_num && boat[i].num < Boat::boat_capacity) {
-#ifdef DEBUG
-        std::cerr << boat[i].id_ << " 船正在装货" << std::endl;
-#endif
-        continue;
-      }
-
-      if (boat[i].DeliveryCond()) {
-        // 去交货
-        boat[i].FindDeliveryPoint();
-      } else {
-        // 找船舶上货
-        boat[i].FindBerth();
-      }
     }
   }
 }
@@ -276,17 +277,20 @@ void DecisionManager::DecisionRobot() {
       next_x = iter->x;
       next_y = iter->y;
       bool same_flag = false;
-      for (std::vector<NextPoint>::size_type j = 0; j < next_points.size();
-           ++j) {
-        if (next_points[j].x == next_x && next_points[j].y == next_y) {
-          // 有相同落点
-          same_flag = true;
-          next_points[j].PushRobot(i, not_move_id);
+      if (!MapController::GetInstance()->IsMainRoad(next_x,
+                                                    next_y)) {  // 不是主干道
+        for (std::vector<NextPoint>::size_type j = 0; j < next_points.size();
+             ++j) {
+          if (next_points[j].x == next_x && next_points[j].y == next_y) {
+            // 有相同落点
+            same_flag = true;
+            next_points[j].PushRobot(i, not_move_id);
 #ifdef DEBUG
-          std::cerr << "same next_point (" << next_x << "," << next_y << ")"
-                    << std::endl;
+            std::cerr << "same next_point (" << next_x << "," << next_y << ")"
+                      << std::endl;
 #endif
-          break;
+            break;
+          }
         }
       }
       if (!same_flag) {
@@ -307,6 +311,11 @@ void DecisionManager::DecisionRobot() {
   for (int i = 0; i < not_move_size; ++i) {
     // next_point的下标
     int block_id = -1;
+    if (MapController::GetInstance()->IsMainRoad(robot[not_move_size].x,
+                                                 robot[not_move_size].y)) {
+      // 位于主干道不挡路
+      continue;
+    }
     if ((block_id = robot[not_move_id[i]].IsBlock(next_points)) > -1) {
 #ifdef DEBUG
       std::cerr << "机器人 " << not_move_id[i] << " 挡住了 "
@@ -419,8 +428,11 @@ void DecisionManager::DecisionRobot() {
   std::vector<Berth> &berth = MapController::GetInstance()->berth;
   for (int i = 0; i < not_move_size; ++i) {
     int robot_id = not_move_id[i];
-    MapController::GetInstance()
-        ->busy_point[robot[robot_id].x][robot[robot_id].y]++;
+    if (!MapController::GetInstance()->IsMainRoad(robot[robot_id].x,
+                                                  robot[robot_id].y)) {
+      ++MapController::GetInstance()
+            ->busy_point[robot[robot_id].x][robot[robot_id].y];
+    }
     if (can_find_goods &&
         MapController::GetInstance()
                 ->busy_point[robot[robot_id].x][robot[robot_id].y] >

@@ -214,16 +214,14 @@ int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
 #ifdef DEBUG
   std::vector<std::string> dir_string = {"右", "左", "上", "下"};
 #endif
-  char(&ch)[N][N] = MapController::GetInstance()->ch;
   for (int i = 1; i <= 4; ++i) {
     int index = (first_dir + i) % 4;
     if (x + DIRS[index].x == ignore_x && y + DIRS[index].y == ignore_y) {
       // 放弃ignore方向移动
       continue;
     }
-    if (ch[x + DIRS[index].x][y + DIRS[index].y] == '.' ||
-        ch[x + DIRS[index].x][y + DIRS[index].y] == 'A' ||
-        ch[x + DIRS[index].x][y + DIRS[index].y] == 'B') {
+    if (MapController::GetInstance()->CanRobotReach(x + DIRS[index].x,
+                                                    y + DIRS[index].y)) {
       bool can_leave = true;
       for (int k = 0; k < size; ++k) {
         if (x + DIRS[index].x == next_points[k].x &&
