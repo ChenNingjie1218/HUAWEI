@@ -196,10 +196,12 @@ void DecisionManager::DecisionBoat() {
               continue;
             } else {
               // 第一艘船逆时针解不开，用第二艘船解
+              q.pop();
               // 判断第二艘船是不是顺时针旋转
               if (IsClockwise(boat[second_id].direction,
                               boat[second_id].path[0])) {
                 // 第二艘船是顺时针旋转，解决方案是逆时针旋转
+
                 q.push(DECISION_BOAT_ROT_COUNTERCLOCKWISE);
                 if (boat[second_id].SolveCollision(q, new_path)) {
                   boat[second_id].path = new_path;
@@ -226,6 +228,7 @@ void DecisionManager::DecisionBoat() {
               continue;
             } else {
               // 第一艘船顺时针解不开，用第二艘船解
+              q.pop();
               // 判断第二艘船是不是顺时针旋转
               if (IsClockwise(boat[second_id].direction,
                               boat[second_id].path[0])) {
@@ -317,6 +320,7 @@ void DecisionManager::DecisionBoat() {
         }
       }
     }
+    boat[first_id].DoMove();
   }
 }
 

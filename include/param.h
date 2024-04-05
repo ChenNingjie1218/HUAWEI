@@ -25,6 +25,7 @@ const int N = 210;
 
 #define DECISION_BOAT_ROT_CLOCKWISE 0
 #define DECISION_BOAT_ROT_COUNTERCLOCKWISE 1
+#define DECISION_BOAT_SHIP 2  // 直行
 
 #define BOAT_DIRECTION_RIGHT 0
 #define BOAT_DIRECTION_LEFT 1
@@ -80,14 +81,14 @@ class DynamicParam {
   }
 
  private:
-  int tolerant_time_ = 40;           // 参数 机器人找货物容忍步数
-  int tolerant_leave_time_ = 5;      // 参数 船最后走可容忍时间的
-  int goods_value_valve_ = 0;        // 参数 货物筛选域值
-  int goods_filter_valve_num_ = 30;  // 参数 货物筛选数量域值
-  int valueable_goods_valve_ = 80;   // 参数 贵重货物域值
-  int final_tolerant_time_ = 200;    // 参数 最后冲刺阶段的容忍时间
-  int busy_valve_ = 5;               // 参数 判断该点拥堵的域值
-  int boat_capacity_reduce_ = 0;     // 参数 改变船容量
+  int tolerant_time_ = 40;             // 参数 机器人找货物容忍步数
+  int tolerant_leave_time_ = 5;        // 参数 船最后走可容忍时间的
+  int goods_value_valve_ = 0;          // 参数 货物筛选域值
+  int goods_filter_valve_num_ = 9999;  // 参数 货物筛选数量域值
+  int valueable_goods_valve_ = 0;      // 参数 贵重货物域值
+  int final_tolerant_time_ = 200;  // 参数 最后冲刺阶段的容忍时间
+  int busy_valve_ = 5;             // 参数 判断该点拥堵的域值
+  int boat_capacity_reduce_ = 0;   // 参数 改变船容量
 
   static DynamicParam* instance_;
 
