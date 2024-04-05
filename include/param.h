@@ -82,7 +82,7 @@ class DynamicParam {
  private:
   int tolerant_time_ = 40;           // 参数 机器人找货物容忍步数
   int tolerant_leave_time_ = 5;      // 参数 船最后走可容忍时间的
-  int goods_value_valve_ = 20;       // 参数 货物筛选域值
+  int goods_value_valve_ = 0;        // 参数 货物筛选域值
   int goods_filter_valve_num_ = 30;  // 参数 货物筛选数量域值
   int valueable_goods_valve_ = 80;   // 参数 贵重货物域值
   int final_tolerant_time_ = 200;    // 参数 最后冲刺阶段的容忍时间

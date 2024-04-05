@@ -416,6 +416,7 @@ void DecisionManager::DecisionRobot() {
 
   // 记录拥堵点
   not_move_size = not_move_id.size();
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
   for (int i = 0; i < not_move_size; ++i) {
     int robot_id = not_move_id[i];
     MapController::GetInstance()
@@ -467,6 +468,35 @@ void DecisionManager::DecisionRobot() {
           std::cerr << "机器人无法更改新的路线" << std::endl;
 #endif
         }
+      } else {  // 没有目标货物罚站
+        // 更换所属泊位
+        if (berth[robot[robot_id].berth_id].robot.size() > 1) {
+          int temp_berth_id = -1;
+          double max_avg_goods_num = 0, temp;
+          auto size = MapController::GetInstance()->berth.size();
+          for (int i = 0; i < size; i++) {
+            temp =
+                berth[i].goods_manager.goods_num * 1.0 / berth[i].robot.size();
+            if (temp > max_avg_goods_num) {
+              max_avg_goods_num = temp;
+              temp_berth_id = i;
+            }
+          }
+          if (temp_berth_id != -1) {
+            int old_berth_id = robot[robot_id].berth_id;
+            for (std::vector<int>::iterator it =
+                     berth[old_berth_id].robot.begin();
+                 it != berth[old_berth_id].robot.end(); ++it) {
+              if (*it == robot_id) {
+                berth[old_berth_id].robot.erase(it);
+                break;
+              }
+            }
+
+            robot[robot_id].berth_id = temp_berth_id;
+            berth[temp_berth_id].robot.push_back(robot_id);
+          }
+        }
       }
     }
   }
@@ -480,7 +510,7 @@ void DecisionManager::DecisionPurchase() {
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
-  if (RentController::GetInstance()->robot.size() < 10) {
+  if (RentController::GetInstance()->robot.size() < 20) {
     for (std::vector<Location>::size_type i = 0; i < size; ++i) {
       RentController::GetInstance()->RentRobot(i);
     }

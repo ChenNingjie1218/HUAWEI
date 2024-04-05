@@ -5,6 +5,7 @@
 
 #include "goods.h"
 #include "param.h"
+#include "robot.h"
 // 泊位
 struct Berth {
   int id_;
@@ -35,6 +36,9 @@ struct Berth {
 
   // 货物管理器
   GoodsManager goods_manager;
+
+  // 机器人队列
+  std::vector<int> robot;  // 当前的机器人
 
   //到泊位的船队列
   std::queue<int> q_boat;

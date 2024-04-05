@@ -185,6 +185,7 @@ void InputController::Input() {
       // 新增机器人
       robot.push_back(Robot(robot_id, temp_goods, ++x, ++y));
       robot[robot_id].berth_id = robot_id % berth.size();
+      berth[robot[robot_id].berth_id].robot.push_back(robot_id);
     } else {
       // 旧机器人更新坐标
       robot[i].x = ++x;

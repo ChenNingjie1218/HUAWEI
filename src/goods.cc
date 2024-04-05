@@ -17,12 +17,12 @@ Goods::Goods(int x, int y, int money, int birth) {
 }
 
 void GoodsManager::PushGoods(Goods *new_goods) {
-#ifdef GOODS_FILTER
+  // #ifdef GOODS_FILTER
   ++goods_num;
   if (goods_num > DynamicParam::GetInstance()->GetGoodsFilterValveNum()) {
     UpdateValueValve(true);
   }
-#endif
+  // #endif
   MapController::GetInstance()->gds[new_goods->x][new_goods->y] = new_goods;
   if (head_goods->next == head_goods) {
     // 空链表
@@ -53,12 +53,12 @@ void GoodsManager::RemoveExpiredGoods(int &x, int &y) {
 }
 // 删除货物
 void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
-#ifdef GOODS_FILTER
+  // #ifdef GOODS_FILTER
   --goods_num;
   if (goods_num < DynamicParam::GetInstance()->GetGoodsFilterValveNum()) {
     UpdateValueValve(false);
   }
-#endif
+  // #endif
   MapController::GetInstance()->gds[goods->x][goods->y] = nullptr;
   goods->pre->next = goods->next;
   goods->next->pre = goods->pre;
