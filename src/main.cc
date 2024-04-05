@@ -42,7 +42,8 @@ int main() {
   fclose(debug_command_file);
   std::vector<Berth> &berth = MapController::GetInstance()->berth;
   // 泊位上残留货物数量
-  for (int i = 0; i < 10; ++i) {
+  int size = berth.size();
+  for (int i = 0; i < size; ++i) {
     std::cerr << "船上残留货物:" << berth[i].goods_num << std::endl;
   }
 #endif
