@@ -116,17 +116,16 @@ CollisionBox::CollisionBox(int core_x, int core_y, int direction,
   Location loc(core_x, core_y, direction);
   switch (MoveType(direction, next_direction)) {
     case DECISION_BOAT_SHIP:
-      loc.Ship();
+      loc = loc.Ship();
       break;
     case DECISION_BOAT_ROT_CLOCKWISE:
-      loc.Clockwise();
+      loc = loc.Clockwise();
       break;
     case DECISION_BOAT_ROT_COUNTERCLOCKWISE:
-      loc.CounterClockwise();
+      loc = loc.CounterClockwise();
       break;
   }
-
-  CollisionBox(loc.x, loc.y, loc.boat_direction);
+  *this = CollisionBox(loc.x, loc.y, loc.boat_direction);
 }
 
 // 是否撞边界
