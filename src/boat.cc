@@ -164,7 +164,8 @@ void Boat::RemoveFirst() {
 // 判断能否交货
 bool Boat::DeliveryCond() {
   if (pos == -1) {
-    return false;
+    return num >=
+           boat_capacity - DynamicParam::GetInstance()->GetBoatCapacityReduce();
   }
   std::vector<Berth> &berth = MapController::GetInstance()->berth;
   if (id > 15000 - berth[pos].transport_time -

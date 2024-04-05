@@ -389,7 +389,11 @@ void DecisionManager::DecisionBoat() {
 #endif
               continue;
             }
+            // 不可解
 
+#ifdef DEBUG
+            std::cerr << "不可解" << std::endl;
+#endif
           } else if (man == 5) {
             if (is_clockwise) {
               // 旋转的是顺时针的情况
@@ -409,6 +413,11 @@ void DecisionManager::DecisionBoat() {
 #endif
               continue;
             }
+            // 不可解
+
+#ifdef DEBUG
+            std::cerr << "不可解" << std::endl;
+#endif
           } else if (man == 4) {
             if (is_clockwise) {
               // 旋转的是顺时针的情况
@@ -427,6 +436,10 @@ void DecisionManager::DecisionBoat() {
 #endif
               continue;
             }
+#ifdef DEBUG
+            std::cerr << "不可解" << std::endl;
+#endif
+            // 不可解
           } else {
 #ifdef DEBUG
             std::cerr << "一船直行、另一船旋转，核心点曼哈顿距离错误"
