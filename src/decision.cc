@@ -129,7 +129,7 @@ void DecisionManager::DecisionBoat() {
 #ifdef DEBUG
           std::cerr << "都是前行" << std::endl;
 #endif
-          if (man == 6) {
+          if (man == 5) {
             // 错开的情况 1 其中一艘船顺、逆可解
 #ifdef DEBUG
             std::cerr << "错开的情况 1" << std::endl;
@@ -175,7 +175,11 @@ void DecisionManager::DecisionBoat() {
               continue;
             }
             // 不可解
-          } else if (man == 5) {
+
+#ifdef DEBUG
+            std::cerr << "不可解" << std::endl;
+#endif
+          } else if (man == 6) {
             // 没有错开的情况
 #ifdef DEBUG
             std::cerr << "没有错开的情况" << std::endl;
@@ -218,7 +222,7 @@ void DecisionManager::DecisionBoat() {
 
             // 无法解开
 #ifdef DEBUG
-            std::cerr << first_id << "不可解" << std::endl;
+            std::cerr << "不可解" << std::endl;
 #endif
           } else {
 #ifdef DEBUG
