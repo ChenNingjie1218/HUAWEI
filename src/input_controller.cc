@@ -226,7 +226,7 @@ void InputController::Input() {
     } else {
       boat[i].x = ++x;
       boat[i].y = ++y;
-      if (boat[i].pos != -1) {
+      if (goods_num - boat[i].num > 0 && boat[i].pos != -1) {
         berth[boat[i].pos].goods_num -= (goods_num - boat[i].num);
 #ifdef DEBUG
         std::cerr << boat[i].pos << " 泊位更新货物数量："
