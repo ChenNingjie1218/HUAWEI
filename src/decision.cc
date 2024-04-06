@@ -301,7 +301,7 @@ void DecisionManager::DecisionBoat() {
             int man = std::abs(boat[first_id].y - boat[second_id].y) +
                       std::abs(boat[first_id].x - boat[second_id].x);
             if (man == 5) {
-              // 执行四步
+              // 直行四步
               q.push(DECISION_BOAT_SHIP);
               q.push(DECISION_BOAT_SHIP);
               q.push(DECISION_BOAT_SHIP);
@@ -309,14 +309,14 @@ void DecisionManager::DecisionBoat() {
               if (boat[first_id].SolveCollision(q, new_path)) {
                 boat[first_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << first_id << " yzx船让行" << std::endl;
+                std::cerr << first_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
               if (boat[second_id].SolveCollision(q, new_path)) {
                 boat[second_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << second_id << " yzx船让行" << std::endl;
+                std::cerr << second_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
@@ -328,14 +328,14 @@ void DecisionManager::DecisionBoat() {
               if (boat[first_id].SolveCollision(q, new_path)) {
                 boat[first_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << first_id << " yzx船让行" << std::endl;
+                std::cerr << first_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
               if (boat[second_id].SolveCollision(q, new_path)) {
                 boat[second_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << second_id << " yzx船让行" << std::endl;
+                std::cerr << second_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
@@ -346,14 +346,14 @@ void DecisionManager::DecisionBoat() {
               if (boat[first_id].SolveCollision(q, new_path)) {
                 boat[first_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << first_id << " yzx船让行" << std::endl;
+                std::cerr << first_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
               if (boat[second_id].SolveCollision(q, new_path)) {
                 boat[second_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << second_id << " yzx船让行" << std::endl;
+                std::cerr << second_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
@@ -363,14 +363,14 @@ void DecisionManager::DecisionBoat() {
               if (boat[first_id].SolveCollision(q, new_path)) {
                 boat[first_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << first_id << " yzx船让行" << std::endl;
+                std::cerr << first_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
               if (boat[second_id].SolveCollision(q, new_path)) {
                 boat[second_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << second_id << " yzx船让行" << std::endl;
+                std::cerr << second_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
@@ -425,7 +425,7 @@ void DecisionManager::DecisionBoat() {
             int man = std::abs(boat[first_id].y - boat[second_id].y) +
                       std::abs(boat[first_id].x - boat[second_id].x);
             if (man == 5) {
-              // 执行四步
+              // 直行四步
               q.push(DECISION_BOAT_SHIP);
               q.push(DECISION_BOAT_SHIP);
               q.push(DECISION_BOAT_SHIP);
@@ -433,14 +433,14 @@ void DecisionManager::DecisionBoat() {
               if (boat[first_id].SolveCollision(q, new_path)) {
                 boat[first_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << first_id << " yzx船让行" << std::endl;
+                std::cerr << first_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
               if (boat[second_id].SolveCollision(q, new_path)) {
                 boat[second_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << second_id << " yzx船让行" << std::endl;
+                std::cerr << second_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
@@ -452,14 +452,14 @@ void DecisionManager::DecisionBoat() {
               if (boat[first_id].SolveCollision(q, new_path)) {
                 boat[first_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << first_id << " yzx船让行" << std::endl;
+                std::cerr << first_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
               if (boat[second_id].SolveCollision(q, new_path)) {
                 boat[second_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << second_id << " yzx船让行" << std::endl;
+                std::cerr << second_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
@@ -470,14 +470,14 @@ void DecisionManager::DecisionBoat() {
               if (boat[first_id].SolveCollision(q, new_path)) {
                 boat[first_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << first_id << " yzx船让行" << std::endl;
+                std::cerr << first_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
               if (boat[second_id].SolveCollision(q, new_path)) {
                 boat[second_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << second_id << " yzx船让行" << std::endl;
+                std::cerr << second_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
@@ -487,14 +487,14 @@ void DecisionManager::DecisionBoat() {
               if (boat[first_id].SolveCollision(q, new_path)) {
                 boat[first_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << first_id << " yzx船让行" << std::endl;
+                std::cerr << first_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
               if (boat[second_id].SolveCollision(q, new_path)) {
                 boat[second_id].path = new_path;
 #ifdef DEBUG
-                std::cerr << second_id << " yzx船让行" << std::endl;
+                std::cerr << second_id << " 船让行" << std::endl;
 #endif
                 continue;
               }
@@ -1055,8 +1055,8 @@ void DecisionManager::DecisionPurchase() {
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
-  if (!boat_first && RentController::GetInstance()->robot.size() < 16) {
-    // if (RentController::GetInstance()->robot.size() < 20) {
+  // if (!boat_first && RentController::GetInstance()->robot.size() < 16) {
+  if (RentController::GetInstance()->robot.size() < 16) {
     for (std::vector<Location>::size_type i = 0; i < size; ++i) {
       RentController::GetInstance()->RentRobot(i);
     }
@@ -1078,7 +1078,7 @@ void DecisionManager::DecisionPurchase() {
 
   // for (std::vector<Location>::size_type i = 0; i < size; ++i) {
   if (RentController::GetInstance()->boat.size() == 0 ||
-      (RentController::GetInstance()->boat.size() < 1 && boat_first)) {
+      (RentController::GetInstance()->boat.size() < 2 && boat_first)) {
     boat_first = false;
     RentController::GetInstance()->RentBoat(0);
   }
