@@ -164,6 +164,11 @@ void Boat::RemoveFirst() {
 // 判断能否交货
 bool Boat::DeliveryCond() {
   if (pos == -1) {
+    // 交货途中碰撞处理过
+
+#ifdef DEBUG
+    std::cerr << "交货途中碰撞处理过，重新交货" << std::endl;
+#endif
     return num >=
            boat_capacity - DynamicParam::GetInstance()->GetBoatCapacityReduce();
   }
@@ -249,10 +254,12 @@ void Boat::FindBerth() {
         berth[now_berth_id].path.find(i) != berth[now_berth_id].path.end()) {
       // 当前处于某泊位上 且 存了该泊位到泊位i的路径
       time -= berth[now_berth_id].path[i].size();  // 修正走过去的时间
+    } else if (pos == -1) {
+      // 位于交货处 考虑来回时间
+      time -= berth[i].transport_time;
     }
-
-    int goods_num = std::min(time * berth[i].loading_speed, berth[i].goods_num);
-    if (goods_num >= boat_capacity - num && berth[i].boat_id == -1) {
+    int can_load = std::min(time * berth[i].loading_speed, berth[i].goods_num);
+    if (can_load >= boat_capacity - num && berth[i].boat_id == -1) {
       // 泊位i可以把该船装满
       if (berth_id == -1 ||
           berth[i].transport_time < berth[berth_id].transport_time) {
@@ -276,13 +283,16 @@ void Boat::FindBerth() {
           berth[now_berth_id].path.find(i) != berth[now_berth_id].path.end()) {
         // 当前处于某泊位上 且 存了该泊位到泊位i的路径
         time -= berth[now_berth_id].path[i].size();  // 修正走过去的时间
+      } else if (pos == -1) {
+        // 位于交货处 考虑来回时间
+        time -= berth[i].transport_time;
       }
       int can_load =
-          std::min(time * berth[i].transport_time, berth[i].goods_num);
+          std::min(time * berth[i].loading_speed, berth[i].goods_num);
 
       // 选货物最多的
       if (can_load > max_goods_num) {
-        max_goods_num = berth[i].goods_num;
+        max_goods_num = can_load;
         berth_id = i;
       }
     }
@@ -290,6 +300,17 @@ void Boat::FindBerth() {
 #ifdef DEBUG
     std::cerr << "选择了回家近的泊位" << std::endl;
 #endif
+  }
+
+  if (pos == -1 && berth_id == -1) {
+    // 最后阶段 随便找个泊位待着
+    for (int i = 0; i < size; ++i) {
+      if (berth[i].area_id != area_id || berth[i].boat_id != -1) {
+        continue;
+      }
+      berth_id = i;
+      break;
+    }
   }
 
   if (berth_id > -1) {

@@ -101,8 +101,7 @@ void DecisionManager::DecisionBoat() {
     CollisionBox first_now(boat[first_id].x, boat[first_id].y,
                            boat[first_id].direction);  // 第一艘船当前位置
     if (boat[first_id].stuck_times >
-            DynamicParam::GetInstance()->GetBusyValve() &&
-        !first_now.IsLocatedOnMainRoute()) {
+        DynamicParam::GetInstance()->GetBusyValve()) {
 #ifdef DEBUG
       std::cerr << first_id << " 船罚站超时" << std::endl;
 #endif
@@ -1032,40 +1031,16 @@ void DecisionManager::DecisionRobot() {
  * 决策购买
  */
 void DecisionManager::DecisionPurchase() {
-  int ex_count = 0;
-  for (int i = 0; i < MapController::GetInstance()->berth.size(); i++) {
-    ex_count += MapController::GetInstance()->berth[i].goods_num;
-  }
-  need_capability = ex_count / Boat::boat_capacity;
-#ifdef DEBUG
-  std::cerr << "机器人数量" << RentController::GetInstance()->robot.size()
-            << std::endl;
-#endif
-
-  if ((need_capability + 1) > RentController::GetInstance()->boat.size() &&
-      ex_count > (Boat::boat_capacity) &&
-      RentController::GetInstance()->robot.size() < 30) {
-    boat_first = true;
-#ifdef DEBUG
-    std::cerr << "船运输能力不足" << ex_count << std::endl;
-#endif
-  }
-
   // 决策买机器人
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
-  // if (!boat_first && RentController::GetInstance()->robot.size() < 16) {
   if (RentController::GetInstance()->robot.size() < 18) {
     for (std::vector<Location>::size_type i = 0; i < size; ++i) {
       RentController::GetInstance()->RentRobot(i);
     }
   }
 
-  if (!first_robot_fool && RentController::GetInstance()->robot.size() >= 16) {
-    std::cerr << "机器人满" << std::endl;
-    first_robot_fool = true;
-  }
   // 决策买船
 
   // auto &boat_purchase_point =
@@ -1077,10 +1052,7 @@ void DecisionManager::DecisionPurchase() {
   // #endif
 
   // for (std::vector<Location>::size_type i = 0; i < size; ++i) {
-  // if (RentController::GetInstance()->boat.size() == 0 ||
-  // (RentController::GetInstance()->boat.size() < 2 && boat_first)) {
   if (RentController::GetInstance()->boat.size() < 2) {
-    boat_first = false;
     RentController::GetInstance()->RentBoat(0);
   }
   // }

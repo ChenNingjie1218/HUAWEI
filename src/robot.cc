@@ -164,7 +164,7 @@ void Robot::FindBerth(int start_x, int start_y) {
     astar.AstarSearch(path, berth_id);
 #ifdef DEBUG
     std::cerr << "------- astar finished -------" << std::endl;
-    std::cerr << "目标泊位：" << berth_id << "path size:" << path.size()
+    std::cerr << "目标泊位：" << berth_id << " path size:" << path.size()
               << std::endl;
 #endif
   } else {

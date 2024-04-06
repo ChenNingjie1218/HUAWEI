@@ -118,7 +118,11 @@ void InputController::Input() {
       std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
       std::cerr << "船泊transport time:" << berth[i].transport_time
                 << std::endl;
-      // std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
+      for (std::map<int, std::vector<int>>::iterator it = berth[i].path.begin();
+           it != berth[i].path.end(); ++it) {
+        std::cerr << "船舶 " << i << " 到船舶 " << it->first
+                  << " 的距离为:" << it->second.size() << std::endl;
+      }
     }
 
     // 全局货物统计
@@ -261,7 +265,8 @@ void InputController::Input() {
         // 指令执行成功
         boat[i].RemoveFirst();
         boat[i].stuck_times = 0;
-      } else if (temp_status == BOAT_STATUS_MOVING) {
+      } else if (temp_status == BOAT_STATUS_MOVING &&
+                 boat[i].status != BOAT_STATUS_RESTORING) {
         ++boat[i].stuck_times;
 #ifdef DEBUG
         std::cerr << boat_id << " 船堵塞，次数：" << boat[i].stuck_times
