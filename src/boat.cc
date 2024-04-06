@@ -252,8 +252,7 @@ void Boat::FindBerth() {
     }
 
     int goods_num = std::min(time * berth[i].loading_speed, berth[i].goods_num);
-    if (i != pos && goods_num >= boat_capacity - num &&
-        berth[i].boat_id == -1) {
+    if (goods_num >= boat_capacity - num && berth[i].boat_id == -1) {
       // 泊位i可以把该船装满
       if (berth_id == -1 ||
           berth[i].transport_time < berth[berth_id].transport_time) {
@@ -294,7 +293,8 @@ void Boat::FindBerth() {
     auto &location_to_berth_id =
         MapController::GetInstance()->location_to_berth_id;
     Location loc(x, y);
-    if (location_to_berth_id.find(loc) != location_to_berth_id.end()) {
+    if (status == BOAT_STATUS_LOADING &&
+        location_to_berth_id.find(loc) != location_to_berth_id.end()) {
       int now_berth_id = location_to_berth_id[loc];
       // 目前处于某泊位中
       if (berth[now_berth_id].path.find(berth_id) !=
