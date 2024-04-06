@@ -287,7 +287,26 @@ void DecisionManager::DecisionBoat() {
                 continue;
               }
             }
-
+            // 两艘船都旋转无法解开，那就看直行能不能解开，直行四步
+            q.pop();
+            q.push(DECISION_BOAT_SHIP);
+            q.push(DECISION_BOAT_SHIP);
+            q.push(DECISION_BOAT_SHIP);
+            q.push(DECISION_BOAT_SHIP);
+            if (boat[first_id].SolveCollision(q, new_path)) {
+              boat[first_id].path = new_path;
+#ifdef DEBUG
+              std::cerr << first_id << " 船让行" << std::endl;
+#endif
+              continue;
+            } else if (boat[second_id].SolveCollision(q, new_path)) {
+              boat[second_id].path = new_path;
+#ifdef DEBUG
+              std::cerr << second_id << " 船让行" << std::endl;
+#endif
+              continue;
+            }
+            // 其他解法
           } else {
 #ifdef DEBUG
             std::cerr << first_id << " 船逆时针旋转" << std::endl;
@@ -332,6 +351,26 @@ void DecisionManager::DecisionBoat() {
                 continue;
               }
             }
+            // 两艘船都旋转无法解开，那就看直行能不能解开，直行四步
+            q.pop();
+            q.push(DECISION_BOAT_SHIP);
+            q.push(DECISION_BOAT_SHIP);
+            q.push(DECISION_BOAT_SHIP);
+            q.push(DECISION_BOAT_SHIP);
+            if (boat[first_id].SolveCollision(q, new_path)) {
+              boat[first_id].path = new_path;
+#ifdef DEBUG
+              std::cerr << first_id << " 船让行" << std::endl;
+#endif
+              continue;
+            } else if (boat[second_id].SolveCollision(q, new_path)) {
+              boat[second_id].path = new_path;
+#ifdef DEBUG
+              std::cerr << second_id << " 船让行" << std::endl;
+#endif
+              continue;
+            }
+            // 其他解法
           }
         } else {
           // 一个旋转 一个直行
@@ -884,7 +923,7 @@ void DecisionManager::DecisionPurchase() {
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
-  if (RentController::GetInstance()->robot.size() < 12) {
+  if (RentController::GetInstance()->robot.size() < 15) {
     for (std::vector<Location>::size_type i = 0; i < size; ++i) {
       RentController::GetInstance()->RentRobot(i);
     }
