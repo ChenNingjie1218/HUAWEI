@@ -151,7 +151,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
         // ++count;
       }
 
-      std::cerr << count << std::endl;
+      // std::cerr << count << std::endl;
       std::reverse(path.begin(), path.end());
       return true;
     }
