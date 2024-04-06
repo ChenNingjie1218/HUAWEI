@@ -353,6 +353,19 @@ bool CollisionBox::IsLocatedOnMainRoute() {
   return false;
 }
 
+// 判断是否完全处于主航道
+bool CollisionBox::IsCompletelyLocatedOnMainRoute() {
+  auto &map_instance = MapController::GetInstance();
+  for (int i = l_x; i <= r_x; ++i) {
+    for (int j = l_y; j <= r_y; ++j) {
+      if (!map_instance->IsMainChannel(i, j)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 // 给该船下移动指令
 void Boat::DoMove() {
   // 继续走

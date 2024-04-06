@@ -17,6 +17,8 @@ class CollisionBox {
   bool IsCollision();
   // 判断是否处于主航道
   bool IsLocatedOnMainRoute();
+  // 判断是否完全处于主航道
+  bool IsCompletelyLocatedOnMainRoute();
   // 两个对象是否相撞
   static bool JudgeCollision(const CollisionBox &first,
                              const CollisionBox &second);
