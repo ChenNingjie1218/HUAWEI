@@ -2,6 +2,7 @@
 #define BERTH_H_
 #include <map>
 #include <queue>
+#include <set>
 
 #include "goods.h"
 #include "param.h"
@@ -39,6 +40,9 @@ struct Berth {
 
   // 机器人队列
   std::vector<int> robot;  // 当前的机器人
+
+  // 邻居
+  std::set<int> neighbor;
 
   //到泊位的船队列
   std::queue<int> q_boat;

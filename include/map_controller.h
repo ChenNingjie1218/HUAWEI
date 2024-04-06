@@ -29,6 +29,7 @@ struct MapController {
   int nearest_delivery[N][N];      // 距离该点最近的交货点id
   int berth_num;                   // 泊位数量
   std::vector<Berth> berth;        // 泊位数据
+
   /*
    ‘.’ ： 空地
    ‘>’ ： 陆地主干道
@@ -44,6 +45,7 @@ struct MapController {
    ‘T’ ： 交货点
    */
   char ch[N][N];
+
   // int astar_debug[N][N];                       // astar调试搜索点次数
   std::vector<Location> robot_purchase_point;  // 机器人购买点
   std::vector<Location> boat_purchase_point;   // 船购买点
@@ -83,6 +85,7 @@ struct MapController {
   // 用并查集分区
   // 找集合
   int FindArea(int id, bool is_land = true);
+
   // 合并集合
   void MergeArea(int id_1, int id_2, bool is_land = true);
 };

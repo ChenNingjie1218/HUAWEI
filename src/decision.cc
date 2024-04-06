@@ -1056,7 +1056,7 @@ void DecisionManager::DecisionPurchase() {
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
   // if (!boat_first && RentController::GetInstance()->robot.size() < 16) {
-  if (RentController::GetInstance()->robot.size() < 16) {
+  if (RentController::GetInstance()->robot.size() < 18) {
     for (std::vector<Location>::size_type i = 0; i < size; ++i) {
       RentController::GetInstance()->RentRobot(i);
     }
@@ -1077,8 +1077,9 @@ void DecisionManager::DecisionPurchase() {
   // #endif
 
   // for (std::vector<Location>::size_type i = 0; i < size; ++i) {
-  if (RentController::GetInstance()->boat.size() == 0 ||
-      (RentController::GetInstance()->boat.size() < 2 && boat_first)) {
+  // if (RentController::GetInstance()->boat.size() == 0 ||
+  // (RentController::GetInstance()->boat.size() < 2 && boat_first)) {
+  if (RentController::GetInstance()->boat.size() < 2) {
     boat_first = false;
     RentController::GetInstance()->RentBoat(0);
   }

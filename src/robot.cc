@@ -270,13 +270,17 @@ void Robot::ZonePlan() {
   std::cerr << "机器人" << id_ << "决定寻找负荷较大泊位" << std::endl;
 #endif
   std::vector<Berth> &berth = MapController::GetInstance()->berth;
-  if (berth[berth_id].robot.size() > 1) {
+  if (berth[berth_id].robot.size() > 0) {
     int temp_berth_id = -1;
     double max_avg_goods_num = 0, temp;
     auto size = MapController::GetInstance()->berth.size();
 
     // 寻找合适泊位
     for (int i = 0; i < size; i++) {
+      if (berth[berth_id].neighbor.find(i) == berth[berth_id].neighbor.end()) {
+        // 不是邻居
+        continue;
+      }
       temp = berth[i].goods_manager.goods_num * 1.0 / berth[i].robot.size();
       if (temp > max_avg_goods_num && berth[i].goods_manager.goods_num > 1) {
         max_avg_goods_num = temp;

@@ -1,4 +1,7 @@
 #include "map_controller.h"
+
+#include <iostream>
+
 MapController* MapController::instance_ = nullptr;
 MapController*& MapController::GetInstance() {
   if (!instance_) {
@@ -134,10 +137,27 @@ void MapController::InitNearestBerth(std::queue<std::pair<Location, int>>& q) {
         if (nearest_berth[x][y] == -1 && CanRobotReach(x, y)) {
           nearest_berth[x][y] = temp.second;
           q.push(std::make_pair(Location(x, y), temp.second));
+        } else if (nearest_berth[x][y] != -1 &&
+                   nearest_berth[x][y] != temp.second) {
+          // 加入邻居
+          berth[nearest_berth[x][y]].neighbor.insert(temp.second);
+          berth[temp.second].neighbor.insert(nearest_berth[x][y]);
         }
       }
     }
   }
+
+#ifdef DEBUG
+  for (int i = 0; i < berth.size(); i++) {
+    std::cerr << i << "neighbor:" << std::endl;
+
+    for (std::set<int>::iterator it = berth[i].neighbor.begin();
+         it != berth[i].neighbor.end(); ++it) {
+      std::cerr << *it << ' ';
+    }
+    std::cerr << "size:" << berth[i].neighbor.size() << std::endl;
+  }
+#endif
 }
 
 // 初始化nearest_delivery
