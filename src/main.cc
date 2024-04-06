@@ -30,6 +30,13 @@ int main() {
     // --------- 准备阶段 ----------
     DecisionManager::GetInstance()->ClearQueue();  // 清空决策队列
 
+    // 维护每个泊位的货物生命周期
+    auto &berth = MapController::GetInstance()->berth;
+    int berth_size = berth.size();
+    for (int j = 0; j < berth_size; ++j) {
+      berth[j].goods_manager.FreshGoodsLists();
+    }
+
     // --------- 决策阶段 ----------
     DecisionManager::GetInstance()->DecisionRobot();
     DecisionManager::GetInstance()->DecisionBoat();

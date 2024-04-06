@@ -126,7 +126,10 @@ void InputController::Input() {
               << MapController::GetInstance()->total_goods_num << std::endl;
     std::cerr << "全局提交货物数量:" << MapController::GetInstance()->pull_num
               << std::endl;
-
+    std::cerr << "全局生成货物金额:"
+              << MapController::GetInstance()->total_money << std::endl;
+    std::cerr << "全局提交货物金额:" << MapController::GetInstance()->pull_money
+              << std::endl;
 #endif
     exit(0);
   }
@@ -164,9 +167,6 @@ void InputController::Input() {
     if (nearest_berth[x][y] != -1 &&
         MapController::GetInstance()->CanRobotReach(x, y)) {
       if (val > 0) {
-#ifdef DEBUG
-        MapController::GetInstance()->total_goods_num += 1;  // 全局货物数量增加
-#endif
 #ifdef GOODS_FILTER
         if (val < berth[nearest_berth[x][y]].goods_manager.value_valve) {
 #ifdef DEBUG
@@ -175,6 +175,10 @@ void InputController::Input() {
           // 忽略不值钱的货物
           continue;
         }
+#endif
+#ifdef DEBUG
+        MapController::GetInstance()->total_goods_num += 1;  // 全局货物数量增加
+        MapController::GetInstance()->total_money += val;  // 全局货物金额增加
 #endif
 
         Goods* new_goods = new Goods(x, y, val, id);
@@ -224,6 +228,11 @@ void InputController::Input() {
       MapController::GetInstance()->pull_num += 1;
       std::cerr << robot[i].berth_id << " 泊位更新货物数量："
                 << berth[robot[i].berth_id].goods_num << std::endl;
+#endif
+    } else if (robot[i].goods && !temp_goods) {
+#ifdef DEBUG
+      // 假get
+      std::cerr << "假get" << std::endl;
 #endif
     }
     robot[i].goods = temp_goods;

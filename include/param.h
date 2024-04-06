@@ -1,7 +1,7 @@
 #ifndef PARAM_H_
 #define PARAM_H_
 #define DEBUG
-
+#define LIFETIME 1000
 // 地图长度
 const int n = 200;
 const int N = 210;
@@ -82,7 +82,7 @@ class DynamicParam {
 
  private:
   int tolerant_time_ = 40;           // 参数 机器人找货物容忍步数
-  int tolerant_leave_time_ = 5;      // 参数 船最后走可容忍时间的
+  int tolerant_leave_time_ = 10;     // 参数 船最后走可容忍时间的
   int goods_value_valve_ = 5;        // 参数 货物筛选域值
   int goods_filter_valve_num_ = 30;  // 参数 货物筛选数量域值
   int valueable_goods_valve_ = 80;   // 参数 贵重货物域值

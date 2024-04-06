@@ -98,8 +98,11 @@ void DecisionManager::DecisionBoat() {
   size = move_id.size();
   for (int i = 0; i < size; ++i) {
     int first_id = move_id[i];
+    CollisionBox first_now(boat[first_id].x, boat[first_id].y,
+                           boat[first_id].direction);  // 第一艘船当前位置
     if (boat[first_id].stuck_times >
-        DynamicParam::GetInstance()->GetBusyValve()) {
+            DynamicParam::GetInstance()->GetBusyValve() &&
+        !first_now.IsLocatedOnMainRoute()) {
 #ifdef DEBUG
       std::cerr << first_id << " 船罚站超时" << std::endl;
 #endif
@@ -111,8 +114,6 @@ void DecisionManager::DecisionBoat() {
       }
       continue;
     }
-    CollisionBox first_now(boat[first_id].x, boat[first_id].y,
-                           boat[first_id].direction);  // 第一艘船当前位置
     CollisionBox first_next(boat[first_id].x, boat[first_id].y,
                             boat[first_id].direction,
                             boat[first_id].path[0]);  // 第一艘船下一步位置
@@ -646,6 +647,8 @@ void DecisionManager::DecisionRobot() {
         robot[i].FindBerth(robot[i].x, robot[i].y);
 #ifdef DEBUG
         std::cerr << "成功更新目标泊位" << std::endl;
+        MapController::GetInstance()->pull_money +=
+            robot[i].target_goods->money;
 #endif
         //当前持有货物
         robot[i].goods = true;
@@ -932,7 +935,7 @@ void DecisionManager::DecisionPurchase() {
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
-  if (!boat_first && RentController::GetInstance()->robot.size() < 20) {
+  if (!boat_first && RentController::GetInstance()->robot.size() < 18) {
     // if (RentController::GetInstance()->robot.size() < 20) {
     for (std::vector<Location>::size_type i = 0; i < size; ++i) {
       RentController::GetInstance()->RentRobot(i);

@@ -108,3 +108,18 @@ void GoodsManager::ResetFirstFreeGoods() {
     first_free_goods = first_free_goods->next;
   }
 }
+
+// 刷新货物链表
+void GoodsManager::FreshGoodsLists() {
+  Goods *cur = head_goods->next;
+  while (cur != head_goods) {
+    if (id - cur->birth >= LIFETIME) {
+      Goods *temp = cur->next;
+      DeleteGoods(cur, true);
+      cur = temp;
+    } else {
+      // 剪枝
+      break;
+    }
+  }
+}

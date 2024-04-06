@@ -37,6 +37,9 @@ struct GoodsManager {
   // 重置first_free_goods
   void ResetFirstFreeGoods();
 
+  // 刷新货物链表
+  void FreshGoodsLists();
+
   // 货物链表头节点
   Goods *head_goods = new Goods();
 
