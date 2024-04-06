@@ -116,7 +116,7 @@ void InputController::Input() {
     int size = berth.size();
     for (int i = 0; i < size; ++i) {
       std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
-      std::cerr << "船泊transport time:" << berth[i].path[-1].size()
+      std::cerr << "船泊transport time:" << berth[i].transport_time
                 << std::endl;
       // std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
     }
@@ -251,6 +251,7 @@ void InputController::Input() {
           boat[i].direction != direction) {
         // 指令执行成功
         boat[i].RemoveFirst();
+        boat[i].stuck_times = 0;
       } else if (temp_status == BOAT_STATUS_MOVING) {
         ++boat[i].stuck_times;
 #ifdef DEBUG

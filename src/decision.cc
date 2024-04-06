@@ -101,9 +101,15 @@ void DecisionManager::DecisionBoat() {
     if (boat[first_id].stuck_times >
         DynamicParam::GetInstance()->GetBusyValve()) {
 #ifdef DEBUG
-      std::cerr << first_id << "船罚站超时" << std::endl;
+      std::cerr << first_id << " 船罚站超时" << std::endl;
 #endif
       boat[first_id].DoDept();
+      int boat_size = boat.size();
+      // 重置所有船堵塞次数，即只dept一艘船
+      for (int j = 0; j < boat_size; ++j) {
+        boat[j].stuck_times = 0;
+      }
+      continue;
     }
     CollisionBox first_now(boat[first_id].x, boat[first_id].y,
                            boat[first_id].direction);  // 第一艘船当前位置
@@ -123,6 +129,7 @@ void DecisionManager::DecisionBoat() {
                                boat[second_id].direction,
                                boat[second_id].path[0]);  // 第二艘船下一步位置
       if (second_next.IsCompletelyLocatedOnMainRoute()) {
+        // 不去影响位于主航道的船
         continue;
       }
       if (CollisionBox::JudgeCollision(first_next, second_now) &&
