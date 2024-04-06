@@ -1,5 +1,6 @@
 #include "input_controller.h"
 
+#include <chrono>
 #include <cstdio>
 #include <iostream>
 
@@ -72,8 +73,12 @@ void InputController::Init() {
   fprintf(debug_map_file, "泊位数据处理完毕！\n");
 #endif
 
+  auto start = std::chrono::high_resolution_clock::now();
   // 初始化离每个点最近的泊位id
   MapController::GetInstance()->InitNearestBerth(q);
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> duration = end - start;
+  std::cerr << "bfs耗时:" << duration.count() << " ms" << std::endl;
 
   // 船容积
   scanf("%d", &Boat::boat_capacity);
@@ -112,6 +117,13 @@ void InputController::Input() {
                 << std::endl;
       // std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
     }
+
+    // 全局货物统计
+    std::cerr << "全局生成货物数量:"
+              << MapController::GetInstance()->total_goods_num << std::endl;
+    std::cerr << "全局提交货物数量:" << MapController::GetInstance()->pull_num
+              << std::endl;
+
 #endif
     exit(0);
   }
@@ -149,6 +161,7 @@ void InputController::Input() {
     if (nearest_berth[x][y] != -1 &&
         MapController::GetInstance()->CanRobotReach(x, y)) {
       if (val > 0) {
+        MapController::GetInstance()->total_goods_num += 1;  // 全局货物数量增加
 #ifdef GOODS_FILTER
         if (val < berth[nearest_berth[x][y]].goods_manager.value_valve) {
 #ifdef DEBUG
@@ -200,6 +213,10 @@ void InputController::Input() {
     // 放置成功港口货物加一
     if (robot[i].pre_goods - temp_goods == 1) {
       ++berth[robot[i].berth_id].goods_num;
+
+      // 全局放置数量增加
+      MapController::GetInstance()->pull_num += 1;
+
 #ifdef DEBUG
       std::cerr << robot[i].berth_id << " 泊位更新货物数量："
                 << berth[robot[i].berth_id].goods_num << std::endl;

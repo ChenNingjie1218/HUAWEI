@@ -73,6 +73,12 @@ struct Robot {
    */
   int GetAway(std::vector<NextPoint> &next_points, int ignore_id,
               std::vector<int> &not_move_id);
+
+  // 分区规划
+  void ZonePlan();
+
+  // 广度寻找最近货物
+  void FindNeighborGoods();
 };
 
 #endif

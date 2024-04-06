@@ -30,6 +30,9 @@ struct DecisionManager {
   DecisionManager() = default;
   DecisionManager(const DecisionManager& other) = default;
   static DecisionManager* instance_;
+  bool first_robot_fool = false;
+  bool boat_first = false;
+  int need_capability = 0;
 
  public:
   static DecisionManager*& GetInstance();

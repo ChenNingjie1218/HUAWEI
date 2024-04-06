@@ -16,6 +16,8 @@ struct MapController {
  public:
   static MapController *&GetInstance();
 
+  int pull_num = 0;                // 机器人往泊位放货总数
+  int total_goods_num = 0;         // 货物生成总数
   int land_area[N * N];            // 陆地区域
   int sea_area[N * N];             // 海洋区域
   int busy_point[N][N];            // 堵车点

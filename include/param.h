@@ -44,7 +44,7 @@ const int N = 210;
  * 开启后将按照 GOODS_VALUE_VALVE 筛选货物
  * 当货物数量超过 GOODS_FILTER_VALVE_NUM 将会按照 VALUEABLE_GOODS_VALVE 筛选货物
  */
-// #define GOODS_FILTER  // 开关 货物过滤机制
+#define GOODS_FILTER  // 开关 货物过滤机制
 
 class DynamicParam {
  public:
@@ -81,14 +81,14 @@ class DynamicParam {
   }
 
  private:
-  int tolerant_time_ = 40;             // 参数 机器人找货物容忍步数
-  int tolerant_leave_time_ = 5;        // 参数 船最后走可容忍时间的
-  int goods_value_valve_ = 0;          // 参数 货物筛选域值
-  int goods_filter_valve_num_ = 9999;  // 参数 货物筛选数量域值
-  int valueable_goods_valve_ = 0;      // 参数 贵重货物域值
-  int final_tolerant_time_ = 200;  // 参数 最后冲刺阶段的容忍时间
-  int busy_valve_ = 5;             // 参数 判断该点拥堵的域值
-  int boat_capacity_reduce_ = 0;   // 参数 改变船容量
+  int tolerant_time_ = 40;           // 参数 机器人找货物容忍步数
+  int tolerant_leave_time_ = 5;      // 参数 船最后走可容忍时间的
+  int goods_value_valve_ = 5;        // 参数 货物筛选域值
+  int goods_filter_valve_num_ = 30;  // 参数 货物筛选数量域值
+  int valueable_goods_valve_ = 80;   // 参数 贵重货物域值
+  int final_tolerant_time_ = 200;    // 参数 最后冲刺阶段的容忍时间
+  int busy_valve_ = 5;               // 参数 判断该点拥堵的域值
+  int boat_capacity_reduce_ = 0;     // 参数 改变船容量
 
   static DynamicParam* instance_;
 

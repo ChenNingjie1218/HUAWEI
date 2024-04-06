@@ -1,5 +1,6 @@
 #include "decision.h"
 
+#include <chrono>
 #include <iostream>
 #include <queue>
 #include <vector>
@@ -832,35 +833,17 @@ void DecisionManager::DecisionRobot() {
           std::cerr << "机器人无法更改新的路线" << std::endl;
 #endif
         }
-      } else {  // 没有目标货物罚站
-        // 更换所属泊位
-        if (berth[robot[robot_id].berth_id].robot.size() > 1) {
-          int temp_berth_id = -1;
-          double max_avg_goods_num = 0, temp;
-          auto size = MapController::GetInstance()->berth.size();
-          for (int i = 0; i < size; i++) {
-            temp =
-                berth[i].goods_manager.goods_num * 1.0 / berth[i].robot.size();
-            if (temp > max_avg_goods_num) {
-              max_avg_goods_num = temp;
-              temp_berth_id = i;
-            }
-          }
-          if (temp_berth_id != -1) {
-            int old_berth_id = robot[robot_id].berth_id;
-            for (std::vector<int>::iterator it =
-                     berth[old_berth_id].robot.begin();
-                 it != berth[old_berth_id].robot.end(); ++it) {
-              if (*it == robot_id) {
-                berth[old_berth_id].robot.erase(it);
-                break;
-              }
-            }
-
-            robot[robot_id].berth_id = temp_berth_id;
-            berth[temp_berth_id].robot.push_back(robot_id);
-          }
-        }
+      } else {
+        // 没有目标货物罚站，更换所属泊位
+        auto start = std::chrono::high_resolution_clock::now();
+        // robot[robot_id].FindNeighborGoods();
+        robot[robot_id].ZonePlan();
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> duration = end - start;
+#ifdef DEBUG
+        std::cerr << "机器人" << robot_id << "换泊位耗时：" << duration.count()
+                  << " ms" << std::endl;
+#endif
       }
     }
   }
@@ -870,16 +853,40 @@ void DecisionManager::DecisionRobot() {
  * 决策购买
  */
 void DecisionManager::DecisionPurchase() {
+  int ex_count = 0;
+  for (int i = 0; i < MapController::GetInstance()->berth.size(); i++) {
+    ex_count += MapController::GetInstance()->berth[i].goods_num;
+  }
+  need_capability = ex_count / Boat::boat_capacity;
+#ifdef DEBUG
+  std::cerr << "机器人数量" << RentController::GetInstance()->robot.size()
+            << std::endl;
+#endif
+
+  if ((need_capability + 1) > RentController::GetInstance()->boat.size() &&
+      ex_count > (Boat::boat_capacity) &&
+      RentController::GetInstance()->robot.size() < 14) {
+    boat_first = true;
+#ifdef DEBUG
+    std::cerr << "船运输能力不足" << ex_count << std::endl;
+#endif
+  }
+
   // 决策买机器人
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   auto size = robot_purchase_point.size();
-  if (RentController::GetInstance()->robot.size() < 12) {
+  if (!boat_first && RentController::GetInstance()->robot.size() < 18) {
+    // if (RentController::GetInstance()->robot.size() < 20) {
     for (std::vector<Location>::size_type i = 0; i < size; ++i) {
       RentController::GetInstance()->RentRobot(i);
     }
   }
 
+  if (!first_robot_fool && RentController::GetInstance()->robot.size() >= 18) {
+    std::cerr << "机器人满" << std::endl;
+    first_robot_fool = true;
+  }
   // 决策买船
 
   // auto &boat_purchase_point =
@@ -891,7 +898,9 @@ void DecisionManager::DecisionPurchase() {
   // #endif
 
   // for (std::vector<Location>::size_type i = 0; i < size; ++i) {
-  if (RentController::GetInstance()->boat.size() < 3) {
+  if (RentController::GetInstance()->boat.size() == 0 ||
+      (RentController::GetInstance()->boat.size() < 2 && boat_first)) {
+    boat_first = false;
     RentController::GetInstance()->RentBoat(0);
   }
   // }
