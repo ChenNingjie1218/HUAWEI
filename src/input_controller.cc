@@ -230,6 +230,12 @@ void InputController::Input() {
           boat[i].direction != direction) {
         // 指令执行成功
         boat[i].RemoveFirst();
+      } else if (temp_status == BOAT_STATUS_MOVING) {
+        ++boat[i].stuck_times;
+#ifdef DEBUG
+        std::cerr << boat_id << " 船堵塞，次数：" << boat[i].stuck_times
+                  << std::endl;
+#endif
       }
 
       boat[i].x = ++x;
@@ -244,11 +250,11 @@ void InputController::Input() {
       boat[i].num = goods_num;
       boat[i].direction = direction;
     }
-    // 到达泊位入队
-    if (temp_status != boat[i].status && temp_status == 0 &&
-        boat[i].pos != -1) {
-      berth[boat[i].pos].q_boat.push(i);
-    }
+    // // 到达泊位入队
+    // if (temp_status != boat[i].status && temp_status == 0 &&
+    //     boat[i].pos != -1) {
+    //   berth[boat[i].pos].q_boat.push(i);
+    // }
 
     boat[i].status = temp_status;
 #ifdef DEBUG

@@ -71,6 +71,7 @@ void Boat::DoDept() {
   Decision decision(DECISION_TYPE_BOAT_DEPT, id_);
   DecisionManager::GetInstance()->q_decision.push(decision);
   path.clear();
+  stuck_times = 0;
 #ifdef DEBUG
   std::cerr << id_ << " 船重置到主航道" << std::endl;
 #endif

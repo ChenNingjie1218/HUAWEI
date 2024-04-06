@@ -73,6 +73,9 @@ struct Boat {
   // 船的路径，只用存方向
   std::vector<int> path;
 
+  // 船堵塞的次数
+  int stuck_times = 0;
+
   Boat();
   Boat(int &id, int &goods_num, int &x, int &y, int &direction, int &status);
 
