@@ -171,5 +171,5 @@ bool MapController::IsMainRoad(int x, int y) {
 // 是否是主航道
 bool MapController::IsMainChannel(int x, int y) {
   return ch[x][y] == '~' || ch[x][y] == 'c' || ch[x][y] == 'T' ||
-         ch[x][y] == 'K';
+         ch[x][y] == 'K' || ch[x][y] == 'S';
 }

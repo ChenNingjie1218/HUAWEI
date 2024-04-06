@@ -286,6 +286,10 @@ void Boat::FindBerth() {
         berth_id = i;
       }
     }
+  } else {
+#ifdef DEBUG
+    std::cerr << "选择了回家近的泊位" << std::endl;
+#endif
   }
 
   if (berth_id > -1) {
