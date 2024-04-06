@@ -44,8 +44,9 @@ int main() {
   // 泊位上残留货物数量
   int size = berth.size();
   for (int i = 0; i < size; ++i) {
-    std::cerr << "船上残留货物:" << berth[i].goods_num << std::endl;
+    std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
   }
+
 #endif
   return 0;
 }

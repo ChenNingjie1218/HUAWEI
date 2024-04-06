@@ -263,3 +263,111 @@ int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
 #endif
   return -1;
 }
+
+// 机器人分区规划
+void Robot::ZonePlan() {
+#ifdef DEBUG
+  std::cerr << "机器人" << id_ << "决定寻找负荷较大泊位" << std::endl;
+#endif
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
+  if (berth[berth_id].robot.size() > 1) {
+    int temp_berth_id = -1;
+    double max_avg_goods_num = 0, temp;
+    auto size = MapController::GetInstance()->berth.size();
+
+    // 寻找合适泊位
+    for (int i = 0; i < size; i++) {
+      temp = berth[i].goods_manager.goods_num * 1.0 / berth[i].robot.size();
+      if (temp > max_avg_goods_num && berth[i].goods_manager.goods_num > 1) {
+        max_avg_goods_num = temp;
+        temp_berth_id = i;
+      }
+    }
+
+    // 机器人换去新泊位
+    if (temp_berth_id != -1) {
+      int old_berth_id = berth_id;
+      for (std::vector<int>::iterator it = berth[old_berth_id].robot.begin();
+           it != berth[old_berth_id].robot.end(); ++it) {
+        if (*it == id_) {
+          berth[old_berth_id].robot.erase(it);
+          break;
+        }
+      }
+      berth_id = temp_berth_id;
+      berth[temp_berth_id].robot.push_back(id_);
+#ifdef DEBUG
+      std::cerr << "机器人" << id_ << "从泊位" << old_berth_id << "更换至泊位"
+                << berth_id << std::endl;
+#endif
+    }
+  }
+}
+
+// bfs寻找最近货物
+void Robot::FindNeighborGoods() {
+#ifdef DEBUG
+  std::cerr << "机器人" << id_ << "决定寻找附近泊位货物" << std::endl;
+  int old_berth = -1, count = 0;
+#endif
+  int x = 0, y = 0;
+  bool search[N][N] = {{false}};
+  std::queue<Location> q;
+  q.push(Location(this->x, this->y));
+  std::array<Location, 4> &DIRS = MapController::GetInstance()->DIRS;
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
+
+  // bfs搜索货物
+  while (!q.empty()) {
+    Location temp = q.front();
+    q.pop();
+    for (int i = 0; i < 4; i++) {
+      x = temp.x + DIRS[i].x;
+      y = temp.y + DIRS[i].y;
+      if (!search[x][y] && (x > 0 && x <= n && y > 0 && y <= n) &&
+          MapController::GetInstance()->CanRobotReach(x, y)) {
+#ifdef DEBUG
+        count++;
+        // std::cerr << " 搜索点:(" << x << "," << y << ") ";  // << std::endl;
+#endif
+        search[x][y] = true;
+        // bfs搜索到货物
+        if (MapController::GetInstance()->gds[x][y] != nullptr &&
+            MapController::GetInstance()->gds[x][y]->robot_id != -1) {
+#ifdef DEBUG
+          std::cerr << "搜索" << count << "个点后找到到货物:" << x << "," << y
+                    << std::endl;
+#endif
+          target_goods = MapController::GetInstance()->gds[x][y];
+          target_goods->robot_id = id_;
+#ifdef DEBUG
+          old_berth = berth_id;
+#endif
+          // 机器人离开原来泊位
+          for (std::vector<int>::iterator it = berth[berth_id].robot.begin();
+               it != berth[berth_id].robot.end(); ++it) {
+            if (*it == id_) {
+              berth[berth_id].robot.erase(it);
+              break;
+            }
+          }
+
+          // 机器人加入新的泊位
+          berth_id = MapController::GetInstance()->nearest_berth[x][y];
+          berth[berth_id].robot.push_back(id_);
+#ifdef DEBUG
+          std::cerr << "机器人" << id_ << "从泊位" << old_berth << "更换至泊位"
+                    << berth_id << std::endl;
+#endif
+          // 清空队列
+          std::queue<Location> empty;
+          q.swap(empty);
+          break;
+        }
+
+        // 没搜索到，加入队列
+        q.push(Location(x, y));
+      }
+    }
+  }
+}
