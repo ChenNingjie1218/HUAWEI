@@ -1,6 +1,7 @@
 #ifndef ASTAR_H_
 #define ASTAR_H_
 #include <array>
+#include <map>
 #include <queue>
 #include <vector>
 
@@ -15,6 +16,12 @@ struct Location {
   friend bool operator==(const Location &a, const Location &b);
   friend bool operator!=(const Location &a, const Location &b);
   friend bool operator<(Location a, Location b);
+
+  // 购买机器人的点记录港口的距离，第一个参数是距离，第二个参数是泊位的id
+  std::multimap<int, int> robot_purchase_point_distance_to_berth;
+
+  // 这个购买点如果购买机器人，机器人应该到哪个泊位去
+  int robot_purchase_point_to_berth_id;
 
   // 顺时针转动
   Location Clockwise();

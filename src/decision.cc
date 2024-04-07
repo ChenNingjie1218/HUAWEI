@@ -1014,13 +1014,15 @@ void DecisionManager::DecisionRobot() {
 #endif
         }
       } else {
-        // 没有目标货物罚站，更换所属泊位
+// 没有目标货物罚站，更换所属泊位
+#ifdef DEBUG
         auto start = std::chrono::high_resolution_clock::now();
-        // robot[robot_id].FindNeighborGoods();
+// robot[robot_id].FindNeighborGoods();
+#endif
         robot[robot_id].ZonePlan();
+#ifdef DEBUG
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> duration = end - start;
-#ifdef DEBUG
         std::cerr << "机器人" << robot_id << "换泊位耗时：" << duration.count()
                   << " ms" << std::endl;
 #endif
@@ -1036,9 +1038,26 @@ void DecisionManager::DecisionPurchase() {
   // 决策买机器人
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
-  auto size = robot_purchase_point.size();
+  auto &purchase_point = robot_purchase_point;
   if (RentController::GetInstance()->robot.size() < 18) {
-    for (std::vector<Location>::size_type i = 0; i < size; ++i) {
+    auto &berth = MapController::GetInstance()->berth;
+    for (std::vector<Location>::size_type i = 0; i < purchase_point.size();
+         ++i) {
+      auto &point_map =
+          purchase_point[i].robot_purchase_point_distance_to_berth;
+      auto min_robot_count = point_map.begin();
+      int count = berth[min_robot_count->second].robot.size();
+      // 找出泊位现有机器人数量最少的
+      for (auto iter = point_map.begin(); iter != point_map.end(); ++iter) {
+        auto count_next = berth[iter->second].robot.size();
+        if (count_next < count) {
+          count = count_next;
+          min_robot_count = iter;
+        }
+      }
+      robot_purchase_point[i].robot_purchase_point_to_berth_id =
+          min_robot_count->second;
+      // std::cerr << "目标泊位yyy = " << min_robot_count->second << std::endl;
       RentController::GetInstance()->RentRobot(i);
     }
   }

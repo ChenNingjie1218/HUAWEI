@@ -94,10 +94,44 @@ void InputController::Init() {
   fprintf(debug_map_file, "%s", okk);
   fclose(debug_map_file);
 #endif
-  printf("OK\n");
-  fflush(stdout);
 
   // --------- 其他初始化 ----------
+  // 初始化计算机器人购买点，到达各个泊位的距离
+  auto& robot_purchase_point =
+      MapController::GetInstance()->robot_purchase_point;
+  for (int i = 0; i < robot_purchase_point.size(); ++i) {
+    auto& berth = MapController::GetInstance()->berth;
+    for (int j = 0; j < berth.size(); ++j) {
+      // 计算购买点i到泊位j的距离
+      Astar astar(robot_purchase_point[i].x, robot_purchase_point[i].y,
+                  berth[j].x, berth[j].y);
+      std::vector<Location> path;
+      astar.AstarSearch(path, berth[j].id_);
+      if (path.empty()) {
+#ifdef DEBUG
+        std::cerr << "计算机器人购买点到泊位的路径失败" << std::endl;
+#endif
+        continue;
+      }
+      // std::cerr << "计算路径" << std::endl;
+      robot_purchase_point[i].robot_purchase_point_distance_to_berth.insert(
+          std::make_pair(static_cast<int>(path.size()), berth[j].id_));
+    }
+  }
+  // 输出robot_purchase_point_distance_to_berth
+  // for (int i = 0; i < robot_purchase_point.size(); ++i) {
+  //   std::cerr << "购买点" << i << "到各个泊位的距离：" << std::endl;
+  //   for (auto it = robot_purchase_point[i]
+  //                      .robot_purchase_point_distance_to_berth.begin();
+  //        it !=
+  //        robot_purchase_point[i].robot_purchase_point_distance_to_berth.end();
+  //        ++it) {
+  //     std::cerr << "距离：" << it->first << "泊位id：" << it->second
+  //               << std::endl;
+  //   }
+  // }
+  printf("OK\n");
+  fflush(stdout);
 }
 
 // 每帧的数据
@@ -210,7 +244,16 @@ void InputController::Input() {
     if (i >= static_cast<int>(robot.size())) {
       // 新增机器人
       robot.push_back(Robot(robot_id, temp_goods, ++x, ++y));
-      robot[robot_id].berth_id = robot_id % berth.size();
+      auto& robot_purchase_point =
+          MapController::GetInstance()->robot_purchase_point;
+      for (auto p : robot_purchase_point) {
+        if (p.x == x && p.y == y) {
+          std::cerr << "增加机器人" << std::endl;
+          robot[robot_id].berth_id = p.robot_purchase_point_to_berth_id;
+          break;
+        }
+      }
+      // robot[robot_id].berth_id = robot_id % berth.size();
       berth[robot[robot_id].berth_id].robot.push_back(robot_id);
     } else {
       // 旧机器人更新坐标
