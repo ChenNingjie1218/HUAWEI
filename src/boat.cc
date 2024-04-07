@@ -167,14 +167,13 @@ bool Boat::DeliveryCond() {
     // 才购买的船
     return false;
   }
-  if (pos == -1) {
+  if (pos == -1 && num) {
     // 交货途中碰撞处理过
 
 #ifdef DEBUG
     std::cerr << "交货途中碰撞处理过，重新交货" << std::endl;
 #endif
-    return num >=
-           boat_capacity - DynamicParam::GetInstance()->GetBoatCapacityReduce();
+    return true;
   }
   std::vector<Berth> &berth = MapController::GetInstance()->berth;
   if (id > 15000 - berth[pos].transport_time -
