@@ -53,7 +53,8 @@ Point::Point(Location loc) {
 bool Point::CanReach() {
   auto &map_instance = MapController::GetInstance();
   if (map_instance->busy_point[loc.x][loc.y] >
-      DynamicParam::GetInstance()->GetBusyValve()) {
+          DynamicParam::GetInstance()->GetBusyValve() &&
+      map_instance->busy_point[loc.x][loc.y] != 'B') {
     return false;
   }
   if (map_instance->CanRobotReach(loc.x, loc.y)) {

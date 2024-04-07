@@ -14,12 +14,12 @@ MapController*& MapController::GetInstance() {
 int MapController::FindArea(int id, bool is_land) {
   if (is_land) {
     if (land_area[id] != id) {
-      land_area[id] = FindArea(land_area[id]);
+      land_area[id] = FindArea(land_area[id], is_land);
     }
     return land_area[id];
   } else {
     if (sea_area[id] != id) {
-      sea_area[id] = FindArea(sea_area[id]);
+      sea_area[id] = FindArea(sea_area[id], is_land);
     }
     return sea_area[id];
   }

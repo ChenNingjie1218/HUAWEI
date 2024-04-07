@@ -266,7 +266,8 @@ void InputController::Input() {
         boat[i].RemoveFirst();
         boat[i].stuck_times = 0;
       } else if (temp_status == BOAT_STATUS_MOVING &&
-                 boat[i].status != BOAT_STATUS_RESTORING) {
+                 boat[i].status != BOAT_STATUS_RESTORING &&
+                 boat[i].path.size()) {
         ++boat[i].stuck_times;
 #ifdef DEBUG
         std::cerr << boat_id << " 船堵塞，次数：" << boat[i].stuck_times
