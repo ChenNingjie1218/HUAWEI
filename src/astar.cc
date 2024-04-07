@@ -213,7 +213,8 @@ void Astar::AstarSearch(std::vector<int> &path) {
     if (target_berth_id > -1 &&
         MapController::GetInstance()->ch[current.x][current.y] == 'K') {
       // 目标泊位，且扫到了靠泊区
-      can_finish = location_to_berth_id[current] == target_berth_id;
+      can_finish = (location_to_berth_id[Location(current.x, current.y)] ==
+                    target_berth_id);
     }
     if (current == end || can_finish) {
       Location temp = current;

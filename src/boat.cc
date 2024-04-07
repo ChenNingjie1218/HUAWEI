@@ -251,7 +251,7 @@ void Boat::FindBerth() {
   if (location_to_berth_id.find(loc) != location_to_berth_id.end()) {
     now_berth_id = location_to_berth_id[loc];
   }
-  int transport_time = 1000;  // 移动到泊位再回家的预估时间
+  int transport_time = 1010;  // 移动到泊位再回家的预估时间
   // 先看有没有泊位能让自己填满
 
   auto &nearest_delivery = MapController::GetInstance()->nearest_delivery;
@@ -270,7 +270,7 @@ void Boat::FindBerth() {
         // 泊位记录的transport_time不是该交货点
         temp_transport_time += 500;
       }
-    } else if (now_berth_id) {
+    } else if (now_berth_id == -1) {
       // 当前没有在交货点和泊位中
       temp_transport_time += 500;
     } else if (berth[now_berth_id].path.find(i) !=
@@ -318,7 +318,7 @@ void Boat::FindBerth() {
           // 泊位记录的transport_time不是该交货点
           temp_transport_time += 500;
         }
-      } else if (now_berth_id) {
+      } else if (now_berth_id == -1) {
         // 当前没有在交货点和泊位中
         temp_transport_time += 500;
       } else if (berth[now_berth_id].path.find(i) !=
