@@ -95,8 +95,9 @@ void MapController::InitMapData() {
 
       // 初始化最近交货点id
       nearest_delivery[i][j] = -1;
-
-      // astar_debug[i][j] = 0;
+#ifdef TEST_ASTAR
+      astar_debug[i][j] = 0;
+#endif
     }
   }
 

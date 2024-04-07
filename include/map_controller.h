@@ -45,8 +45,9 @@ struct MapController {
    ‘T’ ： 交货点
    */
   char ch[N][N];
-
-  // int astar_debug[N][N];                       // astar调试搜索点次数
+#ifdef TEST_ASTAR
+  int astar_debug[N][N];  // astar调试搜索点次数
+#endif
   std::vector<Location> robot_purchase_point;  // 机器人购买点
   std::vector<Location> boat_purchase_point;   // 船购买点
   std::vector<Location> delivery_point;        // 交货点

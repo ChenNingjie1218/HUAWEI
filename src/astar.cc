@@ -27,6 +27,11 @@ bool operator==(const Location &a, const Location &b) {
 bool operator!=(const Location &a, const Location &b) { return !(a == b); }
 
 bool operator<(Location a, Location b) {
+  if (a.change_priority && !b.change_priority) {
+    return true;
+  } else if (!a.change_priority && b.change_priority) {
+    return false;
+  }
   return std::tie(a.x, a.y) < std::tie(b.x, b.y);
 }
 
@@ -132,11 +137,15 @@ bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
   came_from[start] = start;
   double *cost_so_far = new double[1000000];
   cost_so_far[start.x * 1000 + start.y] = 1;
+#ifdef TEST_ASTAR
   int count = 0;
+#endif
   while (!frontier.empty()) {
     Location current = frontier.get();
+#ifdef TEST_ASTAR
     ++count;
-    // ++MapController::GetInstance()->astar_debug[current.x][current.y];
+    ++MapController::GetInstance()->astar_debug[current.x][current.y];
+#endif
     int cur_hash_index = current.x * 1000 + current.y;
     if (MapController::GetInstance()->ch[current.x][current.y] == 'B' &&
         berth_id ==
@@ -177,17 +186,36 @@ void Astar::AstarSearch(std::vector<int> &path) {
   came_from[start] = start;
   double *cost_so_far = new double[10000000];
   cost_so_far[start.boat_direction * 1000000 + start.x * 1000 + start.y] = 1;
-  // int count = 0;
+#ifdef TEST_ASTAR
+  int count = 0;
+#endif
   // 方位朝向不对加高代价
   int located_left = end.y < start.y ? 1 : 0;  // 终点位于起点左边
   int located_up = end.x < start.x ? 1 : 0;    // 终点位于起点上边
+  int target_berth_id = -1;                    // -1表示交货点
+  auto &location_to_berth_id =
+      MapController::GetInstance()->location_to_berth_id;
+  auto it = location_to_berth_id.find(end);
+  if (it != location_to_berth_id.end()) {
+    // 目标是泊位
+    target_berth_id = it->second;
+  }
   while (!frontier.empty()) {
     Location current = frontier.get();
-    // ++count;
-    // ++MapController::GetInstance()->astar_debug[current.x][current.y];
+#ifdef TEST_ASTAR
+    ++count;
+    ++MapController::GetInstance()->astar_debug[current.x][current.y];
+    // std::cerr << current.x << "," << current.y << std::endl;
+#endif
     int cur_hash_index =
         current.boat_direction * 1000000 + current.x * 1000 + current.y;
-    if (current == end) {
+    bool can_finish = false;
+    if (target_berth_id > -1 &&
+        MapController::GetInstance()->ch[current.x][current.y] == 'K') {
+      // 目标泊位，且扫到了靠泊区
+      can_finish = location_to_berth_id[current] == target_berth_id;
+    }
+    if (current == end || can_finish) {
       Location temp = current;
       path.clear();
       // int size = 0;
@@ -223,11 +251,13 @@ void Astar::AstarSearch(std::vector<int> &path) {
         double new_cost = cost_so_far[cur_hash_index] + 1;
         if (i == 2) {
           --new_cost;
+          next.change_priority = true;
         }
         int hash_index = next.boat_direction * 1000000 + next.x * 1000 + next.y;
         if (!cost_so_far[hash_index]) {
           // 主航道要减速
-          if (boat_box.IsLocatedOnMainRoute()) {
+          if (!boat_box.IsInclude(end.x, end.y) &&
+              boat_box.IsLocatedOnMainRoute()) {
             new_cost += 0.33;
           }
 
@@ -235,17 +265,18 @@ void Astar::AstarSearch(std::vector<int> &path) {
           double priority = new_cost + heuristic(next, end);
 
           // 往反方向走，代价加三
-          if (next.boat_direction == BOAT_DIRECTION_LEFT ||
-              next.boat_direction == BOAT_DIRECTION_RIGHT) {
-            if (located_left ^
-                (next.boat_direction == BOAT_DIRECTION_LEFT ? 1 : 0)) {
-              // 横向反方向走
+          if (!boat_box.IsInclude(end.x, end.y)) {
+            if (next.boat_direction == BOAT_DIRECTION_LEFT ||
+                next.boat_direction == BOAT_DIRECTION_RIGHT) {
+              if (located_left ^ (next.boat_direction == BOAT_DIRECTION_LEFT)) {
+                // 横向反方向走
+                priority += 3;
+              }
+            } else if (located_up ^
+                       (next.boat_direction == BOAT_DIRECTION_UP)) {
+              // 纵向反方向走
               priority += 3;
             }
-          } else if (located_up ^
-                     (next.boat_direction == BOAT_DIRECTION_UP ? 1 : 0)) {
-            // 纵向反方向走
-            priority += 3;
           }
 
           frontier.put(next, priority);

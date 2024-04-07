@@ -57,6 +57,17 @@ void DecisionManager::DecisionBoat() {
 #endif
       continue;
     }
+    // 靠泊
+    if (boat[i].status != BOAT_STATUS_LOADING &&
+        MapController::GetInstance()->ch[boat[i].x][boat[i].y] == 'K' &&
+        boat[i].num < Boat::boat_capacity &&
+        boat[i].pos ==
+            MapController::GetInstance()
+                ->location_to_berth_id[Location(boat[i].x, boat[i].y)]) {
+      boat[i].DoBerth();
+      continue;
+    }
+
     if (boat[i].path.empty()) {
       auto &berth = MapController::GetInstance()->berth;
       if (boat[i].status == BOAT_STATUS_LOADING &&
@@ -75,17 +86,8 @@ void DecisionManager::DecisionBoat() {
         boat[i].FindBerth();
       }
     }
+
     if (!boat[i].path.empty()) {
-      // 靠泊
-      if (boat[i].status != BOAT_STATUS_LOADING &&
-          MapController::GetInstance()->ch[boat[i].x][boat[i].y] == 'K' &&
-          boat[i].num < Boat::boat_capacity &&
-          boat[i].pos ==
-              MapController::GetInstance()
-                  ->location_to_berth_id[Location(boat[i].x, boat[i].y)]) {
-        boat[i].DoBerth();
-        continue;
-      }
       move_id.push_back(i);
     }
 #ifdef DEBUG
@@ -138,7 +140,7 @@ void DecisionManager::DecisionBoat() {
         // 会碰撞且方向互斥
 
 #ifdef DEBUG
-        std::cerr << first_id << "与" << second_id << " 船发生碰撞"
+        std::cerr << first_id << " 与 " << second_id << " 船发生碰撞"
                   << std::endl;
 #endif
         int man = std::abs(boat[first_id].y - boat[second_id].y) +

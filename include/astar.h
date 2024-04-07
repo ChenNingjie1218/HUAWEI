@@ -9,6 +9,7 @@
 struct Location {
   int x, y;
   int boat_direction;
+  bool change_priority = false;
   Location() = default;
   Location(int x, int y, int direction = -1);
   friend bool operator==(const Location &a, const Location &b);

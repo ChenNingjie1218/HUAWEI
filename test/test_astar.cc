@@ -4,6 +4,7 @@
 
 #include "astar.h"
 #include "map_controller.h"
+
 #define ROBOT_GOODS  // 机器人找货物
 // #define ROBOT_BERTH  // 机器人找泊位
 #define BOAT  // 船
@@ -15,13 +16,26 @@ FILE *debug_command_file = fopen("./debug/debug.txt", "w");
 FILE *debug_output_file = fopen("./debug/cerr.txt", "w");
 #endif
 int main() {
+#ifdef TEST_ASTAR
   char(&ch)[N][N] = MapController::GetInstance()->ch;
-  FILE *fp = fopen("../../doc/map2.txt", "r");
+  FILE *fp = fopen("../../doc/map1.txt", "r");
   // 地图数据
   for (int i = 1; i <= n; i++) fscanf(fp, "%s", ch[i] + 1);
-  fclose(fp);
+  // fclose(fp);
   MapController::GetInstance()->InitMapData();
   std::cerr << "地图初始化完毕！" << std::endl;
+  // 泊位数据
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
+  std::queue<std::pair<Location, int>> q;
+  int berth_num;
+  fscanf(fp, "%d", &berth_num);
+  for (int i = 0; i < berth_num; ++i) {
+    int id, x, y, loading_speed;
+    fscanf(fp, "%d%d%d%d", &x, &y, &id, &loading_speed);
+    berth.push_back(Berth(i, ++x, ++y, loading_speed));
+    MapController::GetInstance()->InitBerthMap(i, x, y);
+  }
+  fclose(fp);
 #ifdef ROBOT_BERTH
   Astar astar(110, 144, 100, 17);
   MapController::GetInstance()->InitBerthMap(0, 100, 17);
@@ -43,8 +57,9 @@ int main() {
 #endif
 
 #ifdef BOAT
-  // Astar astar(3, 197, 168, 100, BOAT_DIRECTION_DOWN); // map1的交货点到某泊位
-  Astar astar(103, 92, 198, 196, BOAT_DIRECTION_RIGHT);  // map2
+  Astar astar(3, 197, 37, 99, BOAT_DIRECTION_UP);  // map1的交货点到某泊位
+  // Astar astar(37, 99, 3, 197, BOAT_DIRECTION_UP);  //
+
   std::vector<int> path;
   // 获取当前时间点
   auto start = std::chrono::high_resolution_clock::now();
@@ -54,8 +69,8 @@ int main() {
   std::chrono::duration<double, std::milli> duration = end - start;
   std::cerr << "耗时：" << duration.count() << " ms" << std::endl;
   int size = path.size();
-  // Location cur(3, 197, BOAT_DIRECTION_DOWN); // map1的交货点到某泊位
-  Location cur(103, 92, BOAT_DIRECTION_RIGHT);
+  Location cur(3, 197, BOAT_DIRECTION_UP);  // map1的交货点到某泊位
+  // Location cur(37, 99, BOAT_DIRECTION_UP);
   char ship[4] = {'>', '<', '^', 'V'};
   for (int i = 0; i < size; ++i) {
     ch[cur.x][cur.y] = ship[cur.boat_direction];
@@ -115,5 +130,6 @@ int main() {
     fprintf(fp, "\n");
   }
   fclose(fp);
+#endif
   return 0;
 }

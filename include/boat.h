@@ -19,6 +19,9 @@ class CollisionBox {
   bool IsLocatedOnMainRoute();
   // 判断是否完全处于主航道
   bool IsCompletelyLocatedOnMainRoute();
+  // 是否包含某点
+  bool IsInclude(int x, int y);
+
   // 两个对象是否相撞
   static bool JudgeCollision(const CollisionBox &first,
                              const CollisionBox &second);
@@ -55,8 +58,8 @@ struct Boat {
   static char dir_str[4][10];
 #endif
 
-  // 目标泊位，虚拟点为-1
-  int pos = -1;
+  // 目标泊位，虚拟点为-1，购买点为-2
+  int pos = -2;
 
   // 船的最大容量
   static int boat_capacity;
