@@ -83,6 +83,9 @@ struct Robot {
 
   // 广度寻找最近货物
   void FindNeighborGoods();
+
+  // 更换泊位
+  void ChangeBerth(int new_berth_id);
 };
 
 #endif

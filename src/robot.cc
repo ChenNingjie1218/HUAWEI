@@ -375,3 +375,22 @@ void Robot::FindNeighborGoods() {
     }
   }
 }
+
+// 机器人更换泊位
+void Robot::ChangeBerth(int new_berth_id) {
+  std::vector<Berth> &berth = MapController::GetInstance()->berth;
+  int old_berth_id = berth_id;
+  for (std::vector<int>::iterator it = berth[old_berth_id].robot.begin();
+       it != berth[old_berth_id].robot.end(); ++it) {
+    if (*it == id_) {
+      berth[old_berth_id].robot.erase(it);
+      break;
+    }
+  }
+  berth_id = new_berth_id;
+  berth[new_berth_id].robot.push_back(id_);
+#ifdef DEBUG
+  std::cerr << "机器人" << id_ << "从泊位" << old_berth_id << "更换至泊位"
+            << berth_id << std::endl;
+#endif
+}
