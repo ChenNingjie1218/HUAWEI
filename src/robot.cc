@@ -88,9 +88,6 @@ int Robot::JudgePriority(Robot *first, Robot *second) {
  */
 
 bool Robot::FindTargetGoods() {
-#ifdef DEBUG
-  std::cerr << "开始选货物" << std::endl;
-#endif
   auto &berth = MapController::GetInstance()->berth;
   Goods *head_goods = berth[berth_id].goods_manager.head_goods;
   Goods *p_goods = berth[berth_id].goods_manager.first_free_goods;
@@ -116,27 +113,60 @@ bool Robot::FindTargetGoods() {
     }
     p_goods = p_goods->next;
   }
-#ifdef DEBUG
-  if (find_goods) {
-    std::cerr << "选货物(" << find_goods->x << "," << find_goods->y << ")"
-              << std::endl;
-  }
-#endif
-  if (find_goods != nullptr && find_goods->robot_id == -1) {
-    find_goods->robot_id = id_;
-    if (FindPath(find_goods)) {
-      need_change_first_free_goods =
-          target_goods == berth[berth_id].goods_manager.first_free_goods;
-      if (need_change_first_free_goods) {
-        while (berth[berth_id].goods_manager.first_free_goods->next !=
-                   head_goods &&
-               berth[berth_id].goods_manager.first_free_goods->robot_id > -1) {
-          berth[berth_id].goods_manager.first_free_goods =
-              berth[berth_id].goods_manager.first_free_goods->next;
-        }
+  if (is_sprint) {
+    // 表明是冲刺阶段，要全局搜索货物
+    // 循环遍历所有港口
+    for (int i = 0; i < berth.size(); ++i) {
+      if (berth[i].goods_manager.goods_num == 0 || i == berth_id) {
+        // 港口货物列表为空或者是当前港口（因为当前港口在上面已经算过）
+        continue;
       }
+      head_goods = berth[i].goods_manager.head_goods;
+      p_goods = berth[i].goods_manager.first_free_goods;
+      while (p_goods->next != head_goods) {
+        if (p_goods->robot_id > -1) {
+          // 该货物被选过了
+          p_goods = p_goods->next;
+          continue;
+        }
+        if (p_goods->area_id != area_id) {
+          // 不在一个分区
+          p_goods = p_goods->next;
+          continue;
+        }
+        int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
+        if (min_man > cal_man) {
+          min_man = cal_man;
+          find_goods = p_goods;
+        }
+        p_goods = p_goods->next;
+      }
+    }
+  }
+  if (min_man < 500 && find_goods->robot_id == -1) {
+#ifdef DEBUG
+    if (find_goods) {
+      std::cerr << "选货物(" << find_goods->x << "," << find_goods->y << ")"
+                << std::endl;
+    }
+#endif
+    if (find_goods != nullptr && find_goods->robot_id == -1) {
+      find_goods->robot_id = id_;
+      if (FindPath(find_goods)) {
+        need_change_first_free_goods =
+            target_goods == berth[berth_id].goods_manager.first_free_goods;
+        if (need_change_first_free_goods) {
+          while (berth[berth_id].goods_manager.first_free_goods->next !=
+                     head_goods &&
+                 berth[berth_id].goods_manager.first_free_goods->robot_id >
+                     -1) {
+            berth[berth_id].goods_manager.first_free_goods =
+                berth[berth_id].goods_manager.first_free_goods->next;
+          }
+        }
 
-      return true;
+        return true;
+      }
     }
     find_goods->robot_id = -1;
   }
@@ -145,10 +175,32 @@ bool Robot::FindTargetGoods() {
 
 // 存在移动后找泊位，这里不能直接用机器人的位置
 void Robot::FindBerth(int start_x, int start_y) {
-  // auto &berth = MapController::GetInstance()->berth;
-  // berth_id = MapController::GetInstance()->nearest_berth[start_x][start_y];
+  // 判断机器人该不该冲刺，选择船中时间最大的
+  auto &boat = RentController::GetInstance()->boat;
+  auto &berth = MapController::GetInstance()->berth;
+  auto size = RentController::GetInstance()->robot.size();
+  // 遍历所有的港口，寻找回家时间最短的港口
+  std::multimap<int, int> time_map;  // 第一个参数是时间，第二个参数是泊位id
+  if (!boat.empty()) {
+    for (int i = 0; i < berth.size(); ++i) {
+      time_map.insert(std::make_pair(berth[i].transport_time, i));
+    }
+    for (auto it = time_map.begin(); it != time_map.end(); ++it) {
+      if (berth[it->second].robot.size() < size / boat.size()) {
+        // 可以选择这个泊位
+        int sprint_time =
+            it->first * 3 + DynamicParam::GetInstance()->GetFinalTolerantTime();
+        if (15000 - id < sprint_time && !is_sprint) {
+          // 可以冲刺
+          ChangeBerth(it->second);
+          is_sprint = true;
+          break;
+        }
+        break;
+      }
+    }
+  }
   if (berth_id != -1) {
-    auto &berth = MapController::GetInstance()->berth;
 #ifdef DEBUG
     std::cerr << "------- start astar -------" << std::endl;
     std::cerr << "(" << x << "," << y << ")---->(" << berth[berth_id].x << ","
@@ -260,6 +312,7 @@ int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
 
 // 机器人分区规划
 void Robot::ZonePlan() {
+  if (is_sprint) return;
 #ifdef DEBUG
   std::cerr << "机器人" << id_ << "决定寻找负荷较大泊位" << std::endl;
 #endif
@@ -330,7 +383,8 @@ void Robot::FindNeighborGoods() {
           MapController::GetInstance()->CanRobotReach(x, y)) {
 #ifdef DEBUG
         count++;
-        // std::cerr << " 搜索点:(" << x << "," << y << ") ";  // << std::endl;
+        // std::cerr << " 搜索点:(" << x << "," << y << ") ";  // <<
+        // std::endl;
 #endif
         search[x][y] = true;
         // bfs搜索到货物

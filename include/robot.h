@@ -23,6 +23,9 @@ struct Robot {
   // 目标港口
   int berth_id;
 
+  // 冲刺标志
+  bool is_sprint = false;
+
   // 所处区号
   int area_id;
 
