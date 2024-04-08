@@ -5,6 +5,7 @@
 #include <cstdio>
 
 #include "berth.h"
+#include "chrono"
 #include "decision.h"
 #include "goods.h"
 #include "input_controller.h"
@@ -37,11 +38,33 @@ int main() {
       berth[j].goods_manager.FreshGoodsLists();
     }
 
-    // --------- 决策阶段 ----------
+// --------- 决策阶段 ----------
+#ifdef DEBUG
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
     DecisionManager::GetInstance()->DecisionRobot();
+#ifdef DEBUG
+    auto end = std::chrono::high_resolution_clock::now();
+    // 计算执行时间（以毫秒为单位）
+    std::chrono::duration<double, std::milli> duration = end - start;
+    std::cerr << "机器人决策耗时：" << duration.count() << " ms" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+#endif
     DecisionManager::GetInstance()->DecisionBoat();
+#ifdef DEBUG
+    end = std::chrono::high_resolution_clock::now();
+    // 计算执行时间（以毫秒为单位）
+    duration = end - start;
+    std::cerr << "船舶决策耗时：" << duration.count() << " ms" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+#endif
     DecisionManager::GetInstance()->DecisionPurchase();
-
+#ifdef DEBUG
+    end = std::chrono::high_resolution_clock::now();
+    // 计算执行时间（以毫秒为单位）
+    duration = end - start;
+    std::cerr << "购买决策耗时：" << duration.count() << " ms" << std::endl;
+#endif
     // --------- 输出阶段 ----------
     OutputController::GetInstance()->Output();
   }

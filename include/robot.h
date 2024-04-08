@@ -25,6 +25,10 @@ struct Robot {
 
   // 所处区号
   int area_id;
+
+#ifdef DEBUG
+  int money = 0;
+#endif
   Robot() = default;
   Robot(int &id, int &goods, int &startX, int &startY);
 

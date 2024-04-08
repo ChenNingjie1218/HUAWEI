@@ -126,7 +126,8 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
         robot[robot_id].FindBerth(x, y);
 #ifdef DEBUG
         std::cerr << "成功更新目标泊位" << std::endl;
-        MapController::GetInstance()->pull_money +=
+        robot[robot_id].money += robot[robot_id].target_goods->money;
+        MapController::GetInstance()->get_money +=
             robot[robot_id].target_goods->money;
 #endif
         //当前持有货物

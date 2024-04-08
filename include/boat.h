@@ -55,7 +55,8 @@ struct Boat {
   int area_id;
 
 #ifdef DEBUG
-  static char dir_str[4][10];
+  static char dir_str[4][10];  // 输出方向
+  int money = 0;
 #endif
 
   // 目标泊位，虚拟点为-1，购买点为-2

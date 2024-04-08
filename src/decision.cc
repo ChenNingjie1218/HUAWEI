@@ -768,8 +768,8 @@ void DecisionManager::DecisionRobot() {
         robot[i].FindBerth(robot[i].x, robot[i].y);
 #ifdef DEBUG
         std::cerr << "成功更新目标泊位" << std::endl;
-        MapController::GetInstance()->pull_money +=
-            robot[i].target_goods->money;
+        robot[i].money += robot[i].target_goods->money;
+        MapController::GetInstance()->get_money += robot[i].target_goods->money;
 #endif
         //当前持有货物
         robot[i].goods = true;
@@ -1015,12 +1015,15 @@ void DecisionManager::DecisionRobot() {
         }
       } else {
         // 没有目标货物罚站，更换所属泊位
+
+#ifdef DEBUG
         auto start = std::chrono::high_resolution_clock::now();
+#endif
         // robot[robot_id].FindNeighborGoods();
         robot[robot_id].ZonePlan();
+#ifdef DEBUG
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> duration = end - start;
-#ifdef DEBUG
         std::cerr << "机器人" << robot_id << "换泊位耗时：" << duration.count()
                   << " ms" << std::endl;
 #endif

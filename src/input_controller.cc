@@ -107,8 +107,9 @@ void InputController::Input() {
           "-----------------------------INPUT--------------------------\n");
 #endif
   int temp_id = 0;
+  int temp_money = 0;
   std::vector<Berth>& berth = MapController::GetInstance()->berth;
-  if (scanf("%d%d", &temp_id, &money) == EOF) {
+  if (scanf("%d%d", &temp_id, &temp_money) == EOF) {
 #ifdef DEBUG
     fclose(debug_command_file);
 
@@ -125,6 +126,20 @@ void InputController::Input() {
       }
     }
 
+    // 机器人挣钱统计
+    for (std::vector<Robot>::iterator it =
+             RentController::GetInstance()->robot.begin();
+         it != RentController::GetInstance()->robot.end(); ++it) {
+      std::cerr << "机器人 " << it->id_ << " 挣了 " << it->money << std::endl;
+    }
+
+    // 船挣钱统计
+    for (std::vector<Boat>::iterator it =
+             RentController::GetInstance()->boat.begin();
+         it != RentController::GetInstance()->boat.end(); ++it) {
+      std::cerr << "船 " << it->id_ << " 挣了 " << it->money << std::endl;
+    }
+
     // 全局货物统计
     std::cerr << "全局生成货物数量:"
               << MapController::GetInstance()->total_goods_num << std::endl;
@@ -132,8 +147,14 @@ void InputController::Input() {
               << std::endl;
     std::cerr << "全局生成货物金额:"
               << MapController::GetInstance()->total_money << std::endl;
-    std::cerr << "全局提交货物金额:" << MapController::GetInstance()->pull_money
+    std::cerr << "全局捡起货物金额:" << MapController::GetInstance()->get_money
               << std::endl;
+    std::cerr << "理论得分:"
+              << MapController::GetInstance()->get_money + 25000 -
+                     2000 * RentController::GetInstance()->robot.size() -
+                     8000 * RentController::GetInstance()->boat.size()
+              << std::endl;
+
 #endif
     exit(0);
   }
@@ -144,9 +165,28 @@ void InputController::Input() {
   if (dis_id > 1) {
     std::cerr << "跳帧：" << dis_id << std::endl;
   }
+  int dis_moeny = temp_money - money;
+  if (id > 1 && dis_moeny > 0) {
+    int flag = true;
+    for (std::vector<Boat>::iterator it =
+             RentController::GetInstance()->boat.begin();
+         it != RentController::GetInstance()->boat.end(); ++it) {
+      if (it->path.size() == 1 && it->pos == -1) {
+        it->money += dis_moeny;
+        std::cerr << "船 " << it->id_ << " 交货，挣了 " << dis_moeny
+                  << std::endl;
+        flag = false;
+        break;
+      }
+    }
+    if (flag) {
+      std::cerr << "违规进账" << std::endl;
+    }
+  }
 #endif
 
   id = temp_id;
+  money = temp_money;
 #ifdef DEBUG
   std::cerr << "------------------帧数id: " << id << "------------------"
             << std::endl;
