@@ -273,6 +273,10 @@ void InputController::Input() {
       ++berth[robot[i].berth_id].goods_num;
 
 #ifdef DEBUG
+      if (robot[i].berth_id !=
+          MapController::GetInstance()->location_to_berth_id[Location(x, y)]) {
+        std::cerr << "泊位货物数量增加错了" << std::endl;
+      }
       // 全局放置数量增加
       MapController::GetInstance()->pull_num += 1;
       std::cerr << robot[i].berth_id << " 泊位更新货物数量："
@@ -325,6 +329,10 @@ void InputController::Input() {
       if (goods_num - boat[i].num > 0 && boat[i].pos != -1) {
         berth[boat[i].pos].goods_num -= (goods_num - boat[i].num);
 #ifdef DEBUG
+        if (boat[i].pos != MapController::GetInstance()
+                               ->location_to_berth_id[Location(x, y)]) {
+          std::cerr << "泊位数量减少错了" << std::endl;
+        }
         std::cerr << boat[i].pos << " 泊位更新货物数量："
                   << berth[boat[i].pos].goods_num << std::endl;
 #endif

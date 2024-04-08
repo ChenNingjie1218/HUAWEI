@@ -66,10 +66,11 @@ void DecisionManager::DecisionBoat() {
         int berth_id =
             MapController::GetInstance()
                 ->location_to_berth_id[Location(boat[i].x, boat[i].y)];
-        if (berth[berth_id].goods_num) {
+        if (berth[berth_id].goods_num > 4) {
           if (boat[i].pos != berth_id) {
 #ifdef DEBUG
-            std::cerr << i << " 船路过泊位 " << berth_id << std::endl;
+            std::cerr << i << " 船路过泊位 " << berth_id
+                      << " 货物数量:" << berth[berth_id].goods_num << std::endl;
 #endif
             berth[boat[i].pos].boat_id = -1;
             boat[i].pos = berth_id;
@@ -711,7 +712,10 @@ void DecisionManager::DecisionRobot() {
   int robot_num = robot.size();
   for (int i = 0; i < robot_num; ++i) {
     // --------- 移动前动作 ---------
-    if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B') {
+    if (robot[i].goods && ch[robot[i].x][robot[i].y] == 'B' &&
+        robot[i].berth_id ==
+            MapController::GetInstance()
+                ->location_to_berth_id[Location(robot[i].x, robot[i].y)]) {
 #ifdef DEBUG
       std::cerr << "robot " << i << " 卸货：(" << robot[i].x << ","
                 << robot[i].y << ")" << std::endl;

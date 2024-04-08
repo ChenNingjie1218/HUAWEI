@@ -92,7 +92,10 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
     // 如果移动决策移动后动作
     // --------- 移动后动作 ---------
     if (robot[robot_id].goods &&
-        MapController::GetInstance()->ch[x][y] == 'B') {
+        MapController::GetInstance()->ch[x][y] == 'B' &&
+        robot[robot_id].berth_id ==
+            MapController::GetInstance()
+                ->location_to_berth_id[Location(x, y)]) {
 #ifdef DEBUG
       std::cerr << "robot " << robot_id << " 移动后卸货：(" << x << "," << y
                 << ")" << std::endl;

@@ -356,15 +356,20 @@ void Boat::FindBerth() {
 
   if (pos == -1 && berth_id == -1) {
     // 最后阶段 随便找个泊位待着
+    int temp_transport_time = 500;
     for (int i = 0; i < size; ++i) {
       if (berth[i].area_id != area_id || berth[i].boat_id != -1) {
         continue;
       }
-      berth_id = i;
-      break;
+      if (nearest_delivery[x][y] == nearest_delivery[berth[i].x][berth[i].y] &&
+          berth[i].transport_time < temp_transport_time) {
+        berth_id = i;
+        temp_transport_time = berth[i].transport_time;
+      }
     }
 #ifdef DEBUG
-    std::cerr << id_ << " 最后阶段 随便找个泊位待着：" << berth_id << std::endl;
+    std::cerr << id_ << " 最后阶段 找个最近的泊位待着：" << berth_id
+              << std::endl;
 #endif
   }
 
