@@ -1087,7 +1087,6 @@ void DecisionManager::DecisionPurchase() {
 
         while (p_goods != head_goods) {
           if (p_goods->robot_id == -1) {
-            goods.push(p_goods);
             int r_id = map_instance
                            ->nearest_r[p_goods->x]
                                       [p_goods->y];  // 距离该货物最近的购买点id
@@ -1095,7 +1094,12 @@ void DecisionManager::DecisionPurchase() {
               // 夹缝中的货物
               p_goods = p_goods->next;
               continue;
+            } else if (LIFETIME - id + p_goods->birth < 10) {
+              // 生命周期不太够
+              p_goods = p_goods->next;
+              continue;
             }
+            goods.push(p_goods);
             rent_instance->RentRobot(r_id);
 #ifdef DEBUG
             std::cerr << "为货物(" << p_goods->x << "," << p_goods->y

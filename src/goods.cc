@@ -118,6 +118,10 @@ void GoodsManager::FreshGoodsLists() {
   while (cur != head_goods) {
     if (id - cur->birth >= LIFETIME) {
       Goods *temp = cur->next;
+#ifdef DEBUG
+      std::cerr << "超过生命周期:(" << temp->x << "," << temp->y << ")"
+                << std::endl;
+#endif
       DeleteGoods(cur, true);
       cur = temp;
     } else {

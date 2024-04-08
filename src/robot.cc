@@ -138,6 +138,7 @@ bool Robot::FindTargetGoods() {
 
       return true;
     }
+    find_goods->robot_id = -1;
   }
   return false;
 }
