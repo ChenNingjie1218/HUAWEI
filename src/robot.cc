@@ -94,7 +94,12 @@ bool Robot::FindTargetGoods() {
   std::vector<Location> route;
   bool need_change_first_free_goods = true;
   Goods *find_goods = nullptr;
+
+#ifdef MONEY_FIRST
+  int max_money = 0;
+#else
   int min_man = 99999;
+#endif
   if (is_sprint) {
     // 表明是冲刺阶段，要全局搜索货物
     // 循环遍历所有港口
@@ -117,9 +122,15 @@ bool Robot::FindTargetGoods() {
           p_goods = p_goods->next;
           continue;
         }
+#ifdef MONEY_FIRST
+        if (p_goods->money > max_money) {
+          max_money = p_goods->money;
+#else
         int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
         if (min_man > cal_man) {
           min_man = cal_man;
+#endif
+
           find_goods = p_goods;
         }
         p_goods = p_goods->next;
@@ -137,9 +148,14 @@ bool Robot::FindTargetGoods() {
         p_goods = p_goods->next;
         continue;
       }
+#ifdef MONEY_FIRST
+      if (p_goods->money > max_money) {
+        max_money = p_goods->money;
+#else
       int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
       if (min_man > cal_man) {
         min_man = cal_man;
+#endif
         find_goods = p_goods;
       }
       p_goods = p_goods->next;

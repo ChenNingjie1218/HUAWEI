@@ -1,7 +1,9 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-// #define DEBUG
+#define DEBUG
 // #define TEST_ASTAR
+
+#define MONEY_FIRST  // 金钱贪心 关了就是 距离贪心
 
 // 货物生存周期
 #define LIFETIME 1000
