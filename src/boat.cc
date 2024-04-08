@@ -285,7 +285,7 @@ void Boat::FindBerth() {
       temp_transport_time += berth[i].path[now_berth_id].size();
     } else {
       // 在泊位中但还没算过路径
-      temp_transport_time += 500;
+      temp_transport_time += 0;
     }
 
     int time = 15000 - id - temp_transport_time -
@@ -333,7 +333,7 @@ void Boat::FindBerth() {
         temp_transport_time += berth[i].path[now_berth_id].size();
       } else {
         // 在泊位中但还没算过路径
-        temp_transport_time += 500;
+        temp_transport_time += 0;
       }
 
       int time = 15000 - id - temp_transport_time -

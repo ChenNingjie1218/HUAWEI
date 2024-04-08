@@ -14,7 +14,7 @@ struct Berth {
   int y;
 
   // 到交货点的时间
-  int transport_time = 500;
+  int transport_time = 0;
 
   // 每帧可以装载的物品数
   int loading_speed;
