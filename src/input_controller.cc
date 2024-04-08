@@ -71,16 +71,16 @@ void InputController::Init() {
 
 #ifdef DEBUG
   fprintf(debug_map_file, "泊位数据处理完毕！\n");
-  auto start = std::chrono::high_resolution_clock::now();
+  // auto start = std::chrono::high_resolution_clock::now();
 #endif
 
   // 初始化离每个点最近的泊位id
   MapController::GetInstance()->InitNearestBerth(q);
 
 #ifdef DEBUG
-  auto end = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double, std::milli> duration = end - start;
-  std::cerr << "bfs耗时:" << duration.count() << " ms" << std::endl;
+  // auto end = std::chrono::high_resolution_clock::now();
+  // std::chrono::duration<double, std::milli> duration = end - start;
+  // std::cerr << "bfs耗时:" << duration.count() << " ms" << std::endl;
 #endif
 
   // 船容积
@@ -250,7 +250,12 @@ void InputController::Input() {
     if (i >= static_cast<int>(robot.size())) {
       // 新增机器人
       robot.push_back(Robot(robot_id, temp_goods, ++x, ++y));
-      robot[robot_id].berth_id = robot_id % berth.size();
+      Goods* goods = RentController::GetInstance()->goods.front();
+      RentController::GetInstance()->goods.pop();
+      robot[robot_id].target_goods = goods;
+      goods->robot_id = robot_id;
+      robot[robot_id].berth_id =
+          MapController::GetInstance()->nearest_berth[goods->x][goods->y];
       berth[robot[robot_id].berth_id].robot.push_back(robot_id);
     } else {
       // 旧机器人更新坐标

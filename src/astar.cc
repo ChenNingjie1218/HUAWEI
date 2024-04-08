@@ -88,13 +88,14 @@ bool Astar::AstarSearch(std::vector<Location> &path, Goods *&find_goods) {
     }
 
     // 如果是找货物
-    if (MapController::GetInstance()->gds[current.x][current.y] &&
-        MapController::GetInstance()->gds[current.x][current.y]->robot_id ==
-            -1) {
+    if (MapController::GetInstance()->gds[current.x][current.y]) {
 #ifdef CHANGE_CLOSED_GOODS
-      if (MapController::GetInstance()->gds[current.x][current.y]->money >
-          DynamicParam::GetInstance()->GetValueableGoodsValve()) {
+      if (MapController::GetInstance()->gds[current.x][current.y]->robot_id ==
+              -1 &&
+          MapController::GetInstance()->gds[current.x][current.y]->money >
+              DynamicParam::GetInstance()->GetValueableGoodsValve()) {
         // 只换值钱的货物
+        find_goods->robot_id = -1;
         find_goods = MapController::GetInstance()->gds[current.x][current.y];
       }
 #endif

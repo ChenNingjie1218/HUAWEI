@@ -35,8 +35,8 @@ struct Robot {
   Goods *target_goods = nullptr;
   std::vector<Location> path;
 
-  // 更新目标货物
-  bool UpdateTargetGoods(int robot_id);
+  // 寻找目标货物
+  bool FindTargetGoods();
 
   // 删除path的第一个点
   void RemoveFirst();
@@ -83,6 +83,11 @@ struct Robot {
 
   // 广度寻找最近货物
   void FindNeighborGoods();
+
+  /*
+   * 找路径
+   */
+  bool FindPath(Goods *&find_goods);
 
   // 更换泊位
   void ChangeBerth(int new_berth_id);

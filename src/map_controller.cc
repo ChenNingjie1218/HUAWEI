@@ -159,7 +159,8 @@ void MapController::InitNearestBerth(std::queue<std::pair<Location, int>>& q) {
   }
 
 #ifdef DEBUG
-  for (int i = 0; i < berth.size(); i++) {
+  int berth_size = berth.size();
+  for (int i = 0; i < berth_size; i++) {
     std::cerr << i << "neighbor:" << std::endl;
 
     for (std::set<int>::iterator it = berth[i].neighbor.begin();

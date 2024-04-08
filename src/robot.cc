@@ -87,15 +87,18 @@ int Robot::JudgePriority(Robot *first, Robot *second) {
  * 寻找目标货物
  */
 
-bool Robot::UpdateTargetGoods(int robot_id) {
+bool Robot::FindTargetGoods() {
+#ifdef DEBUG
+  std::cerr << "开始选货物" << std::endl;
+#endif
   auto &berth = MapController::GetInstance()->berth;
   Goods *head_goods = berth[berth_id].goods_manager.head_goods;
   Goods *p_goods = berth[berth_id].goods_manager.first_free_goods;
   std::vector<Location> route;
   bool need_change_first_free_goods = true;
-  Goods *find_goods = p_goods;
+  Goods *find_goods = nullptr;
   int min_man = 99999;
-  while (p_goods->next != head_goods) {
+  while (p_goods != head_goods) {
     if (p_goods->robot_id > -1) {
       // 该货物被选过了
       p_goods = p_goods->next;
@@ -113,28 +116,15 @@ bool Robot::UpdateTargetGoods(int robot_id) {
     }
     p_goods = p_goods->next;
   }
-  if (min_man < 500 && find_goods->robot_id == -1) {
 #ifdef DEBUG
-    std::cerr << "------- start astar -------" << std::endl;
-    std::cerr << "(" << x << "," << y << ")---->(" << find_goods->x << ","
-              << find_goods->y << ")" << std::endl;
+  if (find_goods) {
+    std::cerr << "选货物(" << find_goods->x << "," << find_goods->y << ")"
+              << std::endl;
+  }
 #endif
-    Astar astar(x, y, find_goods->x, find_goods->y);
-    Goods *temp_goods = find_goods;
-    if (!astar.AstarSearch(route, temp_goods)) {
-#ifdef DEBUG
-      std::cerr << "route empty" << std::endl;
-#endif
-    } else {
-      target_goods = temp_goods;
-#ifdef DEBUG
-      if (target_goods == find_goods) {
-        std::cerr << "same target goods" << std::endl;
-      } else {
-        std::cerr << "better target goods" << std::endl;
-      }
-#endif
-      path = route;
+  if (find_goods != nullptr && find_goods->robot_id == -1) {
+    find_goods->robot_id = id_;
+    if (FindPath(find_goods)) {
       need_change_first_free_goods =
           target_goods == berth[berth_id].goods_manager.first_free_goods;
       if (need_change_first_free_goods) {
@@ -145,6 +135,7 @@ bool Robot::UpdateTargetGoods(int robot_id) {
               berth[berth_id].goods_manager.first_free_goods->next;
         }
       }
+
       return true;
     }
   }
@@ -153,6 +144,8 @@ bool Robot::UpdateTargetGoods(int robot_id) {
 
 // 存在移动后找泊位，这里不能直接用机器人的位置
 void Robot::FindBerth(int start_x, int start_y) {
+  // auto &berth = MapController::GetInstance()->berth;
+  // berth_id = MapController::GetInstance()->nearest_berth[start_x][start_y];
   if (berth_id != -1) {
     auto &berth = MapController::GetInstance()->berth;
 #ifdef DEBUG
@@ -273,10 +266,10 @@ void Robot::ZonePlan() {
   if (berth[berth_id].robot.size() > 0) {
     int temp_berth_id = -1;
     double max_avg_goods_num = 0, temp;
-    auto size = MapController::GetInstance()->berth.size();
+    int size = MapController::GetInstance()->berth.size();
 
     // 寻找合适泊位
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; ++i) {
       if (berth[berth_id].neighbor.find(i) == berth[berth_id].neighbor.end()) {
         // 不是邻居
         continue;
@@ -303,6 +296,10 @@ void Robot::ZonePlan() {
 #ifdef DEBUG
       std::cerr << "机器人" << id_ << "从泊位" << old_berth_id << "更换至泊位"
                 << berth_id << std::endl;
+#endif
+    } else {
+#ifdef DEBUG
+      std::cerr << "机器人" << id_ << "找不到负荷较大泊位" << std::endl;
 #endif
     }
   }
@@ -393,4 +390,37 @@ void Robot::ChangeBerth(int new_berth_id) {
   std::cerr << "机器人" << id_ << "从泊位" << old_berth_id << "更换至泊位"
             << berth_id << std::endl;
 #endif
+}
+
+/*
+ * 找路径
+ */
+bool Robot::FindPath(Goods *&find_goods) {
+  Astar astar(x, y, find_goods->x, find_goods->y);
+  Goods *temp_goods = find_goods;
+  std::vector<Location> temp_path;
+#ifdef DEBUG
+  std::cerr << "------- start astar -------" << std::endl;
+  std::cerr << "(" << x << "," << y << ")---->(" << temp_goods->x << ","
+            << temp_goods->y << ")" << std::endl;
+#endif
+  if (astar.AstarSearch(temp_path, temp_goods)) {
+#ifdef DEBUG
+    std::cerr << "------- astar finished -------" << std::endl;
+    if (find_goods == temp_goods) {
+      std::cerr << "same target goods" << std::endl;
+    } else {
+      std::cerr << "better target goods" << std::endl;
+    }
+#endif
+    target_goods = temp_goods;
+    target_goods->robot_id = id_;
+    path = temp_path;
+    return true;
+  } else {
+#ifdef DEBUG
+    std::cerr << "route empty" << std::endl;
+#endif
+    return false;
+  }
 }

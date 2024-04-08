@@ -25,6 +25,8 @@ class RentController {
   std::vector<Robot> robot;  // 当前的机器人
 
   std::vector<Boat> boat;  // 当前的船
+
+  std::queue<Goods *> goods;  // 这些货物需要新的机器人来捡
 };
 
 #endif

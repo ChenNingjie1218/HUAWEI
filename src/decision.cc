@@ -14,7 +14,7 @@
 #include "robot.h"
 // extern int busy_point[N][N];
 extern int id;
-bool can_find_goods = true;  // 每次决策只找一次物品
+bool can_astar = true;  // 每次决策只用一次astar
 DecisionManager *DecisionManager::instance_ = nullptr;
 
 Decision::Decision(int type, int param_1, int param_2) {
@@ -57,31 +57,45 @@ void DecisionManager::DecisionBoat() {
 #endif
       continue;
     }
+    auto &berth = MapController::GetInstance()->berth;
     // 靠泊
     if (boat[i].status != BOAT_STATUS_LOADING &&
         MapController::GetInstance()->ch[boat[i].x][boat[i].y] == 'K' &&
-        boat[i].num < Boat::boat_capacity &&
-        boat[i].pos ==
+        boat[i].num < Boat::boat_capacity) {
+      if (boat[i].pos > -1) {
+        int berth_id =
             MapController::GetInstance()
-                ->location_to_berth_id[Location(boat[i].x, boat[i].y)]) {
-      boat[i].DoBerth();
-      continue;
+                ->location_to_berth_id[Location(boat[i].x, boat[i].y)];
+        if (berth[berth_id].goods_num) {
+          if (boat[i].pos != berth_id) {
+#ifdef DEBUG
+            std::cerr << i << " 船路过泊位 " << berth_id << std::endl;
+#endif
+            berth[boat[i].pos].boat_id = -1;
+            boat[i].pos = berth_id;
+          }
+          //&&
+          // boat[i].pos ==
+          //     MapController::GetInstance()
+          //         ->location_to_berth_id[Location(boat[i].x, boat[i].y)]
+          boat[i].DoBerth();
+          continue;
+        }
+      }
     }
 
     if (boat[i].path.empty()) {
-      auto &berth = MapController::GetInstance()->berth;
-      if (boat[i].status == BOAT_STATUS_LOADING &&
-          berth[boat[i].pos].goods_num && boat[i].num < Boat::boat_capacity) {
-#ifdef DEBUG
-        std::cerr << boat[i].id_ << " 船正在装货" << std::endl;
-#endif
-        continue;
-      }
-
       if (boat[i].DeliveryCond()) {
         // 去交货
         boat[i].FindDeliveryPoint();
       } else {
+        if (boat[i].status == BOAT_STATUS_LOADING &&
+            berth[boat[i].pos].goods_num && boat[i].num < Boat::boat_capacity) {
+#ifdef DEBUG
+          std::cerr << boat[i].id_ << " 船正在装货" << std::endl;
+#endif
+          continue;
+        }
         // 找船舶上货
         boat[i].FindBerth();
       }
@@ -684,7 +698,7 @@ void DecisionManager::DecisionBoat() {
  *
  */
 void DecisionManager::DecisionRobot() {
-  can_find_goods = true;
+  can_astar = true;
 #ifdef DEBUG
   std::cerr << "-----------------------------------Robot-----------"
                "--------------------------"
@@ -710,24 +724,17 @@ void DecisionManager::DecisionRobot() {
       robot[i].path.clear();
       // 决策，更新目标货物, 当前不持有货物
 #ifdef DEBUG
-      std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
+      std::cerr << "robot " << i << " start FindTargetGoods" << std::endl;
 #endif
-      if (can_find_goods && robot[i].UpdateTargetGoods(i)) {
-        can_find_goods = false;
+      if (can_astar && robot[i].FindTargetGoods()) {
+        // 有新的目标货物
+        can_astar = false;
       }
 
 #ifdef DEBUG
-      std::cerr << "robot " << i << " finished UpdateTargetGoods after pull"
+      std::cerr << "robot " << i << " finished FindTargetGoods after pull"
                 << std::endl;
 #endif
-      if (!robot[i].path.empty()) {
-        // 有新的目标货物
-
-#ifdef DEBUG
-        std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
-#endif
-        robot[i].target_goods->robot_id = i;
-      }
       robot[i].goods = false;
     } else if (!robot[i].goods &&
                MapController::GetInstance()->gds[robot[i].x][robot[i].y]) {
@@ -745,15 +752,11 @@ void DecisionManager::DecisionRobot() {
         std::cerr << "robot " << i << " 装目标货：(" << robot[i].x << ","
                   << robot[i].y << ")" << std::endl;
 #endif
-        // } else if (robot[i].target_goods &&
-        //            gds[robot[i].x][robot[i].y]->money > VALUEABLE_GOODS_VALVE
-        //            && gds[robot[i].x][robot[i].y]->robot_id == -1) {
       } else if (!robot[i].target_goods) {
         // 机器人没目标货物，且该帧刚好生成了一个货物在脚底下
         is_get = true;
         robot[i].target_goods =
             MapController::GetInstance()->gds[robot[i].x][robot[i].y];
-        robot[i].target_goods->robot_id = i;
 #ifdef DEBUG
         std::cerr << "robot " << i << " 装地上新生成的货：(" << robot[i].x
                   << "," << robot[i].y << ")" << std::endl;
@@ -765,9 +768,14 @@ void DecisionManager::DecisionRobot() {
         q_decision.push(decision);
 
         // 决策更新目标泊位和泊位权重
-        robot[i].FindBerth(robot[i].x, robot[i].y);
+        if (can_astar) {
+          robot[i].FindBerth(robot[i].x, robot[i].y);
+          can_astar = false;
 #ifdef DEBUG
-        std::cerr << "成功更新目标泊位" << std::endl;
+          std::cerr << "成功更新目标泊位" << std::endl;
+#endif
+        }
+#ifdef DEBUG
         robot[i].money += robot[i].target_goods->money;
         MapController::GetInstance()->get_money += robot[i].target_goods->money;
 #endif
@@ -775,28 +783,36 @@ void DecisionManager::DecisionRobot() {
         robot[i].goods = true;
       }
     }
-    if (robot[i].goods && robot[i].path.empty()) {
-      // 如果有货物但是没路径
-      robot[i].FindBerth(robot[i].x, robot[i].y);
-    }
     // 空闲机器人
-    if (!robot[i].target_goods && !robot[i].goods) {
-      robot[i].path.clear();
+    if (robot[i].path.empty() && can_astar) {
+      if (robot[i].goods) {
+        // 如果有货物但是没路径
+        robot[i].FindBerth(robot[i].x, robot[i].y);
+      } else if (robot[i].target_goods) {
+        // 有目标货物但是没路径
+        Goods *target_goods = robot[i].target_goods;
+        if (robot[i].FindPath(target_goods)) {
 #ifdef DEBUG
-      if (can_find_goods) {
-        std::cerr << "robot " << i << " start UpdateTargetGoods" << std::endl;
-      }
+          std::cerr << "robot " << i << " 为目标货物找到路径" << std::endl;
 #endif
-      if (can_find_goods && robot[i].UpdateTargetGoods(i)) {
-        can_find_goods = false;
-      }
-      if (!robot[i].path.empty()) {
-// 有新的目标货物
+        } else {
+#ifdef DEBUG
+          std::cerr << "robot " << i << " 没有为目标货物找到路径" << std::endl;
+#endif
+        }
+
+      } else if (robot[i].FindTargetGoods()) {
+        // 有新的目标货物
 #ifdef DEBUG
         std::cerr << "robot " << i << " 更新新的目标货物" << std::endl;
 #endif
-        robot[i].target_goods->robot_id = i;
+      } else {
+        robot[i].ZonePlan();
+#ifdef DEBUG
+        std::cerr << "robot " << i << " 没有更新新的目标货物" << std::endl;
+#endif
       }
+      can_astar = false;
     }
 #ifdef DEBUG
     std::cerr << "*************** robot " << i
@@ -966,7 +982,7 @@ void DecisionManager::DecisionRobot() {
       ++MapController::GetInstance()
             ->busy_point[robot[robot_id].x][robot[robot_id].y];
     }
-    if (can_find_goods &&
+    if (can_astar &&
         MapController::GetInstance()
                 ->busy_point[robot[robot_id].x][robot[robot_id].y] >
             DynamicParam::GetInstance()->GetBusyValve()) {
@@ -1002,13 +1018,12 @@ void DecisionManager::DecisionRobot() {
 
         // 找新的目标货物
         robot[robot_id].path.clear();
-        robot[robot_id].UpdateTargetGoods(robot_id);
-        if (!robot[robot_id].path.empty()) {
-          robot[robot_id].target_goods->robot_id = robot_id;
+        if (robot[robot_id].FindTargetGoods()) {
 #ifdef DEBUG
           std::cerr << "机器人成功更改新的路线" << std::endl;
 #endif
         } else {
+          robot[robot_id].ZonePlan();
 #ifdef DEBUG
           std::cerr << "机器人无法更改新的路线" << std::endl;
 #endif
@@ -1037,15 +1052,113 @@ void DecisionManager::DecisionRobot() {
  */
 void DecisionManager::DecisionPurchase() {
   // 决策买机器人
-  auto &robot_purchase_point =
-      MapController::GetInstance()->robot_purchase_point;
-  auto size = robot_purchase_point.size();
-  if (RentController::GetInstance()->robot.size() < 18) {
-    for (std::vector<Location>::size_type i = 0; i < size; ++i) {
-      RentController::GetInstance()->RentRobot(i);
+  auto &rent_instance = RentController::GetInstance();
+  auto &map_instance = MapController::GetInstance();
+  auto &param_instance = DynamicParam::GetInstance();
+  int rest_num = param_instance->GetMaxRobotNum() -
+                 rent_instance->robot.size();  // 还可以租的机器人数量
+  auto &berth = map_instance->berth;
+  int berth_size = berth.size();
+  extern int money;        // 全局金额
+  int rest_money = money;  // 剩余金额
+  if (rest_num) {
+    if (rent_instance->boat.empty() && money < 10000) {
+#ifdef DEBUG
+      std::cerr << "还需要购买机器人，但是要留钱至少买一艘船" << std::endl;
+#endif
+    } else if (rest_money < 2000) {
+#ifdef DEBUG
+      std::cerr << "没钱买机器人了" << std::endl;
+#endif
+    } else {
+      auto &goods = rent_instance->goods;
+      // 每帧清空机器人需求
+      while (!goods.empty()) {
+        goods.pop();
+      }
+      // 遍历需要新增机器人捡的货物
+      for (int i = 0; i < berth_size; ++i) {
+        Goods *p_goods = berth[i].goods_manager.first_free_goods;
+        Goods *head_goods = berth[i].goods_manager.head_goods;
+#ifdef DEBUG
+        std::cerr << "泊位 " << i << " 货物数量"
+                  << berth[i].goods_manager.goods_num << std::endl;
+#endif
+
+        while (p_goods != head_goods) {
+          if (p_goods->robot_id == -1) {
+            goods.push(p_goods);
+            int r_id = map_instance
+                           ->nearest_r[p_goods->x]
+                                      [p_goods->y];  // 距离该货物最近的购买点id
+            if (r_id == -1) {
+              // 夹缝中的货物
+              p_goods = p_goods->next;
+              continue;
+            }
+            rent_instance->RentRobot(r_id);
+#ifdef DEBUG
+            std::cerr << "为货物(" << p_goods->x << "," << p_goods->y
+                      << ")购买机器人" << std::endl;
+#endif
+            --rest_num;
+            rest_money -= 2000;
+            if (!rest_num) {
+#ifdef DEBUG
+              std::cerr << "已经买够机器人了" << std::endl;
+#endif
+              break;
+            } else if (rent_instance->boat.empty() && rest_money < 10000) {
+#ifdef DEBUG
+              std::cerr << "还需要购买机器人，但是要留钱至少买一艘船"
+                        << std::endl;
+#endif
+              break;
+            } else if (rest_money < 2000) {
+#ifdef DEBUG
+              std::cerr << "没钱买机器人了" << std::endl;
+#endif
+              break;
+            }
+          }
+          p_goods = p_goods->next;
+        }
+        if (!rest_num) {
+#ifdef DEBUG
+          std::cerr << "已经买够机器人了" << std::endl;
+#endif
+          break;
+        } else if (rent_instance->boat.empty() && rest_money < 10000) {
+#ifdef DEBUG
+          std::cerr << "还需要购买机器人，但是要留钱至少买一艘船" << std::endl;
+#endif
+          break;
+        } else if (rest_money < 2000) {
+#ifdef DEBUG
+          std::cerr << "没钱买机器人了" << std::endl;
+#endif
+          break;
+        }
+      }
     }
   }
 
+  rest_num = param_instance->GetMaxBoatNum() - rent_instance->boat.size();
+  if (rest_num && rest_money > 8000) {
+    // ------- 目前遇到的情况: 最多一帧买一艘船 -----------
+    int berth_id = -1;  // 需要购买船的泊位
+    int max_goods_num = 0;
+    for (int i = 0; i < berth_size; ++i) {
+      if (berth[i].boat_id == -1 && berth[i].goods_num > max_goods_num) {
+        max_goods_num = berth[i].goods_num;
+        berth_id = i;
+      }
+    }
+    if (berth_id != -1) {
+      int s_id = map_instance->nearest_s[berth[berth_id].x][berth[berth_id].y];
+      rent_instance->RentBoat(s_id);
+    }
+  }
   // 决策买船
 
   // auto &boat_purchase_point =
@@ -1055,10 +1168,4 @@ void DecisionManager::DecisionPurchase() {
   // #ifdef DEBUG
   //   std::cerr << "当前船购买点数量：" << size << std::endl;
   // #endif
-
-  // for (std::vector<Location>::size_type i = 0; i < size; ++i) {
-  if (RentController::GetInstance()->boat.size() < 2) {
-    RentController::GetInstance()->RentBoat(0);
-  }
-  // }
 }
