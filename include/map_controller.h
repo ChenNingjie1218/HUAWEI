@@ -27,6 +27,8 @@ struct MapController {
   Goods *gds[N][N] = {{nullptr}};  // 货物地图
   int nearest_berth[N][N];         // 距离该点最近的泊位id
   int nearest_delivery[N][N];      // 距离该点最近的交货点id
+  int nearest_r[N][N];             // 距离该点最近的机器人购买点id
+  int nearest_s[N][N];             // 距离该点最近的船购买点id
   int berth_num;                   // 泊位数量
   std::vector<Berth> berth;        // 泊位数据
 
@@ -67,6 +69,12 @@ struct MapController {
 
   // 初始化nearest_delivery
   void InitNearestDelivery();
+
+  // 初始化nearest_r
+  void InitNearestR();
+
+  // 初始化nearest_s
+  void InitNearestS();
 
   // 机器人可达
   bool CanRobotReach(int x, int y);

@@ -95,6 +95,12 @@ void MapController::InitMapData() {
 
       // 初始化最近交货点id
       nearest_delivery[i][j] = -1;
+
+      // 初始化最近机器人购买点id
+      nearest_r[i][j] = -1;
+
+      // 初始化最近船购买点id
+      nearest_s[i][j] = -1;
 #ifdef TEST_ASTAR
       astar_debug[i][j] = 0;
 #endif
@@ -103,6 +109,10 @@ void MapController::InitMapData() {
 
   // 初始化nearest_delivery
   InitNearestDelivery();
+  // 初始化nearest_s
+  InitNearestS();
+  // 初始化nearest_r
+  InitNearestR();
 
   for (int i = 1; i <= n; ++i) {
     for (int j = 1; j <= n; ++j) {
@@ -177,6 +187,52 @@ void MapController::InitNearestDelivery() {
       if (x > 0 && x <= n && y > 0 && y <= n) {
         if (nearest_delivery[x][y] == -1 && CanBoatReach(x, y)) {
           nearest_delivery[x][y] = temp.second;
+          q.push(std::make_pair(Location(x, y), temp.second));
+        }
+      }
+    }
+  }
+}
+
+// 初始化nearest_r
+void MapController::InitNearestR() {
+  std::queue<std::pair<Location, int>> q;
+  int size = robot_purchase_point.size();
+  for (int i = 0; i < size; ++i) {
+    q.push(std::make_pair(robot_purchase_point[i], i));
+  }
+  while (!q.empty()) {
+    std::pair<Location, int> temp = q.front();
+    q.pop();
+    for (int i = 0; i < 4; ++i) {
+      int x = temp.first.x + DIRS[i].x;
+      int y = temp.first.y + DIRS[i].y;
+      if (x > 0 && x <= n && y > 0 && y <= n) {
+        if (nearest_r[x][y] == -1 && CanRobotReach(x, y)) {
+          nearest_r[x][y] = temp.second;
+          q.push(std::make_pair(Location(x, y), temp.second));
+        }
+      }
+    }
+  }
+}
+
+// 初始化nearest_s
+void MapController::InitNearestS() {
+  std::queue<std::pair<Location, int>> q;
+  int size = boat_purchase_point.size();
+  for (int i = 0; i < size; ++i) {
+    q.push(std::make_pair(boat_purchase_point[i], i));
+  }
+  while (!q.empty()) {
+    std::pair<Location, int> temp = q.front();
+    q.pop();
+    for (int i = 0; i < 4; ++i) {
+      int x = temp.first.x + DIRS[i].x;
+      int y = temp.first.y + DIRS[i].y;
+      if (x > 0 && x <= n && y > 0 && y <= n) {
+        if (nearest_s[x][y] == -1 && CanBoatReach(x, y)) {
+          nearest_s[x][y] = temp.second;
           q.push(std::make_pair(Location(x, y), temp.second));
         }
       }
