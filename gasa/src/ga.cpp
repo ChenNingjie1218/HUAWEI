@@ -248,14 +248,16 @@ int calculateFitness(std::vector<Individual> &population, int index) {
   std::system(command.c_str());
   // 从文件中读取数据
   int money1;
-  std::string str = "./money/money" + std::to_string(index) + ".txt";
-  std::ifstream inputFile1(str.c_str());  // 打开文件用于读取
+  std::string str = "./gasa/money/money" + std::to_string(index) + ".txt";
+  std::fstream inputFile1(str.c_str(), std::ios::in | std::ios::out);  // 打开文件用于读取
   if (inputFile1.is_open()) {
     std::string line;
     while (std::getline(inputFile1, line)) {
       std::cout << line << std::endl;
       money1 = std::stod(line);
     }
+    inputFile1.seekp(0, std::ios::beg);  // 定位到文件开头
+    inputFile1 << 0;
     inputFile1.close();  // 关闭文件
     std::cout << "读取money成功" << std::endl;
   } else {
