@@ -77,6 +77,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, Goods *&find_goods) {
   frontier.put(start, 0);
   came_from[start] = start;
   double *cost_so_far = new double[1000000];
+  std::fill(cost_so_far, cost_so_far + 1000000, 0);
   cost_so_far[start.x * 1000 + start.y] = 1;
   while (!frontier.empty()) {
     Location current = frontier.get();
@@ -140,6 +141,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
   frontier.put(start, 0);
   came_from[start] = start;
   double *cost_so_far = new double[1000000];
+  std::fill(cost_so_far, cost_so_far + 1000000, 0);
   cost_so_far[start.x * 1000 + start.y] = 1;
 #ifdef TEST_ASTAR
   int count = 0;
@@ -191,6 +193,7 @@ void Astar::AstarSearch(std::vector<int> &path) {
   frontier.put(start, 0);
   came_from[start] = start;
   double *cost_so_far = new double[10000000];
+  std::fill(cost_so_far, cost_so_far + 10000000, 0);
   cost_so_far[start.boat_direction * 1000000 + start.x * 1000 + start.y] = 1;
 #ifdef TEST_ASTAR
   int count = 0;
