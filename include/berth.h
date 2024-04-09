@@ -48,5 +48,15 @@ struct Berth {
   std::queue<int> q_boat;
   Berth() {}
   Berth(int id, int x, int y, int loading_speed);
+
+  // 'B'的坐标集合
+  std::vector<Location> loc;
+  int loc_index = 0;
+
+  // 获取该泊位的随机x坐标
+  int GetRandomX();
+
+  // 获取该泊位的随机y坐标
+  int GetRandomY();
 };
 #endif
