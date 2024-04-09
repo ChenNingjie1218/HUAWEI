@@ -106,7 +106,24 @@ void MapController::InitMapData() {
 #endif
     }
   }
-
+  InitMap1Tag();
+  InitMap2Tag();
+  if (delivery_point == map1_tag) {
+#ifdef DEBUG
+    std::cerr << "map1" << std::endl;
+#endif
+    InitMapParam(1);
+  } else if (delivery_point == map2_tag) {
+#ifdef DEBUG
+    std::cerr << "map2" << std::endl;
+#endif
+    InitMapParam(2);
+  } else {
+#ifdef DEBUG
+    std::cerr << "map3" << std::endl;
+#endif
+    InitMapParam(3);
+  }
   // 初始化nearest_delivery
   InitNearestDelivery();
   // 初始化nearest_s
@@ -250,4 +267,29 @@ bool MapController::IsMainRoad(int x, int y) {
 bool MapController::IsMainChannel(int x, int y) {
   return ch[x][y] == '~' || ch[x][y] == 'c' || ch[x][y] == 'T' ||
          ch[x][y] == 'K' || ch[x][y] == 'S';
+}
+
+// 面向地图调参
+void MapController::InitMap1Tag() {
+  map1_tag.push_back(Location(3, 197));
+  map1_tag.push_back(Location(198, 4));
+}
+void MapController::InitMap2Tag() {
+  map2_tag.push_back(Location(3, 196));
+  map2_tag.push_back(Location(198, 196));
+}
+
+void MapController::InitMapParam(int id) {
+  auto& param_instance = DynamicParam::GetInstance();
+  switch (id) {
+    case 1:
+      break;
+    case 2:
+      param_instance->SetMaxRobotNum(20);
+      break;
+    case 3:
+      param_instance->SetMaxRobotNum(18);
+      param_instance->SetMaxBoatNum(1);
+      break;
+  }
 }

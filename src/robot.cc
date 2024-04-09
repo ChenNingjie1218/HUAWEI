@@ -122,12 +122,17 @@ bool Robot::FindTargetGoods() {
           p_goods = p_goods->next;
           continue;
         }
+        int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
 #ifdef MONEY_FIRST
-        if (p_goods->money > max_money) {
+        if (p_goods->money > max_money &&
+            cal_man < LIFETIME - id + p_goods->birth -
+                          DynamicParam::GetInstance()->GetTolerantTime()) {
           max_money = p_goods->money;
 #else
-        int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
-        if (min_man > cal_man) {
+
+        if (min_man > cal_man &&
+            cal_man < LIFETIME - id + p_goods->birth -
+                          DynamicParam::GetInstance()->GetTolerantTime()) {
           min_man = cal_man;
 #endif
 

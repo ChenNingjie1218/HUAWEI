@@ -98,7 +98,7 @@ class DynamicParam {
   int final_tolerant_time_ = 200;    // 参数 最后冲刺阶段的容忍时间
   int busy_valve_ = 5;               // 参数 判断该点拥堵的域值
   int boat_capacity_reduce_ = 15;    // 参数 改变船容量
-  int max_robot_num_ = 18;           // 参数 机器人最大数量
+  int max_robot_num_ = 17;           // 参数 机器人最大数量
   int max_boat_num_ = 2;             // 参数 船舶最大数量
 
   static DynamicParam* instance_;

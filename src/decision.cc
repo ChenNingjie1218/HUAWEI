@@ -66,7 +66,7 @@ void DecisionManager::DecisionBoat() {
         int berth_id =
             MapController::GetInstance()
                 ->location_to_berth_id[Location(boat[i].x, boat[i].y)];
-        if (berth[berth_id].goods_num > 4) {
+        if (berth[berth_id].goods_num) {
           if (boat[i].pos != berth_id) {
 #ifdef DEBUG
             std::cerr << i << " 船路过泊位 " << berth_id
