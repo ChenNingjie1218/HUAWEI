@@ -53,11 +53,13 @@ bool MapController::CanBoatReach(int x, int y) {
 // 初始化坐标映射到泊位id的map
 void MapController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
   std::queue<Location> q;
-  q.push(Location(berth_x, berth_y));
+  Location initial(berth_x, berth_y);
+  location_to_berth_id[initial] = berth_id;
+  berth[berth_id].loc.push_back(initial);
+  q.push(initial);
   while (!q.empty()) {
     Location temp = q.front();
     q.pop();
-    location_to_berth_id[temp] = berth_id;
     for (int i = 0; i < 4; ++i) {
       int x = temp.x + DIRS[i].x;
       int y = temp.y + DIRS[i].y;
@@ -65,10 +67,27 @@ void MapController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
       if (x > 0 && x <= n && y > 0 && y <= n &&
           location_to_berth_id.find(new_point) == location_to_berth_id.end() &&
           (ch[x][y] == 'B' || ch[x][y] == 'K')) {
+        location_to_berth_id[new_point] = berth_id;
+        if (ch[x][y] == 'B') {
+          berth[berth_id].loc.push_back(new_point);
+        }
         q.push(new_point);
       }
     }
   }
+#ifdef DEBUG
+  int size = berth[berth_id].loc.size();
+  std::cerr << "泊位 " << berth_id << " 坐标：" << std::endl;
+  for (int i = 0; i < size; ++i) {
+    Location& loc = berth[berth_id].loc[i];
+    std::cerr << "(" << loc.x << "," << loc.y << ")" << std::endl;
+  }
+  for (auto it = location_to_berth_id.begin(); it != location_to_berth_id.end();
+       ++it) {
+    std::cerr << "泊位：" << it->second << " 坐标："
+              << "(" << it->first.x << "," << it->first.y << ")" << std::endl;
+  }
+#endif
 }
 
 // 初始化各项数据
