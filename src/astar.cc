@@ -235,6 +235,7 @@ void Astar::AstarSearch(std::vector<int> &path) {
       // std::cerr << count << std::endl;
       // std::cerr << size << std::endl;
       std::reverse(path.begin(), path.end());
+      delete[] cost_so_far;
       return;
     }
     // 直行
@@ -295,6 +296,7 @@ void Astar::AstarSearch(std::vector<int> &path) {
 #ifdef DEBUG
   std::cerr << "没路径" << std::endl;
 #endif
+  delete[] cost_so_far;
 }
 
 // 顺时针转动
