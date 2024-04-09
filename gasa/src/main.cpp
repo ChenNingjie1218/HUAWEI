@@ -12,6 +12,11 @@
 #include "output_controller.h"
 extern int money;
 extern int id;
+#ifdef DEBUG
+FILE *debug_map_file = fopen("./debug/debug_map.txt", "w");
+FILE *debug_command_file = fopen("./debug/debug.txt", "w");
+FILE *debug_output_file = fopen("./debug/cerr.txt", "w");
+#endif
 
 int main(int argc, char *argv[]) {
   int FLAG = 0, index;
@@ -48,7 +53,7 @@ int main(int argc, char *argv[]) {
     std::getline(inputFile, line);
     FLAG = std::stoi(line);
     inputFile.close();  // 关闭文件
-    std::cerr << "读取data成功" << std::endl;
+    std::cout << "读取data成功" << std::endl;
   } else {
     std::cerr << "sdg无法打开文件进行读取操作。" << std::endl;
   }
