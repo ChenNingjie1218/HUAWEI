@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-#define DEBUG
+// #define DEBUG
 #define FACE_MAP  // 面向地图
 // #define TEST_ASTAR
 
@@ -91,8 +91,8 @@ class DynamicParam {
   void SetMaxBoatNum(int max_boat_num) { max_boat_num_ = max_boat_num; }
 
  private:
-  int tolerant_time_ = 40;           // 参数 机器人找货物容忍步数
-  int tolerant_leave_time_ = 30;     // 参数 船最后走可容忍时间的
+  int tolerant_time_ = 20;           // 参数 机器人找货物容忍步数
+  int tolerant_leave_time_ = 40;     // 参数 船最后走可容忍时间的
   int goods_value_valve_ = 15;       // 参数 货物筛选域值
   int goods_filter_valve_num_ = 50;  // 参数 货物筛选数量域值
   int valueable_goods_valve_ = 60;   // 参数 贵重货物域值

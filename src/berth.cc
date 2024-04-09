@@ -8,6 +8,10 @@ Berth::Berth(int id, int x, int y, int loading_speed)
     : id_(id), x(x), y(y), loading_speed(loading_speed) {
   goods_num = 0;
   area_id = MapController::GetInstance()->FindArea(x * n + y, false);
+  int delivery_index = MapController::GetInstance()->nearest_delivery[x][y];
+  auto& delivery_point = MapController::GetInstance()->delivery_point;
+  transport_time = std::abs(x - delivery_point[delivery_index].x) +
+                   std::abs(y - delivery_point[delivery_index].y);
 }
 
 // 获取该泊位最近的x坐标

@@ -271,11 +271,15 @@ void Boat::FindBerth() {
         temp_transport_time *= 2;
       } else {
         // 泊位记录的transport_time不是该交货点
-        temp_transport_time += 500;
+        int delivery_index = nearest_delivery[berth[i].x][berth[i].y];
+        auto &delivery_point = MapController::GetInstance()->delivery_point;
+        temp_transport_time += (std::abs(x - delivery_point[delivery_index].x) +
+                                std::abs(y - delivery_point[delivery_index].y));
       }
     } else if (now_berth_id == -1) {
       // 当前没有在交货点和泊位中
-      temp_transport_time += 500;
+      temp_transport_time +=
+          std::abs(x - berth[i].x) + std::abs(y - berth[i].y);
     } else if (berth[now_berth_id].path.find(i) !=
                berth[now_berth_id].path.end()) {
       // 当前泊位存了去目标泊位的路径
@@ -285,7 +289,8 @@ void Boat::FindBerth() {
       temp_transport_time += berth[i].path[now_berth_id].size();
     } else {
       // 在泊位中但还没算过路径
-      temp_transport_time += 0;
+      temp_transport_time += (std::abs(berth[i].x - berth[now_berth_id].x) +
+                              std::abs(berth[i].y - berth[now_berth_id].y));
     }
 
     int time = 15000 - id - temp_transport_time -
@@ -319,11 +324,16 @@ void Boat::FindBerth() {
           temp_transport_time *= 2;
         } else {
           // 泊位记录的transport_time不是该交货点
-          temp_transport_time += 500;
+          int delivery_index = nearest_delivery[berth[i].x][berth[i].y];
+          auto &delivery_point = MapController::GetInstance()->delivery_point;
+          temp_transport_time +=
+              (std::abs(x - delivery_point[delivery_index].x) +
+               std::abs(y - delivery_point[delivery_index].y));
         }
       } else if (now_berth_id == -1) {
         // 当前没有在交货点和泊位中
-        temp_transport_time += 500;
+        temp_transport_time +=
+            std::abs(x - berth[i].x) + std::abs(y - berth[i].y);
       } else if (berth[now_berth_id].path.find(i) !=
                  berth[now_berth_id].path.end()) {
         // 当前泊位存了去目标泊位的路径
@@ -333,7 +343,8 @@ void Boat::FindBerth() {
         temp_transport_time += berth[i].path[now_berth_id].size();
       } else {
         // 在泊位中但还没算过路径
-        temp_transport_time += 0;
+        temp_transport_time += (std::abs(berth[i].x - berth[now_berth_id].x) +
+                                std::abs(berth[i].y - berth[now_berth_id].y));
       }
 
       int time = 15000 - id - temp_transport_time -
