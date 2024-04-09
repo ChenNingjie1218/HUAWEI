@@ -232,8 +232,8 @@ void getCurrentTime() {
 
 int main() {
   double initial_temperature = 100.0;
-  double final_temperature = 80;
-  double cooling_rate = 0.7;
+  double final_temperature = 0.1;
+  double cooling_rate = 0.9;
 
   // 运行模拟退火算法
   auto res =
