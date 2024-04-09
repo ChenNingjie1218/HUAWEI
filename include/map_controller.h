@@ -97,13 +97,14 @@ struct MapController {
 
   // 合并集合
   void MergeArea(int id_1, int id_2, bool is_land = true);
-
+#ifdef FACE_MAP
   // 面向地图调参
   std::vector<Location> map1_tag;
   std::vector<Location> map2_tag;
   void InitMap1Tag();
   void InitMap2Tag();
   void InitMapParam(int id);
+#endif
 };
 
 #endif

@@ -1,6 +1,7 @@
 #ifndef PARAM_H_
 #define PARAM_H_
 #define DEBUG
+#define FACE_MAP  // 面向地图
 // #define TEST_ASTAR
 
 #define MONEY_FIRST  // 金钱贪心 关了就是 距离贪心

@@ -125,6 +125,7 @@ void MapController::InitMapData() {
 #endif
     }
   }
+#ifdef FACE_MAP
   InitMap1Tag();
   InitMap2Tag();
   if (delivery_point == map1_tag) {
@@ -143,6 +144,7 @@ void MapController::InitMapData() {
 #endif
     InitMapParam(3);
   }
+#endif
   // 初始化nearest_delivery
   InitNearestDelivery();
   // 初始化nearest_s
@@ -287,7 +289,7 @@ bool MapController::IsMainChannel(int x, int y) {
   return ch[x][y] == '~' || ch[x][y] == 'c' || ch[x][y] == 'T' ||
          ch[x][y] == 'K' || ch[x][y] == 'S';
 }
-
+#ifdef FACE_MAP
 // 面向地图调参
 void MapController::InitMap1Tag() {
   map1_tag.push_back(Location(3, 197));
@@ -312,3 +314,4 @@ void MapController::InitMapParam(int id) {
       break;
   }
 }
+#endif
