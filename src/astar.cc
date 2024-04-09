@@ -113,6 +113,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, Goods *&find_goods) {
         }
         // std::cerr << count << std::endl;
         std::reverse(path.begin(), path.end());
+        delete[] cost_so_far;
         return true;
       }
     }
@@ -128,6 +129,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, Goods *&find_goods) {
       }
     }
   }
+  delete[] cost_so_far;
   return false;
 }
 
@@ -164,6 +166,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
 
       // std::cerr << count << std::endl;
       std::reverse(path.begin(), path.end());
+      delete[] cost_so_far;
       return true;
     }
     for (auto next : Point(current).neighbors) {
@@ -177,6 +180,7 @@ bool Astar::AstarSearch(std::vector<Location> &path, const int &berth_id) {
       }
     }
   }
+  delete[] cost_so_far;
   return false;
 }
 
