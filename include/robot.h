@@ -15,7 +15,7 @@ struct Robot {
   int goods;
 
   //保存上一刻的货物状态
-  int pre_goods;
+  int pre_goods = 0;
 
   // 手里拿的物品的价值
   int goods_money;
@@ -82,7 +82,7 @@ struct Robot {
               std::vector<int> &not_move_id);
 
   // 分区规划
-  void ZonePlan();
+  bool ZonePlan();
 
   // 广度寻找最近货物
   void FindNeighborGoods();

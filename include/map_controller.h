@@ -101,6 +101,8 @@ struct MapController {
   // 面向地图调参
   std::vector<Location> map1_tag;
   std::vector<Location> map2_tag;
+  bool map1 = false;
+  bool map2 = false;
   void InitMap1Tag();
   void InitMap2Tag();
   void InitMapParam(int id);

@@ -96,7 +96,7 @@ bool Robot::FindTargetGoods() {
   Goods *find_goods = nullptr;
 
 #ifdef MONEY_FIRST
-  int max_money = 0;
+  double max_per_money = 0;
 #else
   int min_man = 99999;
 #endif
@@ -123,13 +123,13 @@ bool Robot::FindTargetGoods() {
           continue;
         }
         int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
+        double per_money = 1.0 * p_goods->money / cal_man;
 #ifdef MONEY_FIRST
-        if (p_goods->money > max_money &&
+        if (per_money > max_per_money &&
             cal_man < LIFETIME - id + p_goods->birth -
                           DynamicParam::GetInstance()->GetTolerantTime()) {
-          max_money = p_goods->money;
+          max_per_money = per_money;
 #else
-
         if (min_man > cal_man &&
             cal_man < LIFETIME - id + p_goods->birth -
                           DynamicParam::GetInstance()->GetTolerantTime()) {
@@ -153,11 +153,14 @@ bool Robot::FindTargetGoods() {
         p_goods = p_goods->next;
         continue;
       }
-#ifdef MONEY_FIRST
-      if (p_goods->money > max_money) {
-        max_money = p_goods->money;
-#else
       int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
+      double per_money = 1.0 * p_goods->money / cal_man;
+#ifdef MONEY_FIRST
+      if (per_money > max_per_money &&
+          cal_man < LIFETIME - id + p_goods->birth -
+                        DynamicParam::GetInstance()->GetTolerantTime()) {
+        max_per_money = per_money;
+#else
       if (min_man > cal_man) {
         min_man = cal_man;
 #endif
@@ -219,10 +222,12 @@ void Robot::FindBerth(int start_x, int start_y) {
   if (berth_id != -1) {
 #ifdef DEBUG
     std::cerr << "------- start astar -------" << std::endl;
-    std::cerr << "(" << x << "," << y << ")---->(" << berth[berth_id].x << ","
-              << berth[berth_id].y << ")" << std::endl;
+    std::cerr << "(" << start_x << "," << start_y << ")---->("
+              << berth[berth_id].x << "," << berth[berth_id].y << ")"
+              << std::endl;
 #endif
-    Astar astar(start_x, start_y, berth[berth_id].x, berth[berth_id].y);
+    Astar astar(start_x, start_y, berth[berth_id].GetNearestX(start_x),
+                berth[berth_id].GetNearestY(start_y));
     astar.AstarSearch(path, berth_id);
 #ifdef DEBUG
     std::cerr << "------- astar finished -------" << std::endl;
@@ -327,8 +332,8 @@ int Robot::GetAway(std::vector<NextPoint> &next_points, int ignore_id,
 }
 
 // 机器人分区规划
-void Robot::ZonePlan() {
-  if (is_sprint) return;
+bool Robot::ZonePlan() {
+  if (is_sprint) return false;
 #ifdef DEBUG
   std::cerr << "机器人" << id_ << "决定寻找负荷较大泊位" << std::endl;
 #endif
@@ -344,7 +349,8 @@ void Robot::ZonePlan() {
         // 不是邻居
         continue;
       }
-      temp = berth[i].goods_manager.goods_num * 1.0 / berth[i].robot.size();
+      temp = berth[i].goods_manager.goods_num * 1.0 /
+             (berth[i].robot.size() ? berth[i].robot.size() : 0.01);
       if (temp > max_avg_goods_num && berth[i].goods_manager.goods_num > 1) {
         max_avg_goods_num = temp;
         temp_berth_id = i;
@@ -367,12 +373,13 @@ void Robot::ZonePlan() {
       std::cerr << "机器人" << id_ << "从泊位" << old_berth_id << "更换至泊位"
                 << berth_id << std::endl;
 #endif
-    } else {
-#ifdef DEBUG
-      std::cerr << "机器人" << id_ << "找不到负荷较大泊位" << std::endl;
-#endif
+      return true;
     }
+#ifdef DEBUG
+    std::cerr << "机器人" << id_ << "找不到负荷较大泊位" << std::endl;
+#endif
   }
+  return false;
 }
 
 // bfs寻找最近货物

@@ -53,10 +53,10 @@ struct Berth {
   std::vector<Location> loc;
   int loc_index = 0;
 
-  // 获取该泊位的随机x坐标
-  int GetRandomX();
+  // 获取该泊位最近的x坐标
+  int GetNearestX(const int &x);
 
-  // 获取该泊位的随机y坐标
-  int GetRandomY();
+  // 获取该泊位最近的y坐标
+  int GetNearestY(const int &y);
 };
 #endif

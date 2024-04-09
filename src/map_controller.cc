@@ -304,8 +304,10 @@ void MapController::InitMapParam(int id) {
   auto& param_instance = DynamicParam::GetInstance();
   switch (id) {
     case 1:
+      map1 = true;
       break;
     case 2:
+      map2 = true;
       param_instance->SetMaxRobotNum(20);
       break;
     case 3:
