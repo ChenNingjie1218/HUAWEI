@@ -407,7 +407,7 @@ void Boat::FindBerth() {
       astar.AstarSearch(path);
     }
 
-    if (pos != -1) {
+    if (pos > -1) {
       // 重置老泊位
       berth[pos].boat_id = -1;
     }
