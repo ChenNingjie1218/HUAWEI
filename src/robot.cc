@@ -188,11 +188,12 @@ bool Robot::FindTargetGoods() {
           DynamicParam::GetInstance()->GetMaxRobotNum() &&
       id < 5000) {
     for (const auto &neighbor_id : neighbor) {
+#ifdef DEBUG
       std::cerr << "邻居" << neighbor_id << std::endl;
+#endif
       Goods *p_goods = berth[neighbor_id].goods_manager.first_free_goods;
       head_goods = berth[neighbor_id].goods_manager.head_goods;
       while (p_goods != head_goods) {
-        std::cerr << "货物列表" << std::endl;
         if (p_goods->robot_id > -1) {
           // 该货物被选过了
           p_goods = p_goods->next;

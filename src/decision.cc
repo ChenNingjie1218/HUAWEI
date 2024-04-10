@@ -1,5 +1,6 @@
 #include "decision.h"
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <queue>
@@ -1080,6 +1081,8 @@ void DecisionManager::DecisionPurchase() {
       while (!goods.empty()) {
         goods.pop();
       }
+      std::vector<std::pair<double, Goods *>> target_goods;
+      auto &purchase_point = map_instance->robot_purchase_point;
       // 遍历需要新增机器人捡的货物
       for (int i = 0; i < berth_size; ++i) {
         Goods *p_goods = berth[i].goods_manager.first_free_goods;
@@ -1098,39 +1101,44 @@ void DecisionManager::DecisionPurchase() {
               // 夹缝中的货物
               p_goods = p_goods->next;
               continue;
-            } else if (LIFETIME - id + p_goods->birth < 10) {
-              // 生命周期不太够
+            }
+            int cal_man = std::abs(purchase_point[r_id].x - p_goods->x) +
+                          std::abs(purchase_point[r_id].y - p_goods->y);
+            if (cal_man > LIFETIME - id + p_goods->birth -
+                              DynamicParam::GetInstance()->GetTolerantTime()) {
               p_goods = p_goods->next;
               continue;
             }
-            goods.push(p_goods);
-            rent_instance->RentRobot(r_id);
-#ifdef DEBUG
-            std::cerr << "为货物(" << p_goods->x << "," << p_goods->y
-                      << ")购买机器人" << std::endl;
-#endif
-            --rest_num;
-            rest_money -= 2000;
-            if (!rest_num) {
-#ifdef DEBUG
-              std::cerr << "已经买够机器人了" << std::endl;
-#endif
-              break;
-            } else if (rent_instance->boat.empty() && rest_money < 10000) {
-#ifdef DEBUG
-              std::cerr << "还需要购买机器人，但是要留钱至少买一艘船"
-                        << std::endl;
-#endif
-              break;
-            } else if (rest_money < 2000) {
-#ifdef DEBUG
-              std::cerr << "没钱买机器人了" << std::endl;
-#endif
-              break;
-            }
+            int total_man =
+                cal_man +
+                std::abs(berth[i].GetNearestX(p_goods->x) - p_goods->x) +
+                std::abs(berth[i].GetNearestY(p_goods->y) - p_goods->y);
+            double per_money = 1.0 * p_goods->money / total_man;
+            target_goods.push_back(std::make_pair(per_money, p_goods));
           }
           p_goods = p_goods->next;
         }
+      }
+      sort(target_goods.begin(), target_goods.end(),
+           std::greater<std::pair<double, Goods *>>());
+      int size = target_goods.size();
+#ifdef DEBUG
+
+      for (int i = 0; i < size; ++i) {
+        std::cerr << " " << target_goods[i].first << std::endl;
+      }
+#endif
+      for (int i = 0; i < size; ++i) {
+        Goods *p_goods = target_goods[i].second;
+        goods.push(p_goods);
+        rent_instance->RentRobot(
+            map_instance->nearest_r[p_goods->x][p_goods->y]);
+#ifdef DEBUG
+        std::cerr << "为货物(" << p_goods->x << "," << p_goods->y
+                  << ")购买机器人" << std::endl;
+#endif
+        --rest_num;
+        rest_money -= 2000;
         if (!rest_num) {
 #ifdef DEBUG
           std::cerr << "已经买够机器人了" << std::endl;

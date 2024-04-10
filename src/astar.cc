@@ -32,7 +32,8 @@ bool operator<(Location a, Location b) {
   } else if (!a.change_priority && b.change_priority) {
     return false;
   }
-  return std::tie(a.x, a.y) < std::tie(b.x, b.y);
+  return std::tie(a.x, a.y, a.boat_direction) <
+         std::tie(b.x, b.y, b.boat_direction);
 }
 
 bool operator==(const Point &a, const Point &b) { return a.loc == b.loc; }
