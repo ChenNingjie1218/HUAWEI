@@ -1,8 +1,10 @@
 #ifndef BOAT_H_
 #define BOAT_H_
+#include <map>
 #include <queue>
 #include <vector>
 
+#include "astar.h"
 #include "param.h"
 /*
  * AABB最小边界框
@@ -79,6 +81,9 @@ struct Boat {
 
   // 船堵塞的次数
   int stuck_times = 0;
+
+  // 交货点到泊位的路径
+  static std::map<std::pair<Location, int>, std::vector<int>> d_path;
 
   Boat();
   Boat(int &id, int &goods_num, int &x, int &y, int &direction, int &status);

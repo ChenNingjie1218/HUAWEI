@@ -126,6 +126,13 @@ void InputController::Input() {
       }
     }
 
+    // 从交货点到各泊位的路径
+    for (auto it = Boat::d_path.begin(); it != Boat::d_path.end(); ++it) {
+      std::cerr << "交货点(" << it->first.first.x << "," << it->first.first.y
+                << ")到泊位" << it->first.second << "距离:" << it->second.size()
+                << std::endl;
+    }
+
     // 机器人挣钱统计
     for (std::vector<Robot>::iterator it =
              RentController::GetInstance()->robot.begin();

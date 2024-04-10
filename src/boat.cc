@@ -9,6 +9,7 @@
 #include "param.h"
 #include "rent_controller.h"
 int Boat::boat_capacity = 0;
+std::map<std::pair<Location, int>, std::vector<int>> Boat::d_path;
 #ifdef DEBUG
 char Boat::dir_str[4][10] = {"右", "左", "上", "下"};
 #endif
@@ -193,6 +194,34 @@ bool Boat::DeliveryCond() {
     // 能装满就装满了走
     return num >= boat_capacity;
   }
+  // if (!MapController::GetInstance()->map1 &&
+  //     !MapController::GetInstance()->map2) {
+  //   int berth_size = berth.size();
+  //   int all_goods_num = 0;  // 目前全场泊位货物数量
+  //   for (int i = 0; i < berth_size; ++i) {
+  //     if (berth[i].area_id != area_id || !berth[i].goods_num) {
+  //       continue;
+  //     }
+  //     if (berth[i].boat_id != -1) {
+  //       if (berth[i].goods_num -
+  //               (boat_capacity -
+  //                RentController::GetInstance()->boat[berth[i].boat_id].num) >
+  //           0) {
+  //         // 如果该泊位的数量比另一艘船剩余容量还大 就加上剩余的数量
+  //         all_goods_num +=
+  //             (berth[i].goods_num - boat_capacity +
+  //              RentController::GetInstance()->boat[berth[i].boat_id].num);
+  //       }
+  //     } else {
+  //       all_goods_num += berth[i].goods_num;
+  //     }
+  //   }
+  //   if (all_goods_num < boat_capacity - num) {
+  //     // 全场货物数量太少，回去送一波积攒点货物
+  //     return true;
+  //   }
+  // }
+
   // 微调快满的船又去换泊位
   return num >=
          boat_capacity - DynamicParam::GetInstance()->GetBoatCapacityReduce();
@@ -204,6 +233,10 @@ void Boat::FindDeliveryPoint() {
   // 去交货
   auto &berth = MapController::GetInstance()->berth;
   if (pos != -1 && berth[pos].path.find(-1) != berth[pos].path.end()) {
+    // 路径存过
+#ifdef DEBUG
+    std::cerr << "路径复用：回交货点" << std::endl;
+#endif
     path = berth[pos].path[-1];
   } else {
     auto &delivery_point = MapController::GetInstance()->delivery_point;
@@ -392,6 +425,10 @@ void Boat::FindBerth() {
       if (berth[now_berth_id].path.find(berth_id) !=
           berth[now_berth_id].path.end()) {
         // 路径已经算过了
+
+#ifdef DEBUG
+        std::cerr << "路径复用：泊位" << std::endl;
+#endif
         path = berth[now_berth_id].path[berth_id];
       } else {
         // 路径没算过
@@ -408,14 +445,54 @@ void Boat::FindBerth() {
     } else {
       // 目前不处于泊位中
 
+      // 交货点的下标
+      int d_index = -1;
+      auto &delivery_point = MapController::GetInstance()->delivery_point;
+      int delivery_point_size = delivery_point.size();
+      Location loc(x, y);
+      for (int i = 0; i < delivery_point_size; ++i) {
+        if (delivery_point[i] == loc) {
+          d_index = i;
+          break;
+        }
+      }
+
+      if (d_index != -1) {
+        // 目前在交货点处
+        std::pair<Location, int> task(
+            std::make_pair(Location(x, y, direction), berth_id));
+        if (d_path.find(task) != d_path.end()) {
+          // 路径存过
+
 #ifdef DEBUG
-      std::cerr << "------- start astar -------" << std::endl;
-      std::cerr << "(" << x << "," << y << ")---->(" << berth[berth_id].x << ","
-                << berth[berth_id].y << ")"
-                << "方向:" << Boat::dir_str[direction] << std::endl;
+          std::cerr << "路径复用：交货点(" << loc.x << "," << loc.y
+                    << ") 起始方向:" << dir_str[direction] << std::endl;
 #endif
-      Astar astar(x, y, berth[berth_id].x, berth[berth_id].y, direction);
-      astar.AstarSearch(path);
+          path = d_path[task];
+        } else {
+          // 路径没存过
+
+#ifdef DEBUG
+          std::cerr << "------- start astar -------" << std::endl;
+          std::cerr << "(" << x << "," << y << ")---->(" << berth[berth_id].x
+                    << "," << berth[berth_id].y << ")"
+                    << "方向:" << Boat::dir_str[direction] << std::endl;
+#endif
+          Astar astar(x, y, berth[berth_id].x, berth[berth_id].y, direction);
+          astar.AstarSearch(path);
+          d_path[task] = path;
+        }
+
+      } else {
+#ifdef DEBUG
+        std::cerr << "------- start astar -------" << std::endl;
+        std::cerr << "(" << x << "," << y << ")---->(" << berth[berth_id].x
+                  << "," << berth[berth_id].y << ")"
+                  << "方向:" << Boat::dir_str[direction] << std::endl;
+#endif
+        Astar astar(x, y, berth[berth_id].x, berth[berth_id].y, direction);
+        astar.AstarSearch(path);
+      }
     }
 
     if (pos > -1) {
