@@ -85,11 +85,11 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
   std::map<std::string, int> param;
 
   // 初始化解
-  std::uniform_int_distribution<int> distribution(0, 50);
+  std::uniform_int_distribution<int> distribution(0, 400);
   int tolerant_time = distribution(gen);
   param["TOLERANT_TIME"] = tolerant_time;
 
-  std::uniform_int_distribution<int> distribution1(0, 20);
+  std::uniform_int_distribution<int> distribution1(0, 200);
   int tolerant_leave_time = distribution1(gen);
   param["TOLERANT_LEAVE_TIME"] = tolerant_leave_time;
 
@@ -97,7 +97,7 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
   int goods_value_value = distribution2(gen);
   param["GOODS_VALUE_VALVE"] = goods_value_value;
 
-  std::uniform_int_distribution<int> distribution3(0, 100);
+  std::uniform_int_distribution<int> distribution3(0, 2000);
   int goods_filter_value_num = distribution3(gen);
   param["GOODS_FILTER_VALVE_NUM"] = goods_filter_value_num;
 
@@ -105,15 +105,15 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
   int valueable_goods_value = distribution4(gen);
   param["VALUEABLE_GOODS_VALVE"] = valueable_goods_value;
 
-  std::uniform_int_distribution<int> distribution5(0, 1000);
+  std::uniform_int_distribution<int> distribution5(0, 5000);
   int final_tolerant_time = distribution5(gen);
   param["FINAL_TOLERANT_TIME"] = final_tolerant_time;
 
-  std::uniform_int_distribution<int> distribution6(0, 1000);
+  std::uniform_int_distribution<int> distribution6(0, 10);
   int busy_value = distribution6(gen);
   param["BUSY_VALVE"] = busy_value;
 
-  std::uniform_int_distribution<int> distribution7(0, 50);
+  std::uniform_int_distribution<int> distribution7(0, 30);
   int boat_capacity_reduce = distribution7(gen);
   param["BOAT_CAPACITY_REDUCE"] = boat_capacity_reduce;
 
@@ -121,7 +121,7 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
   int max_robot_num = distribution8(gen);
   param["MAX_ROBOT_NUM"] = max_robot_num;
 
-  std::uniform_int_distribution<int> distribution9(1, 5);
+  std::uniform_int_distribution<int> distribution9(1, 3);
   int max_boat_num = distribution9(gen);
   param["MAX_BOAT_NUM"] = max_boat_num;
 
@@ -133,11 +133,11 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
   while (temperature > final_temperature) {
     std::map<std::string, int> paramtmp;
     // 在当前解的基础上生成新解
-    std::uniform_int_distribution<int> Distribution(0, 50);
+    std::uniform_int_distribution<int> Distribution(0, 400);
     int tolerant_time_new = Distribution(gen);
     paramtmp["TOLERANT_TIME"] = tolerant_time_new;
 
-    std::uniform_int_distribution<int> Distribution1(0, 20);
+    std::uniform_int_distribution<int> Distribution1(0, 200);
     int tolerant_leave_time_new = Distribution1(gen);
     paramtmp["TOLERANT_LEAVE_TIME"] = tolerant_leave_time_new;
 
@@ -145,7 +145,7 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
     int goods_value_value_new = Distribution2(gen);
     paramtmp["GOODS_VALUE_VALVE"] = goods_value_value_new;
 
-    std::uniform_int_distribution<int> Distribution3(0, 100);
+    std::uniform_int_distribution<int> Distribution3(0, 2000);
     int goods_filter_value_num_new = Distribution3(gen);
     paramtmp["GOODS_FILTER_VALVE_NUM"] = goods_filter_value_num_new;
 
@@ -153,15 +153,15 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
     int valueable_goods_value_new = Distribution4(gen);
     paramtmp["VALUEABLE_GOODS_VALVE"] = valueable_goods_value_new;
 
-    std::uniform_int_distribution<int> Distribution5(0, 1000);
+    std::uniform_int_distribution<int> Distribution5(0, 5000);
     int final_tolerant_time_new = Distribution5(gen);
     paramtmp["FINAL_TOLERANT_TIME"] = final_tolerant_time_new;
 
-    std::uniform_int_distribution<int> Distribution6(0, 1000);
+    std::uniform_int_distribution<int> Distribution6(0, 10);
     int busy_value_new = Distribution6(gen);
     paramtmp["BUSY_VALVE"] = busy_value_new;
 
-    std::uniform_int_distribution<int> Distribution7(0, 50);
+    std::uniform_int_distribution<int> Distribution7(0, 30);
     int boat_capacity_reduce_new = Distribution7(gen);
     paramtmp["BOAT_CAPACITY_REDUCE"] = boat_capacity_reduce_new;
 
@@ -169,7 +169,7 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
     int max_robot_num_new = distribution8(gen);
     paramtmp["MAX_ROBOT_NUM"] = max_robot_num_new;
 
-    std::uniform_int_distribution<int> Distribution9(1, 5);
+    std::uniform_int_distribution<int> Distribution9(1, 3);
     int max_boat_num_new = Distribution9(gen);
     paramtmp["MAX_BOAT_NUM"] = max_boat_num_new;
 

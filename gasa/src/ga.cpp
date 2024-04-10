@@ -24,28 +24,28 @@ void initializePopulation(std::vector<Individual> &population,
                           std::map<std::string, int> &param) {
   std::map<std::string, int> limitMap[NUM_PARAMETERS];
   // std::cout << "最优解ppp" << std::endl;
-  int tolerant_time = param["TOLERANT_TIME"];  // 范围[0,50]
+  int tolerant_time = param["TOLERANT_TIME"];  // 范围[0,400]
   if (tolerant_time - EXTEND > 0) {
     limitMap[0].insert(std::make_pair("min", tolerant_time - EXTEND));
   } else {
     limitMap[0].insert(std::make_pair("min", 0));
   }
-  if (tolerant_time + EXTEND < 50) {
+  if (tolerant_time + EXTEND < 400) {
     limitMap[0].insert(std::make_pair("max", tolerant_time + EXTEND));
   } else {
-    limitMap[0].insert(std::make_pair("max", 50));
+    limitMap[0].insert(std::make_pair("max", 400));
   }
 
-  int tolerant_leave_time = param["TOLERANT_LEAVE_TIME"];  // 范围 [0, 20]
+  int tolerant_leave_time = param["TOLERANT_LEAVE_TIME"];  // 范围 [0, 200]
   if (tolerant_leave_time - EXTEND > 0) {
     limitMap[1].insert(std::make_pair("min", tolerant_leave_time - EXTEND));
   } else {
     limitMap[1].insert(std::make_pair("min", 0));
   }
-  if (tolerant_leave_time + EXTEND < 20) {
+  if (tolerant_leave_time + EXTEND < 200) {
     limitMap[1].insert(std::make_pair("max", tolerant_leave_time + EXTEND));
   } else {
-    limitMap[1].insert(std::make_pair("max", 20));
+    limitMap[1].insert(std::make_pair("max", 200));
   }
 
   int goods_value_value = param["GOODS_VALUE_VALVE"];  // 范围[0, 200]
@@ -60,16 +60,17 @@ void initializePopulation(std::vector<Individual> &population,
     limitMap[2].insert(std::make_pair("max", 200));
   }
 
-  int goods_filter_value_num = param["GOODS_FILTER_VALVE_NUM"];  // 范围[0, 100]
+  int goods_filter_value_num =
+      param["GOODS_FILTER_VALVE_NUM"];  // 范围[0, 2000]
   if (goods_filter_value_num - EXTEND > 0) {
     limitMap[3].insert(std::make_pair("min", goods_filter_value_num - EXTEND));
   } else {
     limitMap[3].insert(std::make_pair("min", 0));
   }
-  if (goods_filter_value_num + EXTEND < 100) {
+  if (goods_filter_value_num + EXTEND < 2000) {
     limitMap[3].insert(std::make_pair("max", goods_filter_value_num + EXTEND));
   } else {
-    limitMap[3].insert(std::make_pair("max", 100));
+    limitMap[3].insert(std::make_pair("max", 2000));
   }
 
   int valueable_goods_value = param["VALUEABLE_GOODS_VALVE"];  // 范围 [0, 200]
@@ -84,40 +85,40 @@ void initializePopulation(std::vector<Individual> &population,
     limitMap[4].insert(std::make_pair("max", 200));
   }
 
-  int final_tolerant_time = param["FINAL_TOLERANT_TIME"];  // 范围[0, 1000]
+  int final_tolerant_time = param["FINAL_TOLERANT_TIME"];  // 范围[0, 5000]
   if (final_tolerant_time - EXTEND > 0) {
     limitMap[5].insert(std::make_pair("min", final_tolerant_time - EXTEND));
   } else {
     limitMap[5].insert(std::make_pair("min", 0));
   }
-  if (final_tolerant_time + EXTEND < 1000) {
+  if (final_tolerant_time + EXTEND < 5000) {
     limitMap[5].insert(std::make_pair("max", final_tolerant_time + EXTEND));
   } else {
-    limitMap[5].insert(std::make_pair("max", 1000));
+    limitMap[5].insert(std::make_pair("max", 5000));
   }
 
-  int busy_value = param["BUSY_VALVE"];  // 范围[0, 1000]
+  int busy_value = param["BUSY_VALVE"];  // 范围[0, 10]
   if (busy_value - EXTEND > 0) {
     limitMap[6].insert(std::make_pair("min", busy_value - EXTEND));
   } else {
     limitMap[6].insert(std::make_pair("min", 0));
   }
-  if (busy_value + EXTEND < 1000) {
+  if (busy_value + EXTEND < 10) {
     limitMap[6].insert(std::make_pair("max", busy_value + EXTEND));
   } else {
-    limitMap[6].insert(std::make_pair("max", 1000));
+    limitMap[6].insert(std::make_pair("max", 10));
   }
 
-  int boat_capacity_reduce = param["BOAT_CAPACITY_REDUCE"];  // 范围[0, 50]
+  int boat_capacity_reduce = param["BOAT_CAPACITY_REDUCE"];  // 范围[0, 30]
   if (boat_capacity_reduce - EXTEND > 0) {
     limitMap[7].insert(std::make_pair("min", boat_capacity_reduce - EXTEND));
   } else {
     limitMap[7].insert(std::make_pair("min", 0));
   }
-  if (boat_capacity_reduce + EXTEND < 50) {
+  if (boat_capacity_reduce + EXTEND < 30) {
     limitMap[7].insert(std::make_pair("max", boat_capacity_reduce + EXTEND));
   } else {
-    limitMap[7].insert(std::make_pair("max", 50));
+    limitMap[7].insert(std::make_pair("max", 30));
   }
 
   int max_robot_num = param["MAX_ROBOT_NUM"];  // 范围[1, 25]
@@ -132,16 +133,16 @@ void initializePopulation(std::vector<Individual> &population,
     limitMap[8].insert(std::make_pair("max", 25));
   }
 
-  int max_boat_num = param["MAX_BOAT_NUM"];  // 范围[1, 5]
+  int max_boat_num = param["MAX_BOAT_NUM"];  // 范围[1, 3]
   if (max_boat_num - EXTEND > 1) {
     limitMap[9].insert(std::make_pair("min", max_boat_num - EXTEND));
   } else {
     limitMap[9].insert(std::make_pair("min", 1));
   }
-  if (max_boat_num + EXTEND < 5) {
+  if (max_boat_num + EXTEND < 3) {
     limitMap[9].insert(std::make_pair("max", max_boat_num + EXTEND));
   } else {
-    limitMap[9].insert(std::make_pair("max", 5));
+    limitMap[9].insert(std::make_pair("max", 3));
   }
   // std::cout << "yyyyyyyy" << std::endl;
   for (int i = 0; i < POPULATION_SIZE - 1; ++i) {
@@ -249,7 +250,8 @@ int calculateFitness(std::vector<Individual> &population, int index) {
   // 从文件中读取数据
   int money1;
   std::string str = "./gasa/money/money" + std::to_string(index) + ".txt";
-  std::fstream inputFile1(str.c_str(), std::ios::in | std::ios::out);  // 打开文件用于读取
+  std::fstream inputFile1(str.c_str(),
+                          std::ios::in | std::ios::out);  // 打开文件用于读取
   if (inputFile1.is_open()) {
     std::string line;
     while (std::getline(inputFile1, line)) {
