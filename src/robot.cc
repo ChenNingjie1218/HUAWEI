@@ -123,6 +123,9 @@ bool Robot::FindTargetGoods() {
           continue;
         }
         int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
+        cal_man +=
+            std::abs(berth[berth_id].GetNearestX(p_goods->x) - p_goods->x) +
+            std::abs(berth[berth_id].GetNearestY(p_goods->y) - p_goods->y);
         double per_money = 1.0 * p_goods->money / cal_man;
 #ifdef MONEY_FIRST
         if (per_money > max_per_money &&
@@ -154,6 +157,9 @@ bool Robot::FindTargetGoods() {
         continue;
       }
       int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
+      cal_man +=
+          std::abs(berth[berth_id].GetNearestX(p_goods->x) - p_goods->x) +
+          std::abs(berth[berth_id].GetNearestY(p_goods->y) - p_goods->y);
       double per_money = 1.0 * p_goods->money / cal_man;
 #ifdef MONEY_FIRST
       if (per_money > max_per_money &&
