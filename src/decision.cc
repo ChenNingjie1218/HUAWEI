@@ -732,7 +732,7 @@ void DecisionManager::DecisionRobot() {
 #endif
       if (can_astar && robot[i].FindTargetGoods()) {
         // 有新的目标货物
-        can_astar = false;
+        can_astar = DynamicParam::GetInstance()->GetMultipleAstar();
       }
 
 #ifdef DEBUG
@@ -774,7 +774,7 @@ void DecisionManager::DecisionRobot() {
         // 决策更新目标泊位和泊位权重
         if (can_astar) {
           robot[i].FindBerth(robot[i].x, robot[i].y);
-          can_astar = false;
+          can_astar = DynamicParam::GetInstance()->GetMultipleAstar();
 #ifdef DEBUG
           std::cerr << "成功更新目标泊位" << std::endl;
 #endif
@@ -816,7 +816,7 @@ void DecisionManager::DecisionRobot() {
         std::cerr << "robot " << i << " 没有更新新的目标货物" << std::endl;
 #endif
       }
-      can_astar = false;
+      can_astar = DynamicParam::GetInstance()->GetMultipleAstar();
     }
 #ifdef DEBUG
     std::cerr << "*************** robot " << i

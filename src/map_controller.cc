@@ -316,6 +316,7 @@ void MapController::InitMapParam(int id) {
     case 3:
       param_instance->SetMaxRobotNum(18);
       param_instance->SetMaxBoatNum(1);
+      param_instance->SetMultipleAstar(true);
       break;
   }
 }

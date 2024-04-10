@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-// #define DEBUG
+#define DEBUG
 #define FACE_MAP  // 面向地图
 // #define TEST_ASTAR
 
@@ -66,6 +66,7 @@ class DynamicParam {
   int GetBoatCapacityReduce() { return boat_capacity_reduce_; }
   int GetMaxRobotNum() { return max_robot_num_; }
   int GetMaxBoatNum() { return max_boat_num_; }
+  bool GetMultipleAstar() { return multiple_astar_; }
 
   void SetTolerantTime(int tolerant_time) { tolerant_time_ = tolerant_time; }
   void SetTolerantLeaveTime(int tolerant_leave_time) {
@@ -89,6 +90,9 @@ class DynamicParam {
   }
   void SetMaxRobotNum(int max_robot_num) { max_robot_num_ = max_robot_num; }
   void SetMaxBoatNum(int max_boat_num) { max_boat_num_ = max_boat_num; }
+  void SetMultipleAstar(bool multiple_astar) {
+    multiple_astar_ = multiple_astar;
+  }
 
  private:
   int tolerant_time_ = 20;           // 参数 机器人找货物容忍步数
@@ -101,6 +105,7 @@ class DynamicParam {
   int boat_capacity_reduce_ = 15;    // 参数 改变船容量
   int max_robot_num_ = 17;           // 参数 机器人最大数量
   int max_boat_num_ = 2;             // 参数 船舶最大数量
+  bool multiple_astar_ = false;      // 参数 一帧可多次astar吗？
 
   static DynamicParam* instance_;
 
