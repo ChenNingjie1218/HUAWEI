@@ -116,8 +116,8 @@ void InputController::Input() {
     // 泊位上残留货物数量
     int size = berth.size();
     for (int i = 0; i < size; ++i) {
-      std::cerr << "船泊残留货物:" << berth[i].goods_num << std::endl;
-      std::cerr << "船泊transport time:" << berth[i].transport_time
+      std::cerr << i << " 船泊残留货物:" << berth[i].goods_num << std::endl;
+      std::cerr << i << " 船泊transport time:" << berth[i].transport_time
                 << std::endl;
       for (std::map<int, std::vector<int>>::iterator it = berth[i].path.begin();
            it != berth[i].path.end(); ++it) {

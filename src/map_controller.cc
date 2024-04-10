@@ -82,11 +82,13 @@ void MapController::InitBerthMap(int berth_id, int berth_x, int berth_y) {
     Location& loc = berth[berth_id].loc[i];
     std::cerr << "(" << loc.x << "," << loc.y << ")" << std::endl;
   }
-  for (auto it = location_to_berth_id.begin(); it != location_to_berth_id.end();
-       ++it) {
-    std::cerr << "泊位：" << it->second << " 坐标："
-              << "(" << it->first.x << "," << it->first.y << ")" << std::endl;
-  }
+  // for (auto it = location_to_berth_id.begin(); it !=
+  // location_to_berth_id.end();
+  //      ++it) {
+  //   std::cerr << "泊位：" << it->second << " 坐标："
+  //             << "(" << it->first.x << "," << it->first.y << ")" <<
+  //             std::endl;
+  // }
 #endif
 }
 
@@ -308,7 +310,8 @@ void MapController::InitMapParam(int id) {
       break;
     case 2:
       map2 = true;
-      param_instance->SetMaxRobotNum(20);
+      param_instance->SetMaxRobotNum(16);
+      param_instance->SetBoatCapacityReduce(12);
       break;
     case 3:
       param_instance->SetMaxRobotNum(18);
