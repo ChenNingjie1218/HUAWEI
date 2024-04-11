@@ -427,7 +427,16 @@ bool Robot::ZonePlan() {
         // 不是邻居
         continue;
       }
-      temp = berth[i].goods_manager.goods_num * 1.0 /
+      // 将机器人手上的货物也纳入考虑
+      int count_hand = 0;
+      std::vector<Robot> &robot = RentController::GetInstance()->robot;
+      for (int k = 0; k < berth[i].robot.size(); k++) {
+        if (robot[berth[i].robot[k]].goods == 1) {
+          count_hand++;
+        }
+      }
+      // 计算邻居泊位权值选择最优
+      temp = (berth[i].goods_manager.goods_num + count_hand) * 1.0 /
              (berth[i].robot.size() ? berth[i].robot.size() : 0.01);
       if (temp > max_avg_goods_num && berth[i].goods_manager.goods_num > 1) {
         max_avg_goods_num = temp;
