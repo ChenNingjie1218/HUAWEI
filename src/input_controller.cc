@@ -150,14 +150,22 @@ void InputController::Input() {
     // 全局货物统计
     std::cerr << "全局生成货物数量:"
               << MapController::GetInstance()->total_goods_num << std::endl;
+    std::cerr << "全局生成筛选货物数量:"
+              << MapController::GetInstance()->total_accepted_goods_num
+              << std::endl;
     std::cerr << "全局提交货物数量:" << MapController::GetInstance()->pull_num
               << std::endl;
+
     std::cerr << "全局生成货物金额:"
               << MapController::GetInstance()->total_money << std::endl;
-    std::cerr << "全局捡起货物金额:" << MapController::GetInstance()->get_money
+    std::cerr << "全局生成筛选货物金额:"
+              << MapController::GetInstance()->total_accepted_goods_money
               << std::endl;
+    std::cerr << "全局提交货物金额:" << MapController::GetInstance()->pull_money
+              << std::endl;
+
     std::cerr << "理论得分:"
-              << MapController::GetInstance()->get_money + 25000 -
+              << MapController::GetInstance()->pull_money + 25000 -
                      2000 * RentController::GetInstance()->robot.size() -
                      8000 * RentController::GetInstance()->boat.size()
               << std::endl;
@@ -218,6 +226,10 @@ void InputController::Input() {
     if (nearest_berth[x][y] != -1 &&
         MapController::GetInstance()->CanRobotReach(x, y)) {
       if (val > 0) {
+#ifdef DEBUG
+        MapController::GetInstance()->total_goods_num += 1;  // 全局货物数量增加
+        MapController::GetInstance()->total_money += val;  // 全局货物金额增加
+#endif
 #ifdef GOODS_FILTER
         if (val < berth[nearest_berth[x][y]].goods_manager.value_valve) {
 #ifdef DEBUG
@@ -227,16 +239,19 @@ void InputController::Input() {
           continue;
         }
 #endif
+
 #ifdef DEBUG
-        MapController::GetInstance()->total_goods_num += 1;  // 全局货物数量增加
-        MapController::GetInstance()->total_money += val;  // 全局货物金额增加
+        MapController::GetInstance()->total_accepted_goods_num +=
+            1;  // 全局筛选货物数量增加
+        MapController::GetInstance()->total_accepted_goods_money +=
+            val;  // 全局筛选货物金额增加
 #endif
 
         Goods* new_goods = new Goods(x, y, val, id);
         berth[nearest_berth[x][y]].goods_manager.PushGoods(new_goods);
         new_goods->area_id = MapController::GetInstance()->FindArea(x * n + y);
       } else if (!val) {
-        berth[nearest_berth[x][y]].goods_manager.RemoveExpiredGoods(x, y);
+        berth[nearest_berth[x][y]].goods_manager.RemoveGoods(x, y);
       }
     }
   }
@@ -286,6 +301,8 @@ void InputController::Input() {
       }
       // 全局放置数量增加
       MapController::GetInstance()->pull_num += 1;
+      MapController::GetInstance()->pull_money += robot[i].goods_money;
+      robot[i].money += robot[i].goods_money;
       std::cerr << robot[i].berth_id << " 泊位更新货物数量："
                 << berth[robot[i].berth_id].goods_num << std::endl;
 #endif

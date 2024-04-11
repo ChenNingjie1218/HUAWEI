@@ -194,33 +194,35 @@ bool Boat::DeliveryCond() {
     // 能装满就装满了走
     return num >= boat_capacity;
   }
-  // if (!MapController::GetInstance()->map1 &&
-  //     !MapController::GetInstance()->map2) {
-  //   int berth_size = berth.size();
-  //   int all_goods_num = 0;  // 目前全场泊位货物数量
-  //   for (int i = 0; i < berth_size; ++i) {
-  //     if (berth[i].area_id != area_id || !berth[i].goods_num) {
-  //       continue;
-  //     }
-  //     if (berth[i].boat_id != -1) {
-  //       if (berth[i].goods_num -
-  //               (boat_capacity -
-  //                RentController::GetInstance()->boat[berth[i].boat_id].num) >
-  //           0) {
-  //         // 如果该泊位的数量比另一艘船剩余容量还大 就加上剩余的数量
-  //         all_goods_num +=
-  //             (berth[i].goods_num - boat_capacity +
-  //              RentController::GetInstance()->boat[berth[i].boat_id].num);
-  //       }
-  //     } else {
-  //       all_goods_num += berth[i].goods_num;
-  //     }
-  //   }
-  //   if (all_goods_num < boat_capacity - num) {
-  //     // 全场货物数量太少，回去送一波积攒点货物
-  //     return true;
-  //   }
-  // }
+#ifdef FACE_MAP
+  if (!MapController::GetInstance()->map1 &&
+      !MapController::GetInstance()->map2) {
+    int berth_size = berth.size();
+    int all_goods_num = 0;  // 目前全场泊位货物数量
+    for (int i = 0; i < berth_size; ++i) {
+      if (berth[i].area_id != area_id || !berth[i].goods_num) {
+        continue;
+      }
+      if (berth[i].boat_id != -1) {
+        if (berth[i].goods_num -
+                (boat_capacity -
+                 RentController::GetInstance()->boat[berth[i].boat_id].num) >
+            0) {
+          // 如果该泊位的数量比另一艘船剩余容量还大 就加上剩余的数量
+          all_goods_num +=
+              (berth[i].goods_num - boat_capacity +
+               RentController::GetInstance()->boat[berth[i].boat_id].num);
+        }
+      } else {
+        all_goods_num += berth[i].goods_num;
+      }
+    }
+    if (all_goods_num < boat_capacity - num) {
+      // 全场货物数量太少，回去送一波积攒点货物
+      return true;
+    }
+  }
+#endif
 
   // 微调快满的船又去换泊位
   return num >=

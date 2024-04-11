@@ -26,10 +26,10 @@ struct GoodsManager {
   void PushGoods(Goods *new_goods);
 
   // 删除货物
-  void DeleteGoods(Goods *&goods, bool is_timeout = false);
+  void DeleteGoods(Goods *&goods);
 
-  // 移除过期货物
-  void RemoveExpiredGoods(int &x, int &y);
+  // 移除货物
+  void RemoveGoods(int &x, int &y);
 
   // 更新价值域值
   void UpdateValueValve(bool is_plus);

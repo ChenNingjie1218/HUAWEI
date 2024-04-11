@@ -780,10 +780,6 @@ void DecisionManager::DecisionRobot() {
           std::cerr << "成功更新目标泊位" << std::endl;
 #endif
         }
-#ifdef DEBUG
-        robot[i].money += robot[i].target_goods->money;
-        MapController::GetInstance()->get_money += robot[i].target_goods->money;
-#endif
         //当前持有货物
         robot[i].goods = true;
       }

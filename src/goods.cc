@@ -40,19 +40,19 @@ void GoodsManager::PushGoods(Goods *new_goods) {
   }
 };
 
-// 移除过期货物
-void GoodsManager::RemoveExpiredGoods(int &x, int &y) {
+// 移除货物
+void GoodsManager::RemoveGoods(int &x, int &y) {
   Goods *cur = head_goods->next;
   while (cur != head_goods) {
     if (cur->x == x && cur->y == y) {
-      DeleteGoods(cur, true);
+      DeleteGoods(cur);
       return;
     }
     cur = cur->next;
   }
 }
 // 删除货物
-void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
+void GoodsManager::DeleteGoods(Goods *&goods) {
   // #ifdef GOODS_FILTER
   --goods_num;
   if (goods_num < DynamicParam::GetInstance()->GetGoodsFilterValveNum()) {
@@ -63,22 +63,26 @@ void GoodsManager::DeleteGoods(Goods *&goods, bool is_timeout) {
   goods->pre->next = goods->next;
   goods->next->pre = goods->pre;
 
+  if (goods->robot_id > -1) {
+    auto &robot = RentController::GetInstance()->robot;
+    if (!robot[goods->robot_id].goods) {
 #ifdef DEBUG
-  if (is_timeout) {
-    std::cerr << "损失货物 money: " << goods->money << std::endl;
-  }
+      std::cerr << "货物失效 money:" << goods->money << " robot "
+                << goods->robot_id << "失去目标" << std::endl;
 #endif
-
-  if (is_timeout && goods->robot_id > -1) {
+      robot[goods->robot_id].path.clear();
+    } else {
+#ifdef DEBUG
+      std::cerr << "货物被捡起 robot " << goods->robot_id << std::endl;
+#endif
+      robot[goods->robot_id].goods_money = goods->money;
+    }
     RentController::GetInstance()->robot[goods->robot_id].target_goods =
         nullptr;
-    if (!RentController::GetInstance()->robot[goods->robot_id].goods) {
+  } else {
 #ifdef DEBUG
-      std::cerr << "货物失效 robot " << goods->robot_id << "失去目标"
-                << std::endl;
+    std::cerr << "货物失效 没锁定的货物 money:" << goods->money << std::endl;
 #endif
-      RentController::GetInstance()->robot[goods->robot_id].path.clear();
-    }
   }
   delete goods;
   if (goods == first_free_goods) {
@@ -118,11 +122,7 @@ void GoodsManager::FreshGoodsLists() {
   while (cur != head_goods) {
     if (id - cur->birth >= LIFETIME) {
       Goods *temp = cur->next;
-#ifdef DEBUG
-      std::cerr << "超过生命周期:(" << temp->x << "," << temp->y << ")"
-                << std::endl;
-#endif
-      DeleteGoods(cur, true);
+      DeleteGoods(cur);
       cur = temp;
     } else {
       // 剪枝
