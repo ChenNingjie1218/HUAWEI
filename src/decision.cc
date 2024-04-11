@@ -789,6 +789,7 @@ void DecisionManager::DecisionRobot() {
       if (robot[i].goods) {
         // 如果有货物但是没路径
         robot[i].FindBerth(robot[i].x, robot[i].y);
+        can_astar = DynamicParam::GetInstance()->GetMultipleAstar();
       } else if (robot[i].target_goods) {
         // 有目标货物但是没路径
         Goods *target_goods = robot[i].target_goods;
@@ -801,19 +802,19 @@ void DecisionManager::DecisionRobot() {
           std::cerr << "robot " << i << " 没有为目标货物找到路径" << std::endl;
 #endif
         }
-
+        can_astar = DynamicParam::GetInstance()->GetMultipleAstar();
       } else if (robot[i].FindTargetGoods()) {
         // 有新的目标货物
 #ifdef DEBUG
         std::cerr << "robot " << i << " 更新新的目标货物" << std::endl;
 #endif
+        can_astar = DynamicParam::GetInstance()->GetMultipleAstar();
       } else {
-        robot[i].ZonePlan();
 #ifdef DEBUG
         std::cerr << "robot " << i << " 没有更新新的目标货物" << std::endl;
 #endif
+        robot[i].ZonePlan();
       }
-      can_astar = DynamicParam::GetInstance()->GetMultipleAstar();
     }
 #ifdef DEBUG
     std::cerr << "*************** robot " << i
@@ -1030,19 +1031,20 @@ void DecisionManager::DecisionRobot() {
 #endif
         }
       } else {
-        // 没有目标货物罚站，更换所属泊位
+        //         // 没有目标货物罚站，更换所属泊位
 
-#ifdef DEBUG
-        auto start = std::chrono::high_resolution_clock::now();
-#endif
-        // robot[robot_id].FindNeighborGoods();
-        robot[robot_id].ZonePlan();
-#ifdef DEBUG
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double, std::milli> duration = end - start;
-        std::cerr << "机器人" << robot_id << "换泊位耗时：" << duration.count()
-                  << " ms" << std::endl;
-#endif
+        // #ifdef DEBUG
+        //         auto start = std::chrono::high_resolution_clock::now();
+        // #endif
+        //         // robot[robot_id].FindNeighborGoods();
+        //         robot[robot_id].ZonePlan();
+        // #ifdef DEBUG
+        //         auto end = std::chrono::high_resolution_clock::now();
+        //         std::chrono::duration<double, std::milli> duration = end -
+        //         start; std::cerr << "机器人" << robot_id << "换泊位耗时：" <<
+        //         duration.count()
+        //                   << " ms" << std::endl;
+        // #endif
       }
     }
   }

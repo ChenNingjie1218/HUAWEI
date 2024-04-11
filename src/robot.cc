@@ -184,53 +184,49 @@ bool Robot::FindTargetGoods() {
 
   std::set<int> &neighbor = berth[berth_id].neighbor;
   //遍历邻居
-  if (RentController::GetInstance()->robot.size() <
-          DynamicParam::GetInstance()->GetMaxRobotNum() &&
-      id < 5000) {
-    for (const auto &neighbor_id : neighbor) {
+  for (const auto &neighbor_id : neighbor) {
 #ifdef DEBUG
-      std::cerr << "邻居" << neighbor_id << std::endl;
+    std::cerr << "邻居" << neighbor_id << std::endl;
 #endif
-      Goods *p_goods = berth[neighbor_id].goods_manager.first_free_goods;
-      head_goods = berth[neighbor_id].goods_manager.head_goods;
-      while (p_goods != head_goods) {
-        if (p_goods->robot_id > -1) {
-          // 该货物被选过了
-          p_goods = p_goods->next;
-          continue;
-        }
-        if (p_goods->area_id != area_id) {
-          // 不在一个分区
-          p_goods = p_goods->next;
-          continue;
-        }
-#ifdef MONEY_FIRST
-        int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
-        int total_cal_man =
-            cal_man +
-            std::abs(berth[neighbor_id].GetNearestX(p_goods->x) - p_goods->x) +
-            std::abs(berth[neighbor_id].GetNearestY(p_goods->y) - p_goods->y);
-        // total_cal_man = cal_man; // 屏蔽精确长度
-        double per_money = 1.0 * p_goods->money / total_cal_man;
-        if ((per_money - max_per_money) > 0.1 &&       // 金钱/长度的差值
-            cal_man < (1000 - id + p_goods->birth) &&  // 生存周期内
-            berth[neighbor_id].robot.size() < 2) {  // 前往的泊位机器人最多为1
-#ifdef DEBUG
-          std::cerr << max_per_money << "--升值-->"
-                    << 1.0 * p_goods->money / cal_man << std::endl;
-#endif
-          max_per_money = p_goods->money;
-          find_goods = p_goods;
-        }
-#else
-        int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
-        if (min_man > cal_man) {
-          min_man = cal_man;
-          find_goods = p_goods;
-        }
-#endif
+    Goods *p_goods = berth[neighbor_id].goods_manager.first_free_goods;
+    head_goods = berth[neighbor_id].goods_manager.head_goods;
+    while (p_goods != head_goods) {
+      if (p_goods->robot_id > -1) {
+        // 该货物被选过了
         p_goods = p_goods->next;
+        continue;
       }
+      if (p_goods->area_id != area_id) {
+        // 不在一个分区
+        p_goods = p_goods->next;
+        continue;
+      }
+#ifdef MONEY_FIRST
+      int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
+      int total_cal_man =
+          cal_man +
+          std::abs(berth[neighbor_id].GetNearestX(p_goods->x) - p_goods->x) +
+          std::abs(berth[neighbor_id].GetNearestY(p_goods->y) - p_goods->y);
+      // total_cal_man = cal_man; // 屏蔽精确长度
+      double per_money = 1.0 * p_goods->money / total_cal_man;
+      if ((per_money - max_per_money) > 0.1 &&       // 金钱/长度的差值
+          cal_man < (1000 - id + p_goods->birth) &&  // 生存周期内
+          berth[neighbor_id].robot.size() < 2) {  // 前往的泊位机器人最多为1
+#ifdef DEBUG
+        std::cerr << max_per_money << "--升值-->"
+                  << 1.0 * p_goods->money / cal_man << std::endl;
+#endif
+        max_per_money = p_goods->money;
+        find_goods = p_goods;
+      }
+#else
+      int cal_man = std::abs(x - p_goods->x) + std::abs(y - p_goods->y);
+      if (min_man > cal_man) {
+        min_man = cal_man;
+        find_goods = p_goods;
+      }
+#endif
+      p_goods = p_goods->next;
     }
   }
 
@@ -238,9 +234,7 @@ bool Robot::FindTargetGoods() {
     // 若货物在邻居分区则先更换分区
     int goods_berth_id = MapController::GetInstance()
                              ->nearest_berth[find_goods->x][find_goods->y];
-    if (goods_berth_id != berth_id &&
-        (RentController::GetInstance()->robot.size() <
-         DynamicParam::GetInstance()->GetMaxRobotNum())) {
+    if (goods_berth_id != berth_id) {
       ChangeBerth(goods_berth_id);
 #ifdef DEBUG
       std::cerr << "找到邻居好货：(" << find_goods->x << "," << find_goods->y
@@ -430,7 +424,8 @@ bool Robot::ZonePlan() {
       // 将机器人手上的货物也纳入考虑
       int count_hand = 0;
       std::vector<Robot> &robot = RentController::GetInstance()->robot;
-      for (int k = 0; k < berth[i].robot.size(); k++) {
+      int robot_size = berth[i].robot.size();
+      for (int k = 0; k < robot_size; k++) {
         if (robot[berth[i].robot[k]].goods == 1) {
           count_hand++;
         }
@@ -438,7 +433,8 @@ bool Robot::ZonePlan() {
       // 计算邻居泊位权值选择最优
       temp = (berth[i].goods_manager.goods_num + count_hand) * 1.0 /
              (berth[i].robot.size() ? berth[i].robot.size() : 0.01);
-      if (temp > max_avg_goods_num && berth[i].goods_manager.goods_num > 1) {
+      if (temp > max_avg_goods_num &&
+          (berth[i].goods_manager.goods_num - robot_size + count_hand >= 1)) {
         max_avg_goods_num = temp;
         temp_berth_id = i;
       }
