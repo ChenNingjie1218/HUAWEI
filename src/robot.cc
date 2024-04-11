@@ -284,14 +284,19 @@ void Robot::FindBerth(int start_x, int start_y) {
       time_map.insert(std::make_pair(berth[i].transport_time, i));
     }
     for (auto it = time_map.begin(); it != time_map.end(); ++it) {
-      if (berth[it->second].robot.size() < size / boat.size()) {
+      if (berth[it->second].robot.size() < size / (boat.size() + 0)) {
         // 可以选择这个泊位
         int sprint_time =
             it->first * 3 + DynamicParam::GetInstance()->GetFinalTolerantTime();
         if (15000 - id < sprint_time) {
           // 可以冲刺
-          ChangeBerth(it->second);
-          is_sprint = true;
+          // 计算机器人离泊位的曼哈顿距离，如果太远就不过去
+          int man = std::abs(start_x - berth[it->second].x) +
+                    std::abs(start_y - berth[it->second].y);
+          if (man < 200) {
+            ChangeBerth(it->second);
+            is_sprint = true;
+          }
         }
         break;
       }

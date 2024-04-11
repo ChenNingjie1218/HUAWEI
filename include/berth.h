@@ -28,6 +28,12 @@ struct Berth {
   // 所处区号
   int area_id = -1;
 
+  // 维护一个队列，用于记录泊位每个货物的金钱
+  std::queue<int> berth_goods_value;
+
+  // 维护泊位的实时总金额
+  int total_value = 0;
+
   /*
    * 已经算过的路径
    * first: 泊位id，交货点是-1

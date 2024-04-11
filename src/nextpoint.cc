@@ -103,6 +103,12 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
       // 卸货
       Decision decision(DECISION_TYPE_ROBOT_PULL, robot_id, -1);
       DecisionManager::GetInstance()->q_decision.push(decision);
+      auto &berth = MapController::GetInstance()->berth;
+      berth[robot[robot_id].berth_id].berth_goods_value.push(
+          robot[robot_id].goods_money);
+
+      berth[robot[robot_id].berth_id].total_value +=
+          robot[robot_id].goods_money;
     } else if (!robot[robot_id].goods &&
                MapController::GetInstance()->gds[x][y]) {
 #ifdef DEBUG
@@ -124,6 +130,7 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
         // 装货
         Decision decision(DECISION_TYPE_ROBOT_GET, robot_id, -1);
         DecisionManager::GetInstance()->q_decision.push(decision);
+        robot[robot_id].goods_money = robot[robot_id].target_goods->money;
 
         // 决策更新目标泊位和泊位权重
         robot[robot_id].FindBerth(x, y);

@@ -64,8 +64,17 @@ struct Boat {
   // 目标泊位，虚拟点为-1，购买点为-2
   int pos = -2;
 
+  // 记录老的pos
+  int old_pos = pos;
+
   // 船的最大容量
   static int boat_capacity;
+
+  // 记录船的钱
+  int boat_money = 0;
+
+  // 标记是否还要买机器人
+  bool is_buy = true;
 
   /*
    * 状态

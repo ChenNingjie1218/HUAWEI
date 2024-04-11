@@ -201,7 +201,6 @@ void InputController::Input() {
 #endif
 
   id = temp_id;
-  money = temp_money;
 #ifdef DEBUG
   std::cerr << "------------------帧数id: " << id << "------------------"
             << std::endl;
@@ -350,16 +349,39 @@ void InputController::Input() {
 
       boat[i].x = ++x;
       boat[i].y = ++y;
-      if (goods_num - boat[i].num > 0 && boat[i].pos != -1) {
-        berth[boat[i].pos].goods_num -= (goods_num - boat[i].num);
+      if (goods_num - boat[i].num > 0 && boat[i].old_pos > -1) {
+        // 表明这一帧之前船装货了
+        berth[boat[i].old_pos].goods_num -= (goods_num - boat[i].num);
+        // 计算并更新船的钱
+        int sum = 0;
+        int num = goods_num - boat[i].num;  // 船装了多少个货物
+        for (int j = 0; j < num; ++j) {
+          sum += berth[boat[i].old_pos].berth_goods_value.front();
+          berth[boat[i].old_pos].berth_goods_value.pop();
+        }
+        boat[i].boat_money += sum;
+        berth[boat[i].old_pos].total_value -= sum;
 #ifdef DEBUG
-        if (boat[i].pos != MapController::GetInstance()
-                               ->location_to_berth_id[Location(x, y)]) {
+        if (boat[i].old_pos != MapController::GetInstance()
+                                   ->location_to_berth_id[Location(x, y)]) {
           std::cerr << "泊位数量减少错了" << std::endl;
         }
-        std::cerr << boat[i].pos << " 泊位更新货物数量："
-                  << berth[boat[i].pos].goods_num << std::endl;
+        std::cerr << boat[i].old_pos << " 泊位更新货物数量："
+                  << berth[boat[i].old_pos].goods_num << std::endl;
 #endif
+        boat[i].old_pos = boat[i].pos;
+      } else if (goods_num == 0 && boat[i].num != 0) {
+#ifdef DEBUG
+        if (temp_money - money != boat[i].boat_money) {
+          std::cerr << "船交货挣的钱和服务器对不上 " << temp_money - money
+                    << " " << boat[i].boat_money << std::endl;
+        } else {
+          std::cerr << "船 " << boat_id << " 交货，挣了 " << temp_money - money
+                    << std::endl;
+        }
+#endif
+        // 表明这一帧在交货点交货了，需要把船的钱清空
+        boat[i].boat_money = 0;
       }
       boat[i].num = goods_num;
       boat[i].direction = direction;
@@ -378,6 +400,7 @@ void InputController::Input() {
             boat_id, goods_num, x, y, Boat::dir_str[direction], temp_status);
 #endif
   }
+  money = temp_money;
   char okk[100];
   scanf("%s", okk);
 #ifdef DEBUG

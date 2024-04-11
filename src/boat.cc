@@ -62,6 +62,7 @@ void Boat::DoBerth() {
   Decision decision(DECISION_TYPE_BOAT_BERTH, id_);
   DecisionManager::GetInstance()->q_decision.push(decision);
   path.clear();
+  old_pos = pos;
 #ifdef DEBUG
   std::cerr << id_ << " 船靠泊：" << pos << std::endl;
 #endif
@@ -181,6 +182,18 @@ bool Boat::DeliveryCond() {
     }
   }
   std::vector<Berth> &berth = MapController::GetInstance()->berth;
+  if (is_buy) {
+    // 如果船上的钱不够至少买一个机器人，那么就切换港口
+    if (boat_money < 2000) return false;
+    // 统计所有表港口货物的总金额
+    int sum_value = 0;
+    for (int i = 0; i < berth.size(); ++i) {
+      sum_value += berth[i].total_value;
+    }
+    // 如果总金额超过了一个机器人购买的金额，那么就值得切换泊位去装货
+    if (sum_value > 2000 && num < boat_capacity) return false;
+    return true;
+  }
   if (id > 15000 - berth[pos].transport_time -
                DynamicParam::GetInstance()->GetTolerantLeaveTime()) {
 #ifdef DEBUG
@@ -264,6 +277,7 @@ void Boat::FindDeliveryPoint() {
   if (pos != -1) {
     berth[pos].boat_id = -1;
   }
+  old_pos = pos;
   pos = -1;
 
 #ifdef DEBUG
@@ -502,6 +516,7 @@ void Boat::FindBerth() {
       berth[pos].boat_id = -1;
     }
     berth[berth_id].boat_id = id_;
+    old_pos = pos;
     pos = berth_id;
 
 #ifdef DEBUG

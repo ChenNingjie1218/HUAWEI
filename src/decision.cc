@@ -74,6 +74,7 @@ void DecisionManager::DecisionBoat() {
                       << " 货物数量:" << berth[berth_id].goods_num << std::endl;
 #endif
             berth[boat[i].pos].boat_id = -1;
+            boat[i].old_pos = berth_id;
             boat[i].pos = berth_id;
           }
           //&&
@@ -725,6 +726,12 @@ void DecisionManager::DecisionRobot() {
       Decision decision(DECISION_TYPE_ROBOT_PULL, i, -1);
       q_decision.push(decision);
 
+      // 把货物金钱入队列
+      auto &berth = MapController::GetInstance()->berth;
+      berth[robot[i].berth_id].berth_goods_value.push(robot[i].goods_money);
+
+      berth[robot[i].berth_id].total_value += robot[i].goods_money;
+
       // 下货的位置可能不是计算的位置，path里面还有内容
       robot[i].path.clear();
       // 决策，更新目标货物, 当前不持有货物
@@ -771,6 +778,7 @@ void DecisionManager::DecisionRobot() {
         // 装货
         Decision decision(DECISION_TYPE_ROBOT_GET, i, -1);
         q_decision.push(decision);
+        robot[i].goods_money = robot[i].target_goods->money;
 
         // 决策更新目标泊位和泊位权重
         if (can_astar) {
@@ -1152,6 +1160,12 @@ void DecisionManager::DecisionPurchase() {
           break;
         }
       }
+    }
+  } else {
+    // 机器人数量已经够了，不需要再购买
+    auto &boat = rent_instance->boat;
+    for (int i = 0; i < boat.size(); ++i) {
+      boat[i].is_buy = false;
     }
   }
 
