@@ -90,11 +90,14 @@ void InputController::Init() {
   std::queue<std::pair<Location, int>> q;
   int berth_num;
   scanf("%d", &berth_num);
+#ifdef FILLBERTH
   int count = 0;
   int maxindex = 0;
+#endif
   for (int i = 0; i < berth_num; ++i) {
     int id, x, y, loading_speed;
     scanf("%d%d%d%d", &id, &x, &y, &loading_speed);
+#ifdef FILLBERTH
     if (i == 3 || i == 4) {
       // 填充海域
       maxindex = i;
@@ -103,6 +106,7 @@ void InputController::Init() {
       continue;
     } else if (i > maxindex)
       id -= count;
+#endif
     berth.push_back(Berth(id, ++x, ++y, loading_speed));
     MapController::GetInstance()->InitBerthMap(id, x, y);
     // 处理nearest_berth
