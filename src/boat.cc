@@ -301,7 +301,7 @@ void Boat::FindBerth() {
     int capacity = std::min(time * berth[i].loading_speed, boat_capacity - num);
     int next_money = berth[i].GetIdealMoney(capacity);
     double next_per_money = 1.0 * next_money / distance;
-    if (next_per_money >= max_per_money) {
+    if (next_per_money > max_per_money) {
       max_per_money = next_per_money;
       berth_id = i;
     }
