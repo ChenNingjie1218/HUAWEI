@@ -14,6 +14,45 @@
 extern FILE* debug_command_file;
 extern FILE* debug_map_file;
 #endif
+
+// 填地图
+void InputController::FillMap(int x, int y, char (&chpy)[N][N]) {
+  std::multimap<int, int> openlist;
+  std::multimap<int, int> closeList;
+  openlist.insert(std::pair<int, int>(x, y));
+  while (!openlist.empty()) {
+    auto p = openlist.begin();
+    auto point = *p;
+    openlist.erase(p);
+    closeList.insert(point);
+    // 获取point周围的四个点
+    int dx[4] = {0, 0, 1, -1};
+    int dy[4] = {1, -1, 0, 0};
+    for (int i = 0; i < 4; i++) {
+      int new_x = point.first + dx[i];
+      int new_y = point.second + dy[i];
+      if (new_x < 1 || new_x > n || new_y < 1 || new_y > n) {
+        continue;
+      }
+      if (chpy[new_x][new_y] == 'K' || chpy[new_x][new_y] == 'B') {
+        // 判断这个新的点是不是在closeList里面
+        bool flag = false;
+        for (auto it = closeList.begin(); it != closeList.end(); ++it) {
+          if (it->first == new_x && it->second == new_y) {
+            flag = true;
+            break;
+          }
+        }
+        if (flag) {
+          continue;
+        }
+        openlist.insert(std::pair<int, int>(new_x, new_y));
+      }
+    }
+    // 把当前点填充
+    chpy[point.first][point.second] = '~';
+  }
+}
 InputController* InputController::instance_ = nullptr;
 
 InputController*& InputController::GetInstance() {
@@ -51,12 +90,21 @@ void InputController::Init() {
   std::queue<std::pair<Location, int>> q;
   int berth_num;
   scanf("%d", &berth_num);
+  int count = 0;
+  int maxindex = 0;
   for (int i = 0; i < berth_num; ++i) {
     int id, x, y, loading_speed;
     scanf("%d%d%d%d", &id, &x, &y, &loading_speed);
+    if (i == 3 || i == 4) {
+      // 填充海域
+      maxindex = i;
+      count++;
+      FillMap(x + 1, y + 1, ch);
+      continue;
+    } else if (i > maxindex)
+      id -= count;
     berth.push_back(Berth(id, ++x, ++y, loading_speed));
     MapController::GetInstance()->InitBerthMap(id, x, y);
-
     // 处理nearest_berth
     MapController::GetInstance()->nearest_berth[x][y] = id;
     q.push(std::make_pair(Location(x, y), id));
