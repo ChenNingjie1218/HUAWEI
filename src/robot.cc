@@ -101,6 +101,12 @@ bool Robot::FindTargetGoods() {
   int min_man = 99999;
 #endif
   // is_sprint = false;
+  //
+  // auto &dash_table = MapController::GetInstance()->dash_table;
+  // if (!is_sprint && id >= dash_table[id_].first) {
+  //   SetDash(dash_table[id_].second);
+  // }
+
   if (is_sprint) {
     // 表明是冲刺阶段，要全局搜索货物
     // 循环遍历所有港口
