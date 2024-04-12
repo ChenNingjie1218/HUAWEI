@@ -105,14 +105,14 @@ class DynamicParam {
   }
 
  private:
-  int tolerant_time_ = 0;            // 参数 机器人找货物容忍步数
-  int tolerant_leave_time_ = 80;     // 参数 船最后走可容忍时间的
-  int goods_value_valve_ = 0;        // 参数 货物筛选域值
-  int goods_filter_valve_num_ = 50;  // 参数 货物筛选数量域值
+  int tolerant_time_ = 20;           // 参数 机器人找货物容忍步数
+  int tolerant_leave_time_ = 40;     // 参数 船最后走可容忍时间的
+  int goods_value_valve_ = 15;       // 参数 货物筛选域值
+  int goods_filter_valve_num_ = 60;  // 参数 货物筛选数量域值
   int valueable_goods_valve_ = 60;   // 参数 贵重货物域值
   int final_tolerant_time_ = 200;    // 参数 最后冲刺阶段的容忍时间
-  int busy_valve_ = 9;               // 参数 判断该点拥堵的域值
-  int boat_capacity_reduce_ = 8;     // 参数 改变船容量
+  int busy_valve_ = 5;               // 参数 判断该点拥堵的域值
+  int boat_capacity_reduce_ = 0;     // 参数 改变船容量
   int max_robot_num_ = 13;           // 参数 机器人最大数量
   int max_boat_num_ = 1;             // 参数 船舶最大数量
   double avr_money_differential_ = 0;  // 参数 寻找邻居货物时更新权重的差值
