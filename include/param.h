@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-#define DEBUG
+// #define DEBUG
 #define FACE_MAP  // 面向地图
 // #define TEST_ASTAR
 
@@ -110,23 +110,11 @@ class DynamicParam {
   int valueable_goods_valve_ = 60;   // 参数 贵重货物域值
   int final_tolerant_time_ = 200;    // 参数 最后冲刺阶段的容忍时间
   int busy_valve_ = 5;               // 参数 判断该点拥堵的域值
-  int boat_capacity_reduce_ = 11;    // 参数 改变船容量
-  int max_robot_num_ = 16;           // 参数 机器人最大数量
-  int max_boat_num_ = 2;             // 参数 船舶最大数量
-  double avr_money_differential_ = 0.1;  // 参数 寻找邻居货物时更新权重的差值
+  int boat_capacity_reduce_ = 0;     // 参数 改变船容量
+  int max_robot_num_ = 13;           // 参数 机器人最大数量
+  int max_boat_num_ = 1;             // 参数 船舶最大数量
+  double avr_money_differential_ = 0;  // 参数 寻找邻居货物时更新权重的差值
   int find_neighbor_max_robot_ = 2;  // 参数 寻找邻居货物的机器人数量限制
-
-  // int tolerant_time_ = 85;
-  // int tolerant_leave_time_ = 0;
-  // int goods_value_valve_ = 16;
-  // int goods_filter_valve_num_ = 471;
-  // int valueable_goods_valve_ = 28;
-  // int final_tolerant_time_ = 0;
-  // int busy_valve_ = 5;
-  // int boat_capacity_reduce_ = 25;
-  // int max_robot_num_ = 17;
-  // int max_boat_num_ = 1;
-
   bool multiple_astar_ = false;  // 参数 一帧可多次astar吗？
 
   static DynamicParam* instance_;

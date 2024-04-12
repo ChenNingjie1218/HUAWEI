@@ -43,3 +43,13 @@ int Berth::GetNearestY(const int& y) {
   }
   return loc[min_y_i].y;
 }
+
+// 获取船到该泊位能装多少钱
+int Berth::GetIdealMoney(const int& capacity) {
+  int can_load = std::min(capacity, goods_num);
+  int sum_money = 0;
+  for (int i = 0; i < can_load; ++i) {
+    sum_money += goods[first_index + i];
+  }
+  return sum_money;
+}

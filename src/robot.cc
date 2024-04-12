@@ -100,6 +100,7 @@ bool Robot::FindTargetGoods() {
 #else
   int min_man = 99999;
 #endif
+  is_sprint = false;
   if (is_sprint) {
     // 表明是冲刺阶段，要全局搜索货物
     // 循环遍历所有港口
@@ -240,7 +241,7 @@ bool Robot::FindTargetGoods() {
     // 若货物在邻居分区则先更换分区
     int goods_berth_id = MapController::GetInstance()
                              ->nearest_berth[find_goods->x][find_goods->y];
-    if (goods_berth_id != berth_id) {
+    if (goods_berth_id != berth_id && !is_sprint) {
       ChangeBerth(goods_berth_id);
 #ifdef DEBUG
       std::cerr << "找到邻居好货：(" << find_goods->x << "," << find_goods->y
@@ -281,29 +282,7 @@ void Robot::FindBerth(int start_x, int start_y) {
   if (id > 13000) {
     // SetDash();
   }
-  // // 遍历所有的港口，寻找回家时间最短的港口
-  // std::multimap<int, int> time_map;  // 第一个参数是时间，第二个参数是泊位id
-  // if (!boat.empty() && !is_sprint) {
-  //   int berth_size = berth.size();
-  //   for (int i = 0; i < berth_size; ++i) {
-  //     time_map.insert(std::make_pair(berth[i].transport_time, i));
-  //   }
-  //   for (auto it = time_map.begin(); it != time_map.end(); ++it) {
-  //     if (berth[it->second].robot.size() < size / boat.size()) {
-  //       // 可以选择这个泊位
-  //       int sprint_time =
-  //           it->first * 3 +
-  //           DynamicParam::GetInstance()->GetFinalTolerantTime();
-  //       if (15000 - id < sprint_time) {
-  //         // 可以冲刺
-  //         ChangeBerth(it->second);
-  //         is_sprint = true;
-  //         is_sprint = false;
-  //       }
-  //       break;
-  //     }
-  //   }
-  // }
+
   if (berth_id != -1) {
 #ifdef DEBUG
     std::cerr << "------- start astar -------" << std::endl;

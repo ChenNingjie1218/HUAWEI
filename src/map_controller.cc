@@ -313,37 +313,15 @@ void MapController::InitMapParam(int id) {
   switch (id) {
     case 1:
       map1 = true;
-      param_instance->SetMultipleAstar(false);
-      param_instance->SetBoatCapacityReduce(11);
-      param_instance->SetMaxRobotNum(16);
-      param_instance->SetAvrMoneyDifferential(0.1);
-      param_instance->SetFindNeighborMaxRobot(2);
-
-      param_instance->SetMaxBoatNum(2);
-
       break;
     case 2:
       map2 = true;
-      param_instance->SetBoatCapacityReduce(13);
       param_instance->SetMaxRobotNum(16);
-      param_instance->SetAvrMoneyDifferential(0.1);
-      param_instance->SetFindNeighborMaxRobot(2);
+      param_instance->SetMaxBoatNum(2);
       break;
     case 3:
-      param_instance->SetTolerantTime(85);
-      param_instance->SetTolerantLeaveTime(0);
-      param_instance->SetGoodsValueValve(16);
-      param_instance->SetGoodsFilterValveNum(471);
-      param_instance->SetValueableGoodsValve(28);
-      param_instance->SetFinalTolerantTime(0);
-      param_instance->SetBusyValve(5);
-      param_instance->SetBoatCapacityReduce(25);
-      param_instance->SetMaxRobotNum(17);
-      param_instance->SetMaxBoatNum(1);
+      param_instance->SetMaxRobotNum(18);
       param_instance->SetMultipleAstar(true);
-      param_instance->SetAvrMoneyDifferential(0.2);
-      param_instance->SetFindNeighborMaxRobot(3);
-
       break;
   }
 }
