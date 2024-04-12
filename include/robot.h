@@ -96,7 +96,7 @@ struct Robot {
   void ChangeBerth(int new_berth_id);
 
   // 设置冲刺
-  void SetDash();
+  void SetDash(const int &target_berth);
 };
 
 #endif

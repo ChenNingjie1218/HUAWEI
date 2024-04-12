@@ -100,7 +100,7 @@ bool Robot::FindTargetGoods() {
 #else
   int min_man = 99999;
 #endif
-  is_sprint = false;
+  // is_sprint = false;
   if (is_sprint) {
     // 表明是冲刺阶段，要全局搜索货物
     // 循环遍历所有港口
@@ -274,13 +274,14 @@ bool Robot::FindTargetGoods() {
 // 存在移动后找泊位，这里不能直接用机器人的位置
 void Robot::FindBerth(int start_x, int start_y) {
   // 判断机器人该不该冲刺，选择船中时间最大的
-  auto &boat = RentController::GetInstance()->boat;
+  // auto &boat = RentController::GetInstance()->boat;
   auto &berth = MapController::GetInstance()->berth;
-  auto size = RentController::GetInstance()->robot.size();
+  // auto size = RentController::GetInstance()->robot.size();
 
   // 冲刺
-  if (id > 13000) {
-    // SetDash();
+  auto &dash_table = MapController::GetInstance()->dash_table;
+  if (!is_sprint && id >= dash_table[id_].first) {
+    SetDash(dash_table[id_].second);
   }
 
   if (berth_id != -1) {
@@ -513,19 +514,15 @@ bool Robot::FindPath(Goods *&find_goods) {
 }
 
 // 设置机器人冲刺
-void Robot::SetDash() {
-  std::vector<std::pair<int, int>> dash_table =
-      MapController::GetInstance()->dash_table;
-  bool &is_dash = MapController::GetInstance()->is_dash;
-
-  // 还未冲刺且达到时间点
-  if (!is_sprint && id >= dash_table[id_].first) {
-    ChangeBerth(dash_table[id_].second);
-    is_sprint = true;
-
-    // 只要有机器人冲刺就将在最终泊位的机器人也置为冲刺
-    if (is_dash) {
-      MapController::GetInstance()->KeepOrigin();
-    }
+void Robot::SetDash(const int &target_berth) {
+  is_sprint = true;
+  auto &robot = RentController::GetInstance()->robot;
+  auto &berth = MapController::GetInstance()->berth;
+  auto &robot_id = berth[target_berth].robot;
+  int robot_id_size = robot_id.size();
+  // 将该泊位的原始机器人设置为冲刺状态
+  for (int i = 0; i < robot_id_size; ++i) {
+    robot[robot_id[i]].is_sprint = true;
   }
+  ChangeBerth(target_berth);
 }

@@ -328,50 +328,71 @@ void MapController::InitMapParam(int id) {
 
 // 初始化冲刺表
 void MapController::InitDashTable(int map_id) {
-  final_berth_id = 4;
-  // auto& param_instance = DynamicParam::GetInstance();
   switch (map_id) {
     case 1:
-      dash_table.push_back(std::make_pair(14630, 4));  // 0
-      dash_table.push_back(std::make_pair(1, 4));      // 1
-      dash_table.push_back(std::make_pair(1, 4));      // 2
-      dash_table.push_back(std::make_pair(1, 4));      // 3
-      dash_table.push_back(std::make_pair(1, 4));      // 4
-      dash_table.push_back(std::make_pair(1, 4));      // 5
-      dash_table.push_back(std::make_pair(1, 4));      // 6
-      dash_table.push_back(std::make_pair(1, 4));      // 7
-      dash_table.push_back(std::make_pair(1, 4));      // 8
-      dash_table.push_back(std::make_pair(1, 4));      // 9
-      dash_table.push_back(std::make_pair(1, 4));      // 10
-      dash_table.push_back(std::make_pair(1, 4));      // 11
-      dash_table.push_back(std::make_pair(1, 4));      // 12
-      dash_table.push_back(std::make_pair(1, 4));      // 13
-      dash_table.push_back(std::make_pair(1, 4));      // 14
-      dash_table.push_back(std::make_pair(1, 4));      // 15
-      dash_table.push_back(std::make_pair(1, 4));      // 16
-      dash_table.push_back(std::make_pair(1, 4));      // 17
+      dash_table.push_back(std::make_pair(15001, 4));  // 0
+      dash_table.push_back(std::make_pair(15001, 4));  // 1
+      dash_table.push_back(std::make_pair(15001, 4));  // 2
+      dash_table.push_back(std::make_pair(15001, 4));  // 3
+      dash_table.push_back(std::make_pair(15001, 4));  // 4
+      dash_table.push_back(std::make_pair(15001, 4));  // 5
+      dash_table.push_back(std::make_pair(15001, 4));  // 6
+      dash_table.push_back(std::make_pair(15001, 4));  // 7
+      dash_table.push_back(std::make_pair(15001, 4));  // 8
+      dash_table.push_back(std::make_pair(15001, 4));  // 9
+      dash_table.push_back(std::make_pair(15001, 4));  // 10
+      dash_table.push_back(std::make_pair(15001, 4));  // 11
+      dash_table.push_back(std::make_pair(15001, 4));  // 12
+      dash_table.push_back(std::make_pair(15001, 4));  // 13
+      dash_table.push_back(std::make_pair(15001, 4));  // 14
+      dash_table.push_back(std::make_pair(15001, 4));  // 15
+      dash_table.push_back(std::make_pair(15001, 4));  // 16
+      dash_table.push_back(std::make_pair(15001, 4));  // 17
+      dash_table.push_back(std::make_pair(15001, 4));  // 18
 
       break;
     case 2:
+      dash_table.push_back(std::make_pair(15001, 4));  // 0
+      dash_table.push_back(std::make_pair(15001, 4));  // 1
+      dash_table.push_back(std::make_pair(15001, 4));  // 2
+      dash_table.push_back(std::make_pair(15001, 4));  // 3
+      dash_table.push_back(std::make_pair(15001, 4));  // 4
+      dash_table.push_back(std::make_pair(15001, 4));  // 5
+      dash_table.push_back(std::make_pair(15001, 4));  // 6
+      dash_table.push_back(std::make_pair(15001, 4));  // 7
+      dash_table.push_back(std::make_pair(15001, 4));  // 8
+      dash_table.push_back(std::make_pair(15001, 4));  // 9
+      dash_table.push_back(std::make_pair(15001, 4));  // 10
+      dash_table.push_back(std::make_pair(15001, 4));  // 11
+      dash_table.push_back(std::make_pair(15001, 4));  // 12
+      dash_table.push_back(std::make_pair(15001, 4));  // 13
+      dash_table.push_back(std::make_pair(15001, 4));  // 14
+      dash_table.push_back(std::make_pair(15001, 4));  // 15
+      dash_table.push_back(std::make_pair(15001, 4));  // 16
+      dash_table.push_back(std::make_pair(15001, 4));  // 17
+      dash_table.push_back(std::make_pair(15001, 4));  // 18
       break;
     case 3:
+      dash_table.push_back(std::make_pair(15001, 4));  // 0
+      dash_table.push_back(std::make_pair(15001, 4));  // 1
+      dash_table.push_back(std::make_pair(15001, 4));  // 2
+      dash_table.push_back(std::make_pair(15001, 4));  // 3
+      dash_table.push_back(std::make_pair(15001, 4));  // 4
+      dash_table.push_back(std::make_pair(15001, 4));  // 5
+      dash_table.push_back(std::make_pair(15001, 4));  // 6
+      dash_table.push_back(std::make_pair(15001, 4));  // 7
+      dash_table.push_back(std::make_pair(15001, 4));  // 8
+      dash_table.push_back(std::make_pair(15001, 4));  // 9
+      dash_table.push_back(std::make_pair(15001, 4));  // 10
+      dash_table.push_back(std::make_pair(15001, 4));  // 11
+      dash_table.push_back(std::make_pair(15001, 4));  // 12
+      dash_table.push_back(std::make_pair(15001, 4));  // 13
+      dash_table.push_back(std::make_pair(15001, 4));  // 14
+      dash_table.push_back(std::make_pair(15001, 4));  // 15
+      dash_table.push_back(std::make_pair(15001, 4));  // 16
+      dash_table.push_back(std::make_pair(15001, 4));  // 17
+      dash_table.push_back(std::make_pair(15001, 4));  // 18
       break;
-  }
-}
-
-// 将还没冲刺且在最终泊位的机器人保留在原地
-void MapController::KeepOrigin() {
-  if (!is_dash) {
-    auto& robot = RentController::GetInstance()->robot;
-    auto size = berth[final_berth_id].robot.size();
-    is_dash = true;
-
-    // 遍历查找还没冲刺且在最终泊位的机器人
-    for (int i = 0; i < size; i++) {
-      if (!robot[i].is_sprint && robot[i].berth_id == final_berth_id) {
-        robot[i].is_sprint = true;
-      }
-    }
   }
 }
 
