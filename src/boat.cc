@@ -194,43 +194,13 @@ bool Boat::DeliveryCond() {
     // 能装满就装满了走
     return num >= boat_capacity;
   }
-#ifdef FACE_MAP
-  if (!MapController::GetInstance()->map1 &&
-      !MapController::GetInstance()->map2) {
-    int berth_size = berth.size();
-    int all_goods_num = 0;  // 目前全场泊位货物数量
-    for (int i = 0; i < berth_size; ++i) {
-      if (berth[i].area_id != area_id || !berth[i].goods_num) {
-        continue;
-      }
-      if (berth[i].boat_id != -1) {
-        if (berth[i].goods_num -
-                (boat_capacity -
-                 RentController::GetInstance()->boat[berth[i].boat_id].num) >
-            0) {
-          // 如果该泊位的数量比另一艘船剩余容量还大 就加上剩余的数量
-          all_goods_num +=
-              (berth[i].goods_num - boat_capacity +
-               RentController::GetInstance()->boat[berth[i].boat_id].num);
-        }
-      } else {
-        all_goods_num += berth[i].goods_num;
-      }
-    }
-    if (all_goods_num < boat_capacity - num) {
-      // 全场货物数量太少，回去送一波积攒点货物
-      return true;
-    }
-  }
-#endif
-
+  return false;
   // 微调快满的船又去换泊位
   return num >=
          boat_capacity - DynamicParam::GetInstance()->GetBoatCapacityReduce();
 }
 
 // 寻找交货点
-// 判断能否交货
 void Boat::FindDeliveryPoint() {
   // 去交货
   auto &berth = MapController::GetInstance()->berth;
@@ -265,11 +235,11 @@ void Boat::FindDeliveryPoint() {
     berth[pos].boat_id = -1;
   }
   pos = -1;
-
 #ifdef DEBUG
-  std::cerr << id_ << " 船去交货, path size:" << path.size()
-            << "货物数量:" << num << std::endl;
+  std::cerr << id_ << " 船去交货, path size: " << path.size()
+            << " 货物数量: " << num << " 金额：" << money << std::endl;
 #endif
+  money = 0;
 }
 
 /*
@@ -280,7 +250,6 @@ void Boat::FindBerth() {
   auto &berth = MapController::GetInstance()->berth;
   int size = berth.size();
   int berth_id = -1;
-  int max_goods_num = 0;
 
   Location loc(x, y);
   int now_berth_id = -1;
@@ -289,116 +258,173 @@ void Boat::FindBerth() {
   if (location_to_berth_id.find(loc) != location_to_berth_id.end()) {
     now_berth_id = location_to_berth_id[loc];
   }
-  int transport_time = 1010;  // 移动到泊位再回家的预估时间
-  // 先看有没有泊位能让自己填满
-
   auto &nearest_delivery = MapController::GetInstance()->nearest_delivery;
+  double max_per_money = 0;
+
   for (int i = 0; i < size; ++i) {
     if (berth[i].area_id != area_id || berth[i].boat_id != -1 ||
         !berth[i].goods_num) {
       continue;
     }
-    int temp_transport_time = berth[i].transport_time;
+    int temp_transport_time = berth[i].transport_time;  // 回家的时间
+    int distance = 0;
     if (pos == -1) {
       // 在交货点，算来回时间
       if (nearest_delivery[x][y] == nearest_delivery[berth[i].x][berth[i].y]) {
         // 泊位记录的transport_time是该交货点
-        temp_transport_time *= 2;
+        distance = temp_transport_time;
       } else {
         // 泊位记录的transport_time不是该交货点
-        int delivery_index = nearest_delivery[berth[i].x][berth[i].y];
-        auto &delivery_point = MapController::GetInstance()->delivery_point;
-        temp_transport_time += (std::abs(x - delivery_point[delivery_index].x) +
-                                std::abs(y - delivery_point[delivery_index].y));
+        distance = std::abs(x - berth[i].GetNearestX(x)) +
+                   std::abs(y - berth[i].GetNearestY(y));
       }
     } else if (now_berth_id == -1) {
       // 当前没有在交货点和泊位中
-      temp_transport_time +=
-          std::abs(x - berth[i].x) + std::abs(y - berth[i].y);
+      distance = std::abs(x - berth[i].GetNearestX(x)) +
+                 std::abs(y - berth[i].GetNearestY(y));
     } else if (berth[now_berth_id].path.find(i) !=
                berth[now_berth_id].path.end()) {
       // 当前泊位存了去目标泊位的路径
-      temp_transport_time += berth[now_berth_id].path[i].size();
+      distance = berth[now_berth_id].path[i].size();
     } else if (berth[i].path.find(now_berth_id) != berth[i].path.end()) {
       // 目标泊位存了来所在泊位的路径
-      temp_transport_time += berth[i].path[now_berth_id].size();
+      distance = berth[i].path[now_berth_id].size();
     } else {
       // 在泊位中但还没算过路径
-      temp_transport_time += (std::abs(berth[i].x - berth[now_berth_id].x) +
-                              std::abs(berth[i].y - berth[now_berth_id].y));
+      distance = std::abs(berth[i].GetNearestX(x) - x) +
+                 std::abs(berth[i].GetNearestY(y) - y);
     }
-
+    temp_transport_time += distance;
     int time = 15000 - id - temp_transport_time -
-               DynamicParam::GetInstance()->GetTolerantLeaveTime();
-
-    int can_load = std::min(time * berth[i].loading_speed, berth[i].goods_num);
-    if (can_load >= boat_capacity - num) {
-      // 泊位i可以把该船装满
-      if (berth_id == -1 || temp_transport_time < transport_time) {
-        // 选离家近的
-        berth_id = i;
-        transport_time = temp_transport_time;
-      }
+               DynamicParam::GetInstance()
+                   ->GetTolerantLeaveTime();  // 过去剩余的装载时间
+    int capacity = std::min(time * berth[i].loading_speed, boat_capacity - num);
+    int next_money = berth[i].GetIdealMoney(capacity);
+    double next_per_money = 1.0 * next_money / distance;
+    if (next_per_money >= max_per_money) {
+      max_per_money = next_per_money;
+      berth_id = i;
     }
   }
 
-  if (berth_id == -1) {
-    // 没有能装满该船的泊位
-    for (int i = 0; i < size; ++i) {
-      if (berth[i].area_id != area_id || berth[i].boat_id != -1 ||
-          !berth[i].goods_num) {
-        continue;
-      }
+  //   // 先看有没有泊位能让自己填满
+  //   int transport_time = 1010;
+  //   // 移动到泊位再回家的预估时间
+  //   for (int i = 0; i < size; ++i) {
+  //     if (berth[i].area_id != area_id || berth[i].boat_id != -1 ||
+  //         !berth[i].goods_num) {
+  //       continue;
+  //     }
+  //     int temp_transport_time = berth[i].transport_time;
+  //     if (pos == -1) {
+  //       // 在交货点，算来回时间
+  //       if (nearest_delivery[x][y] ==
+  //       nearest_delivery[berth[i].x][berth[i].y]) {
+  //         // 泊位记录的transport_time是该交货点
+  //         temp_transport_time *= 2;
+  //       } else {
+  //         // 泊位记录的transport_time不是该交货点
+  //         int delivery_index = nearest_delivery[berth[i].x][berth[i].y];
+  //         auto &delivery_point =
+  //         MapController::GetInstance()->delivery_point; temp_transport_time
+  //         += (std::abs(x - delivery_point[delivery_index].x) +
+  //                                 std::abs(y -
+  //                                 delivery_point[delivery_index].y));
+  //       }
+  //     } else if (now_berth_id == -1) {
+  //       // 当前没有在交货点和泊位中
+  //       temp_transport_time +=
+  //           std::abs(x - berth[i].x) + std::abs(y - berth[i].y);
+  //     } else if (berth[now_berth_id].path.find(i) !=
+  //                berth[now_berth_id].path.end()) {
+  //       // 当前泊位存了去目标泊位的路径
+  //       temp_transport_time += berth[now_berth_id].path[i].size();
+  //     } else if (berth[i].path.find(now_berth_id) != berth[i].path.end()) {
+  //       // 目标泊位存了来所在泊位的路径
+  //       temp_transport_time += berth[i].path[now_berth_id].size();
+  //     } else {
+  //       // 在泊位中但还没算过路径
+  //       temp_transport_time += (std::abs(berth[i].x - berth[now_berth_id].x)
+  //       +
+  //                               std::abs(berth[i].y -
+  //                               berth[now_berth_id].y));
+  //     }
 
-      int temp_transport_time = berth[i].transport_time;
-      if (pos == -1) {
-        // 在交货点，算来回时间
-        if (nearest_delivery[x][y] ==
-            nearest_delivery[berth[i].x][berth[i].y]) {
-          // 泊位记录的transport_time是该交货点
-          temp_transport_time *= 2;
-        } else {
-          // 泊位记录的transport_time不是该交货点
-          int delivery_index = nearest_delivery[berth[i].x][berth[i].y];
-          auto &delivery_point = MapController::GetInstance()->delivery_point;
-          temp_transport_time +=
-              (std::abs(x - delivery_point[delivery_index].x) +
-               std::abs(y - delivery_point[delivery_index].y));
-        }
-      } else if (now_berth_id == -1) {
-        // 当前没有在交货点和泊位中
-        temp_transport_time +=
-            std::abs(x - berth[i].x) + std::abs(y - berth[i].y);
-      } else if (berth[now_berth_id].path.find(i) !=
-                 berth[now_berth_id].path.end()) {
-        // 当前泊位存了去目标泊位的路径
-        temp_transport_time += berth[now_berth_id].path[i].size();
-      } else if (berth[i].path.find(now_berth_id) != berth[i].path.end()) {
-        // 目标泊位存了来所在泊位的路径
-        temp_transport_time += berth[i].path[now_berth_id].size();
-      } else {
-        // 在泊位中但还没算过路径
-        temp_transport_time += (std::abs(berth[i].x - berth[now_berth_id].x) +
-                                std::abs(berth[i].y - berth[now_berth_id].y));
-      }
+  //     int time = 15000 - id - temp_transport_time -
+  //                DynamicParam::GetInstance()->GetTolerantLeaveTime();
 
-      int time = 15000 - id - temp_transport_time -
-                 DynamicParam::GetInstance()->GetTolerantLeaveTime();
+  //     int can_load = std::min(time * berth[i].loading_speed,
+  //     berth[i].goods_num); if (can_load >= boat_capacity - num) {
+  //       // 泊位i可以把该船装满
+  //       if (berth_id == -1 || temp_transport_time < transport_time) {
+  //         // 选离家近的
+  //         berth_id = i;
+  //         transport_time = temp_transport_time;
+  //       }
+  //     }
+  //   }
 
-      int can_load =
-          std::min(time * berth[i].loading_speed, berth[i].goods_num);
+  //   if (berth_id == -1) {
+  //     // 没有能装满该船的泊位
+  //     int max_goods_num = 0;
+  //     for (int i = 0; i < size; ++i) {
+  //       if (berth[i].area_id != area_id || berth[i].boat_id != -1 ||
+  //           !berth[i].goods_num) {
+  //         continue;
+  //       }
 
-      // 选货物最多的
-      if (can_load > max_goods_num) {
-        max_goods_num = can_load;
-        berth_id = i;
-      }
-    }
-  } else {
-#ifdef DEBUG
-    std::cerr << "选择了回家近的泊位" << std::endl;
-#endif
-  }
+  //       int temp_transport_time = berth[i].transport_time;
+  //       if (pos == -1) {
+  //         // 在交货点，算来回时间
+  //         if (nearest_delivery[x][y] ==
+  //             nearest_delivery[berth[i].x][berth[i].y]) {
+  //           // 泊位记录的transport_time是该交货点
+  //           temp_transport_time *= 2;
+  //         } else {
+  //           // 泊位记录的transport_time不是该交货点
+  //           int delivery_index = nearest_delivery[berth[i].x][berth[i].y];
+  //           auto &delivery_point =
+  //           MapController::GetInstance()->delivery_point; temp_transport_time
+  //           +=
+  //               (std::abs(x - delivery_point[delivery_index].x) +
+  //                std::abs(y - delivery_point[delivery_index].y));
+  //         }
+  //       } else if (now_berth_id == -1) {
+  //         // 当前没有在交货点和泊位中
+  //         temp_transport_time +=
+  //             std::abs(x - berth[i].x) + std::abs(y - berth[i].y);
+  //       } else if (berth[now_berth_id].path.find(i) !=
+  //                  berth[now_berth_id].path.end()) {
+  //         // 当前泊位存了去目标泊位的路径
+  //         temp_transport_time += berth[now_berth_id].path[i].size();
+  //       } else if (berth[i].path.find(now_berth_id) != berth[i].path.end()) {
+  //         // 目标泊位存了来所在泊位的路径
+  //         temp_transport_time += berth[i].path[now_berth_id].size();
+  //       } else {
+  //         // 在泊位中但还没算过路径
+  //         temp_transport_time += (std::abs(berth[i].x -
+  //         berth[now_berth_id].x) +
+  //                                 std::abs(berth[i].y -
+  //                                 berth[now_berth_id].y));
+  //       }
+
+  //       int time = 15000 - id - temp_transport_time -
+  //                  DynamicParam::GetInstance()->GetTolerantLeaveTime();
+
+  //       int can_load =
+  //           std::min(time * berth[i].loading_speed, boat_capacity - num);
+  //       can_load = std::min(can_load, berth[i].goods_num);
+  //       // 选货物最多的
+  //       if (can_load > max_goods_num) {
+  //         max_goods_num = can_load;
+  //         berth_id = i;
+  //       }
+  //     }
+  //   } else {
+  // #ifdef DEBUG
+  //     std::cerr << "选择了回家近的泊位" << std::endl;
+  // #endif
+  //   }
 
   if (pos == -1 && berth_id == -1) {
     // 最后阶段 随便找个泊位待着
@@ -444,6 +470,30 @@ void Boat::FindBerth() {
         astar.AstarSearch(path);
         berth[now_berth_id].path[berth_id] = path;
       }
+
+      double now_per_money =
+          1.0 * money /
+          (total_transport_time + berth[now_berth_id].transport_time);
+      int time = 15000 - path.size() - berth[berth_id].transport_time -
+                 DynamicParam::GetInstance()->GetTolerantLeaveTime();
+      int capacity =
+          std::min(boat_capacity - num, time * berth[berth_id].loading_speed);
+      int next_money = money + berth[berth_id].GetIdealMoney(capacity);
+      double next_per_money =
+          1.0 * next_money /
+          (total_transport_time + path.size() + berth[berth_id].transport_time);
+      if (next_per_money < now_per_money) {
+        FindDeliveryPoint();
+#ifdef DEBUG
+        std::cerr << "现在回家性价比更高:" << num << "目标泊位货物："
+                  << berth[berth_id].goods_num << std::endl;
+#endif
+        return;
+      } else {
+#ifdef DEBUG
+        std::cerr << "继续换泊位 " << num << std::endl;
+#endif
+      }
     } else {
       // 目前不处于泊位中
 
@@ -484,7 +534,6 @@ void Boat::FindBerth() {
           astar.AstarSearch(path);
           d_path[task] = path;
         }
-
       } else {
 #ifdef DEBUG
         std::cerr << "------- start astar -------" << std::endl;
@@ -503,7 +552,6 @@ void Boat::FindBerth() {
     }
     berth[berth_id].boat_id = id_;
     pos = berth_id;
-
 #ifdef DEBUG
     std::cerr << id_ << " 船去泊位 " << pos << ", path size:" << path.size()
               << " 货物数量: " << num << std::endl;

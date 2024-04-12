@@ -58,7 +58,7 @@ struct Boat {
 
 #ifdef DEBUG
   static char dir_str[4][10];  // 输出方向
-  int money = 0;
+  int total_money = 0;
 #endif
 
   // 目标泊位，虚拟点为-1，购买点为-2
@@ -84,6 +84,12 @@ struct Boat {
 
   // 交货点到泊位的路径
   static std::map<std::pair<Location, int>, std::vector<int>> d_path;
+
+  // 船上装的货物价值
+  int money = 0;
+
+  // 船走过的路程
+  int total_transport_time = 0;
 
   Boat();
   Boat(int &id, int &goods_num, int &x, int &y, int &direction, int &status);

@@ -62,27 +62,25 @@ void DecisionManager::DecisionBoat() {
     // 靠泊
     if (boat[i].status != BOAT_STATUS_LOADING &&
         MapController::GetInstance()->ch[boat[i].x][boat[i].y] == 'K' &&
-        boat[i].num < Boat::boat_capacity) {
-      if (boat[i].pos > -1) {
-        int berth_id =
-            MapController::GetInstance()
-                ->location_to_berth_id[Location(boat[i].x, boat[i].y)];
-        if (berth[berth_id].goods_num) {
-          if (boat[i].pos != berth_id) {
+        boat[i].num < Boat::boat_capacity && boat[i].pos > -1) {
+      int berth_id = MapController::GetInstance()
+                         ->location_to_berth_id[Location(boat[i].x, boat[i].y)];
+      // if (berth[berth_id].goods_num &&  // 有货物
+      //     (boat[i].pos == berth_id ||   // 到达目标泊位
+      //      (berth[boat[i].pos].goods_num <
+      //       Boat::boat_capacity -
+      //           boat[i].num))) {  // 目标泊位货物无法让船装满，就路过装货
+      if (berth[berth_id].goods_num) {
+        if (boat[i].pos != berth_id) {
 #ifdef DEBUG
-            std::cerr << i << " 船路过泊位 " << berth_id
-                      << " 货物数量:" << berth[berth_id].goods_num << std::endl;
+          std::cerr << i << " 船路过泊位 " << berth_id
+                    << " 货物数量:" << berth[berth_id].goods_num << std::endl;
 #endif
-            berth[boat[i].pos].boat_id = -1;
-            boat[i].pos = berth_id;
-          }
-          //&&
-          // boat[i].pos ==
-          //     MapController::GetInstance()
-          //         ->location_to_berth_id[Location(boat[i].x, boat[i].y)]
-          boat[i].DoBerth();
-          continue;
+          berth[boat[i].pos].boat_id = -1;
+          boat[i].pos = berth_id;
         }
+        boat[i].DoBerth();
+        continue;
       }
     }
 
@@ -108,7 +106,7 @@ void DecisionManager::DecisionBoat() {
     }
 #ifdef DEBUG
     std::cerr << "*************** " << boat[i].id_
-              << " 船 path size:" << boat[i].path.size() << "*****************"
+              << " 船 path size:" << boat[i].path.size() << " *****************"
               << std::endl;
 #endif
   }

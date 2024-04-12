@@ -46,6 +46,12 @@ struct Berth {
 
   //到泊位的船队列
   std::queue<int> q_boat;
+
+  // 放在该泊位的货物
+  std::vector<int> goods;
+  // 指向第一个没被装上船的货物下标
+  int first_index = 0;
+
   Berth() {}
   Berth(int id, int x, int y, int loading_speed);
 
@@ -58,5 +64,8 @@ struct Berth {
 
   // 获取该泊位最近的y坐标
   int GetNearestY(const int &y);
+
+  // 获取船到该泊位能装多少钱
+  int GetIdealMoney(const int &capacity);
 };
 #endif

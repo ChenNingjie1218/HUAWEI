@@ -144,7 +144,7 @@ void InputController::Input() {
     for (std::vector<Boat>::iterator it =
              RentController::GetInstance()->boat.begin();
          it != RentController::GetInstance()->boat.end(); ++it) {
-      std::cerr << "船 " << it->id_ << " 挣了 " << it->money << std::endl;
+      std::cerr << "船 " << it->id_ << " 挣了 " << it->total_money << std::endl;
     }
 
     // 全局货物统计
@@ -180,15 +180,15 @@ void InputController::Input() {
   if (dis_id > 1) {
     std::cerr << "跳帧：" << dis_id << std::endl;
   }
-  int dis_moeny = temp_money - money;
-  if (id > 1 && dis_moeny > 0) {
+  int dis_money = temp_money - money;
+  if (id > 1 && dis_money > 0) {
     int flag = true;
     for (std::vector<Boat>::iterator it =
              RentController::GetInstance()->boat.begin();
          it != RentController::GetInstance()->boat.end(); ++it) {
       if (it->path.size() == 1 && it->pos == -1) {
-        it->money += dis_moeny;
-        std::cerr << "船 " << it->id_ << " 交货，挣了 " << dis_moeny
+        it->total_money += dis_money;
+        std::cerr << "船 " << it->id_ << " 交货，挣了 " << dis_money
                   << std::endl;
         flag = false;
         break;
@@ -293,7 +293,7 @@ void InputController::Input() {
     // 放置成功港口货物加一
     if (robot[i].pre_goods - temp_goods == 1) {
       ++berth[robot[i].berth_id].goods_num;
-
+      berth[robot[i].berth_id].goods.push_back(robot[i].goods_money);
 #ifdef DEBUG
       if (robot[i].berth_id !=
           MapController::GetInstance()->location_to_berth_id[Location(x, y)]) {
@@ -337,6 +337,7 @@ void InputController::Input() {
           boat[i].direction != direction) {
         // 指令执行成功
         boat[i].RemoveFirst();
+        ++boat[i].total_transport_time;
         boat[i].stuck_times = 0;
       } else if (temp_status == BOAT_STATUS_MOVING &&
                  boat[i].status != BOAT_STATUS_RESTORING &&
@@ -350,8 +351,15 @@ void InputController::Input() {
 
       boat[i].x = ++x;
       boat[i].y = ++y;
-      if (goods_num - boat[i].num > 0 && boat[i].pos != -1) {
-        berth[boat[i].pos].goods_num -= (goods_num - boat[i].num);
+      int dis_goods_num = goods_num - boat[i].num;
+      if (dis_goods_num > 0 && boat[i].pos != -1) {
+        berth[boat[i].pos].goods_num -= dis_goods_num;
+        // 船装货，钱增加
+        while (dis_goods_num) {
+          boat[i].money +=
+              berth[boat[i].pos].goods[berth[boat[i].pos].first_index++];
+          --dis_goods_num;
+        }
 #ifdef DEBUG
         if (boat[i].pos != MapController::GetInstance()
                                ->location_to_berth_id[Location(x, y)]) {
@@ -360,6 +368,9 @@ void InputController::Input() {
         std::cerr << boat[i].pos << " 泊位更新货物数量："
                   << berth[boat[i].pos].goods_num << std::endl;
 #endif
+      } else if (dis_goods_num < 0) {
+        // 装完货，将行驶路程置零
+        boat[i].total_transport_time = 0;
       }
       boat[i].num = goods_num;
       boat[i].direction = direction;

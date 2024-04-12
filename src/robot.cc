@@ -100,6 +100,7 @@ bool Robot::FindTargetGoods() {
 #else
   int min_man = 99999;
 #endif
+  is_sprint = false;
   if (is_sprint) {
     // 表明是冲刺阶段，要全局搜索货物
     // 循环遍历所有港口
@@ -209,7 +210,7 @@ bool Robot::FindTargetGoods() {
           std::abs(berth[neighbor_id].GetNearestY(p_goods->y) - p_goods->y);
       // total_cal_man = cal_man; // 屏蔽精确长度
       double per_money = 1.0 * p_goods->money / total_cal_man;
-      if ((per_money - max_per_money) > 0.1 &&       // 金钱/长度的差值
+      if ((per_money - max_per_money) > 0 &&         // 金钱/长度的差值
           cal_man < (1000 - id + p_goods->birth) &&  // 生存周期内
           berth[neighbor_id].robot.size() < 2) {  // 前往的泊位机器人最多为1
 #ifdef DEBUG
@@ -234,7 +235,7 @@ bool Robot::FindTargetGoods() {
     // 若货物在邻居分区则先更换分区
     int goods_berth_id = MapController::GetInstance()
                              ->nearest_berth[find_goods->x][find_goods->y];
-    if (goods_berth_id != berth_id) {
+    if (goods_berth_id != berth_id && !is_sprint) {
       ChangeBerth(goods_berth_id);
 #ifdef DEBUG
       std::cerr << "找到邻居好货：(" << find_goods->x << "," << find_goods->y
@@ -269,7 +270,7 @@ void Robot::FindBerth(int start_x, int start_y) {
   // 判断机器人该不该冲刺，选择船中时间最大的
   auto &boat = RentController::GetInstance()->boat;
   auto &berth = MapController::GetInstance()->berth;
-  auto size = RentController::GetInstance()->robot.size();
+  int size = RentController::GetInstance()->robot.size();
   // 遍历所有的港口，寻找回家时间最短的港口
   std::multimap<int, int> time_map;  // 第一个参数是时间，第二个参数是泊位id
   if (!boat.empty() && !is_sprint) {

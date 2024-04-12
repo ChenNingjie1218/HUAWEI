@@ -310,12 +310,14 @@ void MapController::InitMapParam(int id) {
       break;
     case 2:
       map2 = true;
-      param_instance->SetBoatCapacityReduce(13);
+      // param_instance->SetBoatCapacityReduce(13);
+      param_instance->SetMaxRobotNum(15);
+      param_instance->SetMaxBoatNum(2);
       break;
     case 3:
       param_instance->SetMaxRobotNum(18);
-      param_instance->SetBoatCapacityReduce(14);
-      param_instance->SetMaxBoatNum(1);
+      // param_instance->SetBoatCapacityReduce(14);
+      // param_instance->SetMaxBoatNum(1);
       param_instance->SetMultipleAstar(true);
       break;
   }

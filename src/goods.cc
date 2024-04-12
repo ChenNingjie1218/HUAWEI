@@ -19,7 +19,7 @@ Goods::Goods(int x, int y, int money, int birth) {
 void GoodsManager::PushGoods(Goods *new_goods) {
   // #ifdef GOODS_FILTER
   ++goods_num;
-  if (goods_num > DynamicParam::GetInstance()->GetGoodsFilterValveNum()) {
+  if (goods_num == DynamicParam::GetInstance()->GetGoodsFilterValveNum()) {
     UpdateValueValve(true);
   }
   // #endif
@@ -55,7 +55,7 @@ void GoodsManager::RemoveGoods(int &x, int &y) {
 void GoodsManager::DeleteGoods(Goods *&goods) {
   // #ifdef GOODS_FILTER
   --goods_num;
-  if (goods_num < DynamicParam::GetInstance()->GetGoodsFilterValveNum()) {
+  if (goods_num == DynamicParam::GetInstance()->GetGoodsFilterValveNum()) {
     UpdateValueValve(false);
   }
   // #endif
@@ -101,8 +101,14 @@ void GoodsManager::DeleteGoods(Goods *&goods) {
 // 更新价值域值
 void GoodsManager::UpdateValueValve(bool is_plus) {
   if (is_plus) {
+#ifdef DEBUG
+    std::cerr << "货物数量太多，增加筛选域值" << std::endl;
+#endif
     value_valve = DynamicParam::GetInstance()->GetValueableGoodsValve();
   } else {
+#ifdef DEBUG
+    std::cerr << "货物数量太少，减少筛选域值" << std::endl;
+#endif
     value_valve = DynamicParam::GetInstance()->GetGoodsValueValve();
   }
 }
