@@ -287,6 +287,45 @@ void MapController::InitNearestS() {
   }
 }
 
+// 填地图
+void MapController::FillMap(int x, int y) {
+  std::multimap<int, int> openlist;
+  std::multimap<int, int> closeList;
+  openlist.insert(std::pair<int, int>(x, y));
+  while (!openlist.empty()) {
+    auto p = openlist.begin();
+    auto point = *p;
+    openlist.erase(p);
+    closeList.insert(point);
+    // 获取point周围的四个点
+    int dx[4] = {0, 0, 1, -1};
+    int dy[4] = {1, -1, 0, 0};
+    for (int i = 0; i < 4; i++) {
+      int new_x = point.first + dx[i];
+      int new_y = point.second + dy[i];
+      if (new_x < 1 || new_x > n || new_y < 1 || new_y > n) {
+        continue;
+      }
+      if (ch[new_x][new_y] == 'K' || ch[new_x][new_y] == 'B') {
+        // 判断这个新的点是不是在closeList里面
+        bool flag = false;
+        for (auto it = closeList.begin(); it != closeList.end(); ++it) {
+          if (it->first == new_x && it->second == new_y) {
+            flag = true;
+            break;
+          }
+        }
+        if (flag) {
+          continue;
+        }
+        openlist.insert(std::pair<int, int>(new_x, new_y));
+      }
+    }
+    // 把当前点填充
+    ch[point.first][point.second] = '~';
+  }
+}
+
 // 是否是主干道
 bool MapController::IsMainRoad(int x, int y) {
   return ch[x][y] == '>' || ch[x][y] == 'c' || ch[x][y] == 'R';

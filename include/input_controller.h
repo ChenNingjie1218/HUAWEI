@@ -14,8 +14,5 @@ struct InputController {
 
   // 每帧的数据
   void Input();
-
-  // 填地图, 最后一个参数是二维数组的引用
-  void FillMap(int x, int y, char (&chpy)[N][N]);
 };
 #endif

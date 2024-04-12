@@ -100,6 +100,9 @@ struct MapController {
 
   // 合并集合
   void MergeArea(int id_1, int id_2, bool is_land = true);
+
+  // 填地图, 最后一个参数是二维数组的引用
+  void FillMap(int x, int y);
 #ifdef FACE_MAP
   // 面向地图调参
   std::vector<Location> map1_tag;
