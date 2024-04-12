@@ -84,7 +84,7 @@ struct Robot {
   // 分区规划
   bool ZonePlan();
 
-  // 广度寻找最近货物
+  // 偷邻居的货物
   void FindNeighborGoods();
 
   /*
@@ -94,6 +94,9 @@ struct Robot {
 
   // 更换泊位
   void ChangeBerth(int new_berth_id);
+
+  // 设置冲刺
+  void SetDash();
 };
 
 #endif

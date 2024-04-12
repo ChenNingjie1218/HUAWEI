@@ -1,6 +1,6 @@
 #ifndef PARAM_H_
 #define PARAM_H_
-// #define DEBUG
+#define DEBUG
 #define FACE_MAP  // 面向地图
 // #define TEST_ASTAR
 
@@ -67,6 +67,8 @@ class DynamicParam {
   int GetMaxRobotNum() { return max_robot_num_; }
   int GetMaxBoatNum() { return max_boat_num_; }
   bool GetMultipleAstar() { return multiple_astar_; }
+  double GetAvrMoneyDifferential() { return avr_money_differential_; }
+  int GetFindNeighborMaxRobot() { return find_neighbor_max_robot_; }
 
   void SetTolerantTime(int tolerant_time) { tolerant_time_ = tolerant_time; }
   void SetTolerantLeaveTime(int tolerant_leave_time) {
@@ -93,6 +95,12 @@ class DynamicParam {
   void SetMultipleAstar(bool multiple_astar) {
     multiple_astar_ = multiple_astar;
   }
+  void SetAvrMoneyDifferential(double avr_money_differential) {
+    avr_money_differential_ = avr_money_differential;
+  }
+  void SetFindNeighborMaxRobot(bool find_neighbor_max_robot) {
+    find_neighbor_max_robot_ = find_neighbor_max_robot;
+  }
 
  private:
   int tolerant_time_ = 20;           // 参数 机器人找货物容忍步数
@@ -105,7 +113,21 @@ class DynamicParam {
   int boat_capacity_reduce_ = 11;    // 参数 改变船容量
   int max_robot_num_ = 16;           // 参数 机器人最大数量
   int max_boat_num_ = 2;             // 参数 船舶最大数量
-  bool multiple_astar_ = false;      // 参数 一帧可多次astar吗？
+  double avr_money_differential_ = 0.1;  // 参数 寻找邻居货物时更新权重的差值
+  int find_neighbor_max_robot_ = 2;  // 参数 寻找邻居货物的机器人数量限制
+
+  // int tolerant_time_ = 85;
+  // int tolerant_leave_time_ = 0;
+  // int goods_value_valve_ = 16;
+  // int goods_filter_valve_num_ = 471;
+  // int valueable_goods_valve_ = 28;
+  // int final_tolerant_time_ = 0;
+  // int busy_valve_ = 5;
+  // int boat_capacity_reduce_ = 25;
+  // int max_robot_num_ = 17;
+  // int max_boat_num_ = 1;
+
+  bool multiple_astar_ = false;  // 参数 一帧可多次astar吗？
 
   static DynamicParam* instance_;
 

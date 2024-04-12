@@ -109,6 +109,13 @@ struct MapController {
   void InitMap1Tag();
   void InitMap2Tag();
   void InitMapParam(int id);
+
+  bool is_dash = false;     // 是否有机器人开始冲刺
+  int final_berth_id = -1;  // 最后冲刺的泊位id
+  std::vector<std::pair<int, int>> dash_table;  //  <冲刺时间点 , 目的地>
+  void InitDashTable(int map_id);               // 初始化冲刺时间表
+  void KeepOrigin();
+
 #endif
 };
 

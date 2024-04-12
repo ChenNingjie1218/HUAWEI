@@ -1,6 +1,9 @@
+
 #include "map_controller.h"
 
 #include <iostream>
+
+#include "rent_controller.h"
 
 MapController* MapController::instance_ = nullptr;
 MapController*& MapController::GetInstance() {
@@ -135,16 +138,19 @@ void MapController::InitMapData() {
     std::cerr << "map1" << std::endl;
 #endif
     InitMapParam(1);
+    InitDashTable(1);
   } else if (delivery_point == map2_tag) {
 #ifdef DEBUG
     std::cerr << "map2" << std::endl;
 #endif
     InitMapParam(2);
+    InitDashTable(2);
   } else {
 #ifdef DEBUG
     std::cerr << "map3" << std::endl;
 #endif
     InitMapParam(3);
+    InitDashTable(3);
   }
 #endif
   // 初始化nearest_delivery
@@ -307,17 +313,88 @@ void MapController::InitMapParam(int id) {
   switch (id) {
     case 1:
       map1 = true;
+      param_instance->SetMultipleAstar(false);
+      param_instance->SetBoatCapacityReduce(11);
+      param_instance->SetMaxRobotNum(16);
+      param_instance->SetAvrMoneyDifferential(0.1);
+      param_instance->SetFindNeighborMaxRobot(2);
+
+      param_instance->SetMaxBoatNum(2);
+
       break;
     case 2:
       map2 = true;
       param_instance->SetBoatCapacityReduce(13);
+      param_instance->SetMaxRobotNum(16);
+      param_instance->SetAvrMoneyDifferential(0.1);
+      param_instance->SetFindNeighborMaxRobot(2);
       break;
     case 3:
-      param_instance->SetMaxRobotNum(18);
-      param_instance->SetBoatCapacityReduce(14);
+      param_instance->SetTolerantTime(85);
+      param_instance->SetTolerantLeaveTime(0);
+      param_instance->SetGoodsValueValve(16);
+      param_instance->SetGoodsFilterValveNum(471);
+      param_instance->SetValueableGoodsValve(28);
+      param_instance->SetFinalTolerantTime(0);
+      param_instance->SetBusyValve(5);
+      param_instance->SetBoatCapacityReduce(25);
+      param_instance->SetMaxRobotNum(17);
       param_instance->SetMaxBoatNum(1);
       param_instance->SetMultipleAstar(true);
+      param_instance->SetAvrMoneyDifferential(0.2);
+      param_instance->SetFindNeighborMaxRobot(3);
+
       break;
   }
 }
+
+// 初始化冲刺表
+void MapController::InitDashTable(int map_id) {
+  final_berth_id = 4;
+  // auto& param_instance = DynamicParam::GetInstance();
+  switch (map_id) {
+    case 1:
+      dash_table.push_back(std::make_pair(14630, 4));  // 0
+      dash_table.push_back(std::make_pair(1, 4));      // 1
+      dash_table.push_back(std::make_pair(1, 4));      // 2
+      dash_table.push_back(std::make_pair(1, 4));      // 3
+      dash_table.push_back(std::make_pair(1, 4));      // 4
+      dash_table.push_back(std::make_pair(1, 4));      // 5
+      dash_table.push_back(std::make_pair(1, 4));      // 6
+      dash_table.push_back(std::make_pair(1, 4));      // 7
+      dash_table.push_back(std::make_pair(1, 4));      // 8
+      dash_table.push_back(std::make_pair(1, 4));      // 9
+      dash_table.push_back(std::make_pair(1, 4));      // 10
+      dash_table.push_back(std::make_pair(1, 4));      // 11
+      dash_table.push_back(std::make_pair(1, 4));      // 12
+      dash_table.push_back(std::make_pair(1, 4));      // 13
+      dash_table.push_back(std::make_pair(1, 4));      // 14
+      dash_table.push_back(std::make_pair(1, 4));      // 15
+      dash_table.push_back(std::make_pair(1, 4));      // 16
+      dash_table.push_back(std::make_pair(1, 4));      // 17
+
+      break;
+    case 2:
+      break;
+    case 3:
+      break;
+  }
+}
+
+// 将还没冲刺且在最终泊位的机器人保留在原地
+void MapController::KeepOrigin() {
+  if (!is_dash) {
+    auto& robot = RentController::GetInstance()->robot;
+    auto size = berth[final_berth_id].robot.size();
+    is_dash = true;
+
+    // 遍历查找还没冲刺且在最终泊位的机器人
+    for (int i = 0; i < size; i++) {
+      if (!robot[i].is_sprint && robot[i].berth_id == final_berth_id) {
+        robot[i].is_sprint = true;
+      }
+    }
+  }
+}
+
 #endif
