@@ -730,7 +730,7 @@ void DecisionManager::DecisionRobot() {
 #ifdef DEBUG
       std::cerr << "robot " << i << " start FindTargetGoods" << std::endl;
 #endif
-      if (can_astar && robot[i].FindTargetGoods()) {
+      if (can_astar && robot[i].FindTargetGoods(robot[i].x, robot[i].y)) {
         // 有新的目标货物
         can_astar = DynamicParam::GetInstance()->GetMultipleAstar();
       }
@@ -740,7 +740,7 @@ void DecisionManager::DecisionRobot() {
                 << std::endl;
 #endif
       robot[i].goods = false;
-    } else if (!robot[i].goods &&
+    } else if (robot[i].goods < robot[i].type &&
                MapController::GetInstance()->gds[robot[i].x][robot[i].y]) {
 #ifdef DEBUG
       std::cerr << "地上有货物" << std::endl;
@@ -756,31 +756,41 @@ void DecisionManager::DecisionRobot() {
         std::cerr << "robot " << i << " 装目标货：(" << robot[i].x << ","
                   << robot[i].y << ")" << std::endl;
 #endif
-      } else if (!robot[i].target_goods) {
-        // 机器人没目标货物，且该帧刚好生成了一个货物在脚底下
-        is_get = true;
-        robot[i].target_goods =
-            MapController::GetInstance()->gds[robot[i].x][robot[i].y];
-#ifdef DEBUG
-        std::cerr << "robot " << i << " 装地上新生成的货：(" << robot[i].x
-                  << "," << robot[i].y << ")" << std::endl;
-#endif
       }
+      //       else if (!robot[i].target_goods) {
+      //         // 机器人没目标货物，且该帧刚好生成了一个货物在脚底下
+      //         is_get = true;
+      //         robot[i].target_goods =
+      //             MapController::GetInstance()->gds[robot[i].x][robot[i].y];
+      // #ifdef DEBUG
+      //         std::cerr << "robot " << i << " 装地上新生成的货：(" <<
+      //         robot[i].x
+      //                   << "," << robot[i].y << ")" << std::endl;
+      // #endif
+      //       }
       if (is_get) {
         // 装货
         Decision decision(DECISION_TYPE_ROBOT_GET, i, -1);
         q_decision.push(decision);
-
+        //当前持有货物
+        ++robot[i].goods;
         // 决策更新目标泊位和泊位权重
         if (can_astar) {
-          robot[i].FindBerth(robot[i].x, robot[i].y);
+          if (robot[i].goods < robot[i].type) {
+            if (robot[i].FindTargetGoods(robot[i].x, robot[i].y)) {
+              // 还可以找目标货物
+            } else {
+              // 找不到目标货物 直接回去送货
+              robot[i].FindBerth(robot[i].x, robot[i].y);
+            }
+          } else {
+            robot[i].FindBerth(robot[i].x, robot[i].y);
+          }
           can_astar = DynamicParam::GetInstance()->GetMultipleAstar();
 #ifdef DEBUG
           std::cerr << "成功更新目标泊位" << std::endl;
 #endif
         }
-        //当前持有货物
-        robot[i].goods = true;
       }
     }
     // 空闲机器人
@@ -792,7 +802,7 @@ void DecisionManager::DecisionRobot() {
       } else if (robot[i].target_goods) {
         // 有目标货物但是没路径
         Goods *target_goods = robot[i].target_goods;
-        if (robot[i].FindPath(target_goods)) {
+        if (robot[i].FindPath(target_goods, robot[i].x, robot[i].y)) {
 #ifdef DEBUG
           std::cerr << "robot " << i << " 为目标货物找到路径" << std::endl;
 #endif
@@ -802,7 +812,7 @@ void DecisionManager::DecisionRobot() {
 #endif
         }
         can_astar = DynamicParam::GetInstance()->GetMultipleAstar();
-      } else if (robot[i].FindTargetGoods()) {
+      } else if (robot[i].FindTargetGoods(robot[i].x, robot[i].y)) {
         // 有新的目标货物
 #ifdef DEBUG
         std::cerr << "robot " << i << " 更新新的目标货物" << std::endl;
@@ -991,7 +1001,7 @@ void DecisionManager::DecisionRobot() {
       std::cerr << "机器人原地罚站超时" << std::endl;
 #endif
       // 该机器人原地占了BUSY_VALVE次了
-      if (robot[robot_id].goods) {
+      if (robot[robot_id].goods == robot[robot_id].type) {
         // 在送货
 
 #ifdef DEBUG
@@ -1019,7 +1029,8 @@ void DecisionManager::DecisionRobot() {
 
         // 找新的目标货物
         robot[robot_id].path.clear();
-        if (robot[robot_id].FindTargetGoods()) {
+        if (robot[robot_id].FindTargetGoods(robot[robot_id].x,
+                                            robot[robot_id].y)) {
 #ifdef DEBUG
           std::cerr << "机器人成功更改新的路线" << std::endl;
 #endif
@@ -1053,105 +1064,109 @@ void DecisionManager::DecisionRobot() {
  * 决策购买
  */
 void DecisionManager::DecisionPurchase() {
+  extern int money;        // 全局金额
+  int rest_money = money;  // 剩余金额
+
   // 决策买机器人
+  auto &rent_instance = RentController::GetInstance();
+  auto &goods = rent_instance->goods;
+  // 每帧清空机器人需求
+  while (!goods.empty()) {
+    goods.pop();
+  }
+  std::vector<std::pair<double, Goods *>> target_goods = InitTargetGoods();
+  int start_index = 0;
+  DecisionPurchaseRobot(1, rest_money, target_goods, start_index);
+  DecisionPurchaseRobot(0, rest_money, target_goods, start_index);
+
+  // 决策买船
+  DecisionPurchaseBoat(rest_money);
+}
+
+/*
+ * 决策购买机器人
+ * type 0 购买容量为1的机器人
+ * type 1 购买容量为2的机器人
+ */
+void DecisionManager::DecisionPurchaseRobot(
+    int type, int &rest_money,
+    std::vector<std::pair<double, Goods *>> &target_goods, int &start_index) {
   auto &rent_instance = RentController::GetInstance();
   auto &map_instance = MapController::GetInstance();
   auto &param_instance = DynamicParam::GetInstance();
-  int rest_num = param_instance->GetMaxRobotNum() -
-                 rent_instance->robot.size();  // 还可以租的机器人数量
   auto &berth = map_instance->berth;
-  int berth_size = berth.size();
-  extern int money;        // 全局金额
-  int rest_money = money;  // 剩余金额
+  auto &goods = RentController::GetInstance()->goods;
+  int purchase_money = type ? ROBOT_PRICE_TYPE_2 : ROBOT_PRICE_TYPE_1;
+  int rest_num =
+      param_instance->GetMaxRobotNum1() -
+      (rent_instance->robot.size() -
+       rent_instance->robot_num_type_2);  // 还可以租的容量为1的机器人数量
+  if (type) {
+    // 容量为2的机器人数量
+    rest_num =
+        param_instance->GetMaxRobotNum2() - rent_instance->robot_num_type_2;
+  }
   if (rest_num) {
-    if (rent_instance->boat.empty() && money < 10000) {
+    if (rent_instance->boat.empty() &&
+        rest_money < BOAT_PRICE + purchase_money) {
 #ifdef DEBUG
       std::cerr << "还需要购买机器人，但是要留钱至少买一艘船" << std::endl;
 #endif
-    } else if (rest_money < 2000) {
+    } else if (rest_money < purchase_money) {
 #ifdef DEBUG
       std::cerr << "没钱买机器人了" << std::endl;
 #endif
     } else {
-      auto &goods = rent_instance->goods;
-      // 每帧清空机器人需求
-      while (!goods.empty()) {
-        goods.pop();
-      }
-      std::vector<std::pair<double, Goods *>> target_goods;
-      auto &purchase_point = map_instance->robot_purchase_point;
-      // 遍历需要新增机器人捡的货物
-      for (int i = 0; i < berth_size; ++i) {
-        Goods *p_goods = berth[i].goods_manager.first_free_goods;
-        Goods *head_goods = berth[i].goods_manager.head_goods;
-#ifdef DEBUG
-        std::cerr << "泊位 " << i << " 货物数量"
-                  << berth[i].goods_manager.goods_num << std::endl;
-#endif
-
-        while (p_goods != head_goods) {
-          if (p_goods->robot_id == -1) {
-            int r_id = map_instance
-                           ->nearest_r[p_goods->x]
-                                      [p_goods->y];  // 距离该货物最近的购买点id
-            if (r_id == -1) {
-              // 夹缝中的货物
-              p_goods = p_goods->next;
-              continue;
-            }
-            int cal_man = std::abs(purchase_point[r_id].x - p_goods->x) +
-                          std::abs(purchase_point[r_id].y - p_goods->y);
-            if (cal_man > LIFETIME - id + p_goods->birth -
-                              DynamicParam::GetInstance()->GetTolerantTime()) {
-              p_goods = p_goods->next;
-              continue;
-            }
-            int total_man =
-                cal_man +
-                std::abs(berth[i].GetNearestX(p_goods->x) - p_goods->x) +
-                std::abs(berth[i].GetNearestY(p_goods->y) - p_goods->y);
-            double per_money = 1.0 * p_goods->money / total_man;
-            target_goods.push_back(std::make_pair(per_money, p_goods));
-          }
-          p_goods = p_goods->next;
-        }
-      }
-      sort(target_goods.begin(), target_goods.end(),
-           std::greater<std::pair<double, Goods *>>());
       int size = target_goods.size();
-      for (int i = 0; i < size; ++i) {
+      int i;
+      for (i = start_index; i < size; ++i) {
         Goods *p_goods = target_goods[i].second;
-        goods.push(p_goods);
+        goods.push(std::make_pair(p_goods, type));
         rent_instance->RentRobot(
-            map_instance->nearest_r[p_goods->x][p_goods->y]);
+            map_instance->nearest_r[p_goods->x][p_goods->y], type);
 #ifdef DEBUG
         std::cerr << "为货物(" << p_goods->x << "," << p_goods->y
-                  << ")购买机器人" << std::endl;
+                  << ")购买机器人" << type << std::endl;
 #endif
         --rest_num;
-        rest_money -= ROBOT_PRICE_TYPE_1;
+        rest_money -= purchase_money;
         if (!rest_num) {
 #ifdef DEBUG
           std::cerr << "已经买够机器人了" << std::endl;
 #endif
+          ++i;
           break;
-        } else if (rent_instance->boat.empty() && rest_money < 10000) {
+        } else if (rent_instance->boat.empty() &&
+                   rest_money < BOAT_PRICE + purchase_money) {
 #ifdef DEBUG
           std::cerr << "还需要购买机器人，但是要留钱至少买一艘船" << std::endl;
 #endif
+          ++i;
           break;
-        } else if (rest_money < 2000) {
+        } else if (rest_money < purchase_money) {
 #ifdef DEBUG
           std::cerr << "没钱买机器人了" << std::endl;
 #endif
+          ++i;
           break;
         }
       }
+      start_index = i;
     }
   }
+}
 
-  rest_num = param_instance->GetMaxBoatNum() - rent_instance->boat.size();
-  if (rest_num && rest_money > 8000) {
+/*
+ * 决策购买船
+ */
+void DecisionManager::DecisionPurchaseBoat(int &rest_money) {
+  auto &rent_instance = RentController::GetInstance();
+  auto &map_instance = MapController::GetInstance();
+  auto &param_instance = DynamicParam::GetInstance();
+  auto &berth = map_instance->berth;
+  int berth_size = berth.size();
+  int rest_num = param_instance->GetMaxBoatNum() - rent_instance->boat.size();
+  if (rest_num && rest_money >= BOAT_PRICE) {
     // ------- 目前遇到的情况: 最多一帧买一艘船 -----------
     int berth_id = -1;  // 需要购买船的泊位
     int max_goods_num = 0;
@@ -1166,13 +1181,50 @@ void DecisionManager::DecisionPurchase() {
       rent_instance->RentBoat(s_id);
     }
   }
-  // 决策买船
+}
 
-  // auto &boat_purchase_point =
-  // MapController::GetInstance()->boat_purchase_point; size =
-  // boat_purchase_point.size();
+std::vector<std::pair<double, Goods *>> DecisionManager::InitTargetGoods() {
+  auto &map_instance = MapController::GetInstance();
+  auto &berth = map_instance->berth;
+  int berth_size = berth.size();
+  std::vector<std::pair<double, Goods *>> target_goods;
+  auto &purchase_point = map_instance->robot_purchase_point;
+  // 遍历需要新增机器人捡的货物
+  for (int i = 0; i < berth_size; ++i) {
+    Goods *p_goods = berth[i].goods_manager.first_free_goods;
+    Goods *head_goods = berth[i].goods_manager.head_goods;
+#ifdef DEBUG
+    std::cerr << "泊位 " << i << " 货物数量" << berth[i].goods_manager.goods_num
+              << std::endl;
+#endif
 
-  // #ifdef DEBUG
-  //   std::cerr << "当前船购买点数量：" << size << std::endl;
-  // #endif
+    while (p_goods != head_goods) {
+      if (p_goods->robot_id == -1) {
+        int r_id =
+            map_instance->nearest_r[p_goods->x]
+                                   [p_goods->y];  // 距离该货物最近的购买点id
+        if (r_id == -1) {
+          // 夹缝中的货物
+          p_goods = p_goods->next;
+          continue;
+        }
+        int cal_man = std::abs(purchase_point[r_id].x - p_goods->x) +
+                      std::abs(purchase_point[r_id].y - p_goods->y);
+        if (cal_man > LIFETIME - id + p_goods->birth -
+                          DynamicParam::GetInstance()->GetTolerantTime()) {
+          p_goods = p_goods->next;
+          continue;
+        }
+        int total_man =
+            cal_man + std::abs(berth[i].GetNearestX(p_goods->x) - p_goods->x) +
+            std::abs(berth[i].GetNearestY(p_goods->y) - p_goods->y);
+        double per_money = 1.0 * p_goods->money / total_man;
+        target_goods.push_back(std::make_pair(per_money, p_goods));
+      }
+      p_goods = p_goods->next;
+    }
+  }
+  sort(target_goods.begin(), target_goods.end(),
+       std::greater<std::pair<double, Goods *>>());
+  return target_goods;
 }

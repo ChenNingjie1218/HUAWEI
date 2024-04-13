@@ -10,8 +10,8 @@
 #include "param.h"
 #include "rent_controller.h"
 extern int id;
-Robot::Robot(int &id, int &goods, int &startX, int &startY)
-    : id_(id), x(startX), y(startY), goods(goods) {
+Robot::Robot(int &id, int &goods, int &startX, int &startY, int type)
+    : id_(id), x(startX), y(startY), goods(goods), type(type) {
   area_id = MapController::GetInstance()->FindArea(x * n + y);
 }
 
@@ -46,7 +46,7 @@ void Robot::AddFirst(int x, int y) {
 int Robot::JudgePriority(Robot *first, Robot *second) {
   // 如果都有货物，价值高的优先
   if (first->goods && second->goods) {
-    if (first->goods_money < second->goods_money) {
+    if (first->goods_money.top() < second->goods_money.top()) {
       return 2;
     } else {
       return 1;
@@ -87,7 +87,7 @@ int Robot::JudgePriority(Robot *first, Robot *second) {
  * 寻找目标货物
  */
 
-bool Robot::FindTargetGoods() {
+bool Robot::FindTargetGoods(int x, int y) {
   auto &berth = MapController::GetInstance()->berth;
   Goods *head_goods = berth[berth_id].goods_manager.head_goods;
   Goods *p_goods = berth[berth_id].goods_manager.first_free_goods;
@@ -257,7 +257,7 @@ bool Robot::FindTargetGoods() {
     head_goods = berth[goods_berth_id].goods_manager.head_goods;
 
     find_goods->robot_id = id_;
-    if (FindPath(find_goods)) {
+    if (FindPath(find_goods, x, y)) {
       need_change_first_free_goods =
           target_goods == berth[berth_id].goods_manager.first_free_goods;
       if (need_change_first_free_goods) {
@@ -489,7 +489,7 @@ void Robot::ChangeBerth(int new_berth_id) {
 /*
  * 找路径
  */
-bool Robot::FindPath(Goods *&find_goods) {
+bool Robot::FindPath(Goods *&find_goods, int x, int y) {
   Astar astar(x, y, find_goods->x, find_goods->y);
   Goods *temp_goods = find_goods;
   std::vector<Location> temp_path;

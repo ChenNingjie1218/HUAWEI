@@ -129,8 +129,8 @@ void OutputController::Output() {
         SendLbot(next_decision.param_1, next_decision.param_2,
                  next_decision.param_3);
 #ifdef DEBUG
-        fprintf(debug_command_file, "lbot %d %d\n", next_decision.param_1,
-                next_decision.param_2);
+        fprintf(debug_command_file, "lbot %d %d %d\n", next_decision.param_1,
+                next_decision.param_2, next_decision.param_3);
 #endif
         break;
       case DECISION_TYPE_ROBOT_MOVE:

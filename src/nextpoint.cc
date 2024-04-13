@@ -103,7 +103,7 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
       // 卸货
       Decision decision(DECISION_TYPE_ROBOT_PULL, robot_id, -1);
       DecisionManager::GetInstance()->q_decision.push(decision);
-    } else if (!robot[robot_id].goods &&
+    } else if (robot[robot_id].goods < robot[robot_id].type &&
                MapController::GetInstance()->gds[x][y]) {
 #ifdef DEBUG
       std::cerr << "地上有货物" << std::endl;
@@ -124,14 +124,31 @@ void NextPoint::OutPut(std::vector<int> &not_move_robot_id) {
         // 装货
         Decision decision(DECISION_TYPE_ROBOT_GET, robot_id, -1);
         DecisionManager::GetInstance()->q_decision.push(decision);
+        //当前持有货物
+        ++robot[robot_id].goods;
+        if (robot[robot_id].goods < robot[robot_id].type) {
+#ifdef DEBUG
+          std::cerr << robot_id << "机器人继续找货物" << std::endl;
+#endif
+          if (robot[robot_id].FindTargetGoods(x, y)) {
+#ifdef DEBUG
+            std::cerr << robot_id << "成功" << std::endl;
+#endif
+          } else {
+#ifdef DEBUG
+            std::cerr << robot_id << "失败" << std::endl;
+#endif
+            // 决策更新目标泊位和泊位权重
+            robot[robot_id].FindBerth(x, y);
+          }
+        } else {
+          // 决策更新目标泊位和泊位权重
+          robot[robot_id].FindBerth(x, y);
+        }
 
-        // 决策更新目标泊位和泊位权重
-        robot[robot_id].FindBerth(x, y);
 #ifdef DEBUG
         std::cerr << "成功更新目标泊位" << std::endl;
 #endif
-        //当前持有货物
-        robot[robot_id].goods = true;
       }
     }
   }

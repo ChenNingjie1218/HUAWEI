@@ -1,6 +1,8 @@
 #ifndef DECISION_H_
 #define DECISION_H_
 #include <queue>
+
+#include "goods.h"
 // 决策
 struct Decision {
   /*
@@ -64,7 +66,17 @@ struct DecisionManager {
    * type 0 购买容量为1的机器人
    * type 1 购买容量为2的机器人
    */
-  void DecisionPurchaseRobot(int type);
+  void DecisionPurchaseRobot(
+      int type, int& rest_money,
+      std::vector<std::pair<double, Goods*>>& target_goods, int& start_index);
+
+  /*
+   * 决策购买船
+   */
+  void DecisionPurchaseBoat(int& rest_money);
+
+  /* 初始化目标货物 */
+  std::vector<std::pair<double, Goods*>> InitTargetGoods();
 
   // 决策队列
   std::queue<Decision> q_decision;

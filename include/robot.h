@@ -1,6 +1,8 @@
 #ifndef ROBOT_H_
 #define ROBOT_H_
 
+#include <stack>
+
 #include "astar.h"
 #include "goods.h"
 #include "nextpoint.h"
@@ -14,11 +16,18 @@ struct Robot {
   // 是否携带货物
   int goods;
 
+  /*
+   * 机器人类型
+   * 1 ：容量为1
+   * 2 ：容量为2
+   */
+  int type;
+
   //保存上一刻的货物状态
   int pre_goods = 0;
 
   // 手里拿的物品的价值
-  int goods_money;
+  std::stack<int> goods_money;
 
   // 目标港口
   int berth_id;
@@ -33,13 +42,13 @@ struct Robot {
   int money = 0;
 #endif
   Robot() = default;
-  Robot(int &id, int &goods, int &startX, int &startY);
+  Robot(int &id, int &goods, int &startX, int &startY, int type);
 
   Goods *target_goods = nullptr;
   std::vector<Location> path;
 
   // 寻找目标货物
-  bool FindTargetGoods();
+  bool FindTargetGoods(int x, int y);
 
   // 删除path的第一个点
   void RemoveFirst();
@@ -90,7 +99,7 @@ struct Robot {
   /*
    * 找路径
    */
-  bool FindPath(Goods *&find_goods);
+  bool FindPath(Goods *&find_goods, int x, int y);
 
   // 更换泊位
   void ChangeBerth(int new_berth_id);

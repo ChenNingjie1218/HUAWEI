@@ -74,8 +74,9 @@ void GoodsManager::DeleteGoods(Goods *&goods) {
     } else {
 #ifdef DEBUG
       std::cerr << "货物被捡起 robot " << goods->robot_id << std::endl;
+      std::cerr << robot[goods->robot_id].goods_money.size() << std::endl;
 #endif
-      robot[goods->robot_id].goods_money = goods->money;
+      robot[goods->robot_id].goods_money.push(goods->money);
     }
     RentController::GetInstance()->robot[goods->robot_id].target_goods =
         nullptr;

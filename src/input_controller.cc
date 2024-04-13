@@ -181,7 +181,7 @@ void InputController::Input() {
     std::cerr << "理论得分:"
               << MapController::GetInstance()->pull_money + 25000 -
                      2000 * RentController::GetInstance()->robot.size() -
-                     8000 * RentController::GetInstance()->boat.size()
+                     BOAT_PRICE * RentController::GetInstance()->boat.size()
               << std::endl;
 
 #endif
@@ -285,9 +285,15 @@ void InputController::Input() {
     scanf("%d%d%d%d", &robot_id, &temp_goods, &x, &y);
     if (i >= static_cast<int>(robot.size())) {
       // 新增机器人
-      robot.push_back(Robot(robot_id, temp_goods, ++x, ++y));
-      Goods* goods = RentController::GetInstance()->goods.front();
+      std::pair<Goods*, int> goods_and_type =
+          RentController::GetInstance()->goods.front();
+      robot.push_back(
+          Robot(robot_id, temp_goods, ++x, ++y, goods_and_type.second + 1));
+      if (goods_and_type.second) {
+        ++RentController::GetInstance()->robot_num_type_2;
+      }
       RentController::GetInstance()->goods.pop();
+      Goods* goods = goods_and_type.first;
       robot[robot_id].target_goods = goods;
       goods->robot_id = robot_id;
       robot[robot_id].berth_id =
@@ -300,23 +306,41 @@ void InputController::Input() {
     }
     ++busy_point[robot[i].x][robot[i].y];
 #ifdef DEBUG
-    fprintf(debug_command_file, "机器人 %d 信息: goods = %d, x = %d, y = %d\n",
-            robot_id, temp_goods, robot[i].x, robot[i].y);
+    fprintf(debug_command_file,
+            "机器人 %d 信息: goods = %d, x = %d, y = %d, type = %d, goods_num "
+            "= %d\n",
+            robot_id, temp_goods, robot[i].x, robot[i].y, robot[i].type,
+            robot[i].goods_money.size());
 
 #endif
     // 放置成功港口货物加一
-    if (robot[i].pre_goods - temp_goods == 1) {
+    if (robot[i].pre_goods - temp_goods > 0) {
       ++berth[robot[i].berth_id].goods_num;
-      berth[robot[i].berth_id].goods.push_back(robot[i].goods_money);
+      berth[robot[i].berth_id].goods.push_back(robot[i].goods_money.top());
+
+#ifdef DEBUG
+      // 全局放置数量增加
+      MapController::GetInstance()->pull_num += 1;
+      MapController::GetInstance()->pull_money += robot[i].goods_money.top();
+      robot[i].money += robot[i].goods_money.top();
+#endif
+      robot[i].goods_money.pop();
+      if (robot[i].pre_goods - temp_goods == 2) {
+        ++berth[robot[i].berth_id].goods_num;
+        berth[robot[i].berth_id].goods.push_back(robot[i].goods_money.top());
+#ifdef DEBUG
+        // 全局放置数量增加
+        MapController::GetInstance()->pull_num += 1;
+        MapController::GetInstance()->pull_money += robot[i].goods_money.top();
+        robot[i].money += robot[i].goods_money.top();
+#endif
+        robot[i].goods_money.pop();
+      }
 #ifdef DEBUG
       if (robot[i].berth_id !=
           MapController::GetInstance()->location_to_berth_id[Location(x, y)]) {
         std::cerr << "泊位货物数量增加错了" << std::endl;
       }
-      // 全局放置数量增加
-      MapController::GetInstance()->pull_num += 1;
-      MapController::GetInstance()->pull_money += robot[i].goods_money;
-      robot[i].money += robot[i].goods_money;
       std::cerr << robot[i].berth_id << " 泊位更新货物数量："
                 << berth[robot[i].berth_id].goods_num << std::endl;
 #endif

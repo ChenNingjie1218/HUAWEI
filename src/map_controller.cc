@@ -339,12 +339,12 @@ bool MapController::IsMainChannel(int x, int y) {
 #ifdef FACE_MAP
 // 面向地图调参
 void MapController::InitMap1Tag() {
-  map1_tag.push_back(Location(3, 3));
-  map1_tag.push_back(Location(3, 198));
+  map1_tag.push_back(Location(198, 11));
+  map1_tag.push_back(Location(198, 192));
 }
 void MapController::InitMap2Tag() {
-  map2_tag.push_back(Location(4, 23));
-  map2_tag.push_back(Location(197, 22));
+  map2_tag.push_back(Location(3, 198));
+  map2_tag.push_back(Location(198, 198));
 }
 
 void MapController::InitMapParam(int id) {

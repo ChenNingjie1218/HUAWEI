@@ -28,9 +28,11 @@ class RentController {
 
   std::vector<Robot> robot;  // 当前的机器人
 
+  int robot_num_type_2 = 0;  // 容量为2的机器人数量
+
   std::vector<Boat> boat;  // 当前的船
 
-  std::queue<Goods *> goods;  // 这些货物需要新的机器人来捡
+  std::queue<std::pair<Goods *, int>> goods;  // 这些货物需要新的机器人来捡
 };
 
 #endif
