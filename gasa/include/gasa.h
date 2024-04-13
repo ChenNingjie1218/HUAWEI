@@ -14,7 +14,7 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
 extern std::string WHICHMAP;
 
 // 问题参数
-const int NUM_PARAMETERS = 10;  // 参数个数
+const int NUM_PARAMETERS = 13;  // 参数个数
 const int PARAMETER_MIN = 0;    // 参数最小值(不用)
 const int PARAMETER_MAX = 100;  // 参数最大值(不用)
 
@@ -22,9 +22,9 @@ const int EXTEND =
     20;  // 在退火算法得到的参数左右两边扩展的长度，形成参数范围（要考虑是否超过了原本的范围，如果超过了，就以原本的额范围作为遗传算法的参数范围）
 
 // 遗传算法参数
-const int POPULATION_SIZE = 60;  // 种群大小
+const int POPULATION_SIZE = 100;  // 种群大小
 const int DISCARD_NUM = 10;      // 每一次迭代种群丢弃的个体数量
-const int MAX_GENERATIONS = 30;  // 最大迭代代数
+const int MAX_GENERATIONS = 40;  // 最大迭代代数
 const double MUTATION_RATE = 0.01;  // 变异率
 
 // 个体定义

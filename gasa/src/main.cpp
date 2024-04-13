@@ -47,9 +47,15 @@ int main(int argc, char *argv[]) {
     std::getline(inputFile, line);
     DynamicParam::GetInstance()->SetBoatCapacityReduce(std::stoi(line));
     std::getline(inputFile, line);
-    DynamicParam::GetInstance()->SetMaxRobotNum(std::stoi(line));
+    DynamicParam::GetInstance()->SetMaxRobotNum1(std::stoi(line));
+    std::getline(inputFile, line);
+    DynamicParam::GetInstance()->SetMaxRobotNum2(std::stoi(line));
     std::getline(inputFile, line);
     DynamicParam::GetInstance()->SetMaxBoatNum(std::stoi(line));
+    std::getline(inputFile, line);
+    DynamicParam::GetInstance()->SetAvrMoneyDifferential(std::stod(line));
+    std::getline(inputFile, line);
+    DynamicParam::GetInstance()->SetFindNeighborMaxRobot(std::stoi(line));
     std::getline(inputFile, line);
     FLAG = std::stoi(line);
     inputFile.close();  // 关闭文件

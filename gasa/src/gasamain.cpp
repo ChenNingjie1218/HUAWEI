@@ -14,9 +14,12 @@ int VALUEABLE_GOODS_VALVE = 0;
 int FINAL_TOLERANT_TIME = 0;
 int BUSY_VALVE = 0;
 int BOAT_CAPACITY_REDUCE = 0;
-int MAX_ROBOT_NUM = 1;
+int MAX_ROBOT_NUM_1 = 1;
+int MAX_ROBOT_NUM_2 = 1;
 int MAX_BOAT_NUM = 1;
-std::string WHICHMAP = "map3.txt";
+double AVR_MONEY_DIFFERENTIAL = 0.0;
+int FIND_NEIGHBOR_MAX_ROBOT = 0;
+std::string WHICHMAP = "map1.txt";
 // 目标函数
 int objective_function(std::map<std::string, int> paramMap) {
   TOLERANT_TIME = paramMap["TOLERANT_TIME"];
@@ -27,8 +30,11 @@ int objective_function(std::map<std::string, int> paramMap) {
   FINAL_TOLERANT_TIME = paramMap["FINAL_TOLERANT_TIME"];
   BUSY_VALVE = paramMap["BUSY_VALVE"];
   BOAT_CAPACITY_REDUCE = paramMap["BOAT_CAPACITY_REDUCE"];
-  MAX_ROBOT_NUM = paramMap["MAX_ROBOT_NUM"];
+  MAX_ROBOT_NUM_1 = paramMap["MAX_ROBOT_NUM_1"];
+  MAX_ROBOT_NUM_2 = paramMap["MAX_ROBOT_NUM_2"];
   MAX_BOAT_NUM = paramMap["MAX_BOAT_NUM"];
+  AVR_MONEY_DIFFERENTIAL = paramMap["AVR_MONEY_DIFFERENTIAL"];
+  FIND_NEIGHBOR_MAX_ROBOT = paramMap["FIND_NEIGHBOR_MAX_ROBOT"];
   // 写入数据到文件
   std::ofstream outputFile(
       "./gasa/data.txt", std::ios::out | std::ios::trunc);  // 打开文件用于写入
@@ -41,8 +47,11 @@ int objective_function(std::map<std::string, int> paramMap) {
     outputFile << FINAL_TOLERANT_TIME << std::endl;
     outputFile << BUSY_VALVE << std::endl;
     outputFile << BOAT_CAPACITY_REDUCE << std::endl;
-    outputFile << MAX_ROBOT_NUM << std::endl;
+    outputFile << MAX_ROBOT_NUM_1 << std::endl;
+    outputFile << MAX_ROBOT_NUM_2 << std::endl;
     outputFile << MAX_BOAT_NUM << std::endl;
+    outputFile << AVR_MONEY_DIFFERENTIAL << std::endl;
+    outputFile << FIND_NEIGHBOR_MAX_ROBOT << std::endl;
     outputFile << "1" << std::endl;
     outputFile.close();  // 关闭文件
     std::cout << "退火算法写入data成功" << std::endl;
@@ -118,12 +127,24 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
   param["BOAT_CAPACITY_REDUCE"] = boat_capacity_reduce;
 
   std::uniform_int_distribution<int> distribution8(1, 25);
-  int max_robot_num = distribution8(gen);
-  param["MAX_ROBOT_NUM"] = max_robot_num;
+  int max_robot_num_1 = distribution8(gen);
+  param["MAX_ROBOT_NUM_1"] = max_robot_num_1;
 
-  std::uniform_int_distribution<int> distribution9(1, 3);
-  int max_boat_num = distribution9(gen);
+  std::uniform_int_distribution<int> distribution9(1, 25);
+  int max_robot_num_2 = distribution9(gen);
+  param["MAX_ROBOT_NUM_2"] = max_robot_num_2;
+
+  std::uniform_int_distribution<int> distribution10(1, 3);
+  int max_boat_num = distribution10(gen);
   param["MAX_BOAT_NUM"] = max_boat_num;
+
+  std::uniform_real_distribution<double> distribution11(0.0, 3.0);
+  int avr_money_differential = distribution11(gen);
+  param["AVR_MONEY_DIFFERENTIAL"] = avr_money_differential;
+
+  std::uniform_int_distribution<int> distribution12(1, 3);
+  int find_neighbor_max_robot = distribution12(gen);
+  param["FIND_NEIGHBOR_MAX_ROBOT"] = find_neighbor_max_robot;
 
   int current_energy = objective_function(param);
 
@@ -166,12 +187,25 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
     paramtmp["BOAT_CAPACITY_REDUCE"] = boat_capacity_reduce_new;
 
     std::uniform_int_distribution<int> Distribution8(1, 25);
-    int max_robot_num_new = distribution8(gen);
-    paramtmp["MAX_ROBOT_NUM"] = max_robot_num_new;
+    int max_robot_num_1_new = distribution8(gen);
+    paramtmp["MAX_ROBOT_NUM_1"] = max_robot_num_1_new;
 
-    std::uniform_int_distribution<int> Distribution9(1, 3);
-    int max_boat_num_new = Distribution9(gen);
+    std::uniform_int_distribution<int> Distribution9(1, 25);
+    int max_robot_num_2_new = distribution8(gen);
+    paramtmp["MAX_ROBOT_NUM_2"] = max_robot_num_2_new;
+
+
+    std::uniform_int_distribution<int> Distribution10(1, 3);
+    int max_boat_num_new = Distribution10(gen);
     paramtmp["MAX_BOAT_NUM"] = max_boat_num_new;
+
+    std::uniform_real_distribution<double> Distribution11(0.0, 3.0);
+    int avr_money_differential_new = Distribution11(gen);
+    paramtmp["AVR_MONEY_DIFFERENTIAL"] = avr_money_differential_new;
+
+    std::uniform_int_distribution<int> Distribution12(1, 3);
+    int find_neighbor_max_robot_new = Distribution12(gen);
+    paramtmp["FIND_NEIGHBOR_MAX_ROBOT"] = find_neighbor_max_robot_new;
 
     // 计算新解的能量（目标函数值）
     int new_energy = objective_function(paramtmp);
@@ -192,8 +226,11 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
       final_tolerant_time = final_tolerant_time_new;
       busy_value = busy_value_new;
       boat_capacity_reduce = boat_capacity_reduce_new;
-      max_robot_num = max_robot_num_new;
+      max_robot_num_1 = max_robot_num_1_new;
+      max_robot_num_2 = max_robot_num_2_new;
       max_boat_num = max_boat_num_new;
+      avr_money_differential = avr_money_differential_new;
+      find_neighbor_max_robot = find_neighbor_max_robot_new;
       current_energy = new_energy;
     }
 
@@ -209,8 +246,11 @@ std::map<std::string, int> simulated_annealing(double initial_temperature,
   resmap["FINAL_TOLERANT_TIME"] = final_tolerant_time;
   resmap["BUSY_VALVE"] = busy_value;
   resmap["BOAT_CAPACITY_REDUCE"] = boat_capacity_reduce;
-  resmap["MAX_ROBOT_NUM"] = max_robot_num;
+  resmap["MAX_ROBOT_NUM_1"] = max_robot_num_1;
+  resmap["MAX_ROBOT_NUM_2"] = max_robot_num_2;
   resmap["MAX_BOAT_NUM"] = max_boat_num;
+  resmap["AVR_MONEY_DIFFERENTIAL"] = avr_money_differential;
+  resmap["FIND_NEIGHBOR_MAX_ROBOT"] = find_neighbor_max_robot;
   return resmap;
 }
 void getCurrentTime() {
@@ -232,8 +272,8 @@ void getCurrentTime() {
 
 int main() {
   double initial_temperature = 100.0;
-  double final_temperature = 0.1;
-  double cooling_rate = 0.9;
+  double final_temperature = 1;
+  double cooling_rate = 0.8;
 
   // 运行模拟退火算法
   auto res =
@@ -262,9 +302,15 @@ int main() {
     outputFile << "int busy_valve_ = " << res["BUSY_VALVE"] << ";" << std::endl;
     outputFile << "int boat_capacity_reduce_ = " << res["BOAT_CAPACITY_REDUCE"]
                << ";" << std::endl;
-    outputFile << "int max_robot_num_ = " << res["MAX_ROBOT_NUM"] << ";"
+    outputFile << "int max_robot_num_1_ = " << res["MAX_ROBOT_NUM_1"] << ";"
+               << std::endl;
+    outputFile << "int max_robot_num_2_ = " << res["MAX_ROBOT_NUM_2"] << ";"
                << std::endl;
     outputFile << "int max_boat_num_ = " << res["MAX_BOAT_NUM"] << ";"
+               << std::endl;
+    outputFile << "int avr_money_differential_ = " << res["AVR_MONEY_DIFFERENTIAL"]
+               << ";" << std::endl;
+    outputFile << "int find_neighbor_max_robot_ = " << res["FIND_NEIGHBOR_MAX_ROBOT"] << ";"
                << std::endl;
     outputFile.close();  // 关闭文件
     std::cerr << "写入money成功" << std::endl;

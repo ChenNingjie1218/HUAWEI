@@ -121,28 +121,66 @@ void initializePopulation(std::vector<Individual> &population,
     limitMap[7].insert(std::make_pair("max", 30));
   }
 
-  int max_robot_num = param["MAX_ROBOT_NUM"];  // 范围[1, 25]
-  if (max_robot_num - EXTEND > 1) {
-    limitMap[8].insert(std::make_pair("min", max_robot_num - EXTEND));
+  int max_robot_num_1 = param["MAX_ROBOT_NUM_1"];  // 范围[1, 25]
+  if (max_robot_num_1 - EXTEND > 1) {
+    limitMap[8].insert(std::make_pair("min", max_robot_num_1 - EXTEND));
   } else {
     limitMap[8].insert(std::make_pair("min", 1));
   }
-  if (max_robot_num + EXTEND < 25) {
-    limitMap[8].insert(std::make_pair("max", max_robot_num + EXTEND));
+  if (max_robot_num_1 + EXTEND < 25) {
+    limitMap[8].insert(std::make_pair("max", max_robot_num_1 + EXTEND));
   } else {
     limitMap[8].insert(std::make_pair("max", 25));
   }
 
-  int max_boat_num = param["MAX_BOAT_NUM"];  // 范围[1, 3]
-  if (max_boat_num - EXTEND > 1) {
-    limitMap[9].insert(std::make_pair("min", max_boat_num - EXTEND));
+  int max_robot_num_2 = param["MAX_ROBOT_NUM_2"];  // 范围[1, 25]
+  if (max_robot_num_2 - EXTEND > 1) {
+    limitMap[9].insert(std::make_pair("min", max_robot_num_2 - EXTEND));
   } else {
     limitMap[9].insert(std::make_pair("min", 1));
   }
-  if (max_boat_num + EXTEND < 3) {
-    limitMap[9].insert(std::make_pair("max", max_boat_num + EXTEND));
+  if (max_robot_num_2 + EXTEND < 25) {
+    limitMap[9].insert(std::make_pair("max", max_robot_num_2 + EXTEND));
   } else {
-    limitMap[9].insert(std::make_pair("max", 3));
+    limitMap[9].insert(std::make_pair("max", 25));
+  }
+
+  int max_boat_num = param["MAX_BOAT_NUM"];  // 范围[1, 3]
+  if (max_boat_num - EXTEND > 1) {
+    limitMap[10].insert(std::make_pair("min", max_boat_num - EXTEND));
+  } else {
+    limitMap[10].insert(std::make_pair("min", 1));
+  }
+  if (max_boat_num + EXTEND < 3) {
+    limitMap[10].insert(std::make_pair("max", max_boat_num + EXTEND));
+  } else {
+    limitMap[10].insert(std::make_pair("max", 3));
+  }
+
+  int avr_money_differential = param["AVR_MONEY_DIFFERENTIAL"];  // 范围[0, 100]
+  if (avr_money_differential - EXTEND > 0) {
+    limitMap[11].insert(std::make_pair("min", avr_money_differential - EXTEND));
+  } else {
+    limitMap[11].insert(std::make_pair("min", 0));
+  }
+  if (avr_money_differential + EXTEND < 100) {
+    limitMap[11].insert(
+        std::make_pair("max", avr_money_differential + EXTEND));
+  } else {
+    limitMap[11].insert(std::make_pair("max", 100));
+  }
+
+  int find_neighbor_max_robot = param["FIND_NEIGHBOR_MAX_ROBOT"];  // 范围[0, 10]
+  if (find_neighbor_max_robot - EXTEND > 0) {
+    limitMap[12].insert(std::make_pair("min", find_neighbor_max_robot - EXTEND));
+  } else {
+    limitMap[12].insert(std::make_pair("min", 0));
+  }
+  if (find_neighbor_max_robot + EXTEND < 10) {
+    limitMap[12].insert(
+        std::make_pair("max", find_neighbor_max_robot + EXTEND));
+  } else {
+    limitMap[12].insert(std::make_pair("max", 10));
   }
   // std::cout << "yyyyyyyy" << std::endl;
   for (int i = 0; i < POPULATION_SIZE - 1; ++i) {
@@ -196,13 +234,25 @@ void initializePopulation(std::vector<Individual> &population,
   individual.min_value[7] = limitMap[7]["min"];
   individual.max_value[7] = limitMap[7]["max"];
 
-  individual.genes[8] = max_robot_num;
+  individual.genes[8] = max_robot_num_1;
   individual.min_value[8] = limitMap[8]["min"];
   individual.max_value[8] = limitMap[8]["max"];
-
-  individual.genes[9] = max_boat_num;
+  
+  individual.genes[9] = max_robot_num_2;
   individual.min_value[9] = limitMap[9]["min"];
   individual.max_value[9] = limitMap[9]["max"];
+
+  individual.genes[10] = max_boat_num;
+  individual.min_value[10] = limitMap[10]["min"];
+  individual.max_value[10] = limitMap[10]["max"];
+
+  individual.genes[11] = avr_money_differential;
+  individual.min_value[11] = limitMap[11]["min"];
+  individual.max_value[11] = limitMap[11]["max"];
+
+  individual.genes[12] = find_neighbor_max_robot;
+  individual.min_value[12] = limitMap[12]["min"];
+  individual.max_value[12] = limitMap[12]["max"];
 
   population.push_back(individual);
   // for (auto it = individual.genes.begin(); it != individual.genes.end();
@@ -236,6 +286,9 @@ int calculateFitness(std::vector<Individual> &population, int index) {
     outputFile << individual.genes[7] << std::endl;
     outputFile << individual.genes[8] << std::endl;
     outputFile << individual.genes[9] << std::endl;
+    outputFile << individual.genes[10] << std::endl;
+    outputFile << individual.genes[11] << std::endl;
+    outputFile << individual.genes[12] << std::endl;
     outputFile << "1" << std::endl;
     outputFile.close();  // 关闭文件
     // std::cout << "写入data成功" << std::endl;
@@ -390,8 +443,11 @@ void geneticAlgorithm(std::vector<Individual> &population) {
       std::cout << "BUSY_VALVE = " << population[0].genes[6] << std::endl;
       std::cout << "BOAT_CAPACITY_REDUCE = " << population[0].genes[7]
                 << std::endl;
-      std::cout << "MAX_ROBOT_NUM = " << population[0].genes[8] << std::endl;
-      std::cout << "MAX_BOAT_NUM = " << population[0].genes[9] << std::endl;
+      std::cout << "MAX_ROBOT_NUM_1 = " << population[0].genes[8] << std::endl;
+      std::cout << "MAX_ROBOT_NUM_2 = " << population[0].genes[9] << std::endl;
+      std::cout << "MAX_BOAT_NUM = " << population[0].genes[10] << std::endl;
+      std::cout << "AVR_MONEY_DIFFERENTIAL = " << population[0].genes[11] << std::endl;
+      std::cout << "FIND_NEIGHBOR_MAX_ROBOT = " << population[0].genes[12] << std::endl;
       parent_max = population[0];
       // 最后一代存入res
       if (generation == MAX_GENERATIONS - 1) {
@@ -403,8 +459,11 @@ void geneticAlgorithm(std::vector<Individual> &population) {
         res["FINAL_TOLERANT_TIME"] = population[0].genes[5];
         res["BUSY_VALVE"] = population[0].genes[6];
         res["BOAT_CAPACITY_REDUCE"] = population[0].genes[7];
-        res["MAX_ROBOT_NUM"] = population[0].genes[8];
-        res["MAX_BOAT_NUM"] = population[0].genes[9];
+        res["MAX_ROBOT_NUM_1"] = population[0].genes[8];
+        res["MAX_ROBOT_NUM_2"] = population[0].genes[9];
+        res["MAX_BOAT_NUM"] = population[0].genes[10];
+        res["AVR_MONEY_DIFFERENTIAL"] = population[0].genes[11];
+        res["FIND_NEIGHBOR_MAX_ROBOT"] = population[0].genes[12];
       }
     } else {
       std::cout << "第" << generation << "代最优的个体" << std::endl;
@@ -427,9 +486,12 @@ void geneticAlgorithm(std::vector<Individual> &population) {
       std::cout << "BUSY_VALVE = " << population[index].genes[6] << std::endl;
       std::cout << "BOAT_CAPACITY_REDUCE = " << population[index].genes[7]
                 << std::endl;
-      std::cout << "MAX_ROBOT_NUM = " << population[index].genes[8]
+      std::cout << "MAX_ROBOT_NUM_1 = " << population[index].genes[8]
                 << std::endl;
-      std::cout << "MAX_BOAT_NUM = " << population[index].genes[9] << std::endl;
+      std::cout << "MAX_ROBOT_NUM_2 = " << population[index].genes[9] << std::endl;
+      std::cout << "MAX_BOAT_NUM = " << population[index].genes[10] << std::endl;
+      std::cout << "AVR_MONEY_DIFFERENTIAL = " << population[index].genes[11] << std::endl;
+      std::cout << "FIND_NEIGHBOR_MAX_ROBOT = " << population[index].genes[12] << std::endl;
       parent_max = population[index];
       // 最后一代存入res
       if (generation == MAX_GENERATIONS - 1) {
@@ -441,8 +503,11 @@ void geneticAlgorithm(std::vector<Individual> &population) {
         res["FINAL_TOLERANT_TIME"] = population[index].genes[5];
         res["BUSY_VALVE"] = population[index].genes[6];
         res["BOAT_CAPACITY_REDUCE"] = population[index].genes[7];
-        res["MAX_ROBOT_NUM"] = population[index].genes[8];
-        res["MAX_BOAT_NUM"] = population[index].genes[9];
+        res["MAX_ROBOT_NUM_1"] = population[index].genes[8];
+        res["MAX_ROBOT_NUM_2"] = population[index].genes[9];
+        res["MAX_BOAT_NUM"] = population[index].genes[10];
+        res["AVR_MONEY_DIFFERENTIAL"] = population[index].genes[11];
+        res["FIND_NEIGHBOR_MAX_ROBOT"] = population[index].genes[12];
       }
     }
 
@@ -493,10 +558,16 @@ int gaRun(std::map<std::string, int> param) {
     outputFile << "int busy_valve_ = " << res["BUSY_VALVE"] << ";" << std::endl;
     outputFile << "int boat_capacity_reduce_ = " << res["BOAT_CAPACITY_REDUCE"]
                << ";" << std::endl;
-    outputFile << "int max_robot_num_ = " << res["MAX_ROBOT_NUM"] << ";"
+    outputFile << "int max_robot_num_1_ = " << res["MAX_ROBOT_NUM_1"] << ";"
                << std::endl;
+    outputFile << "int max_robot_num_2_ = " << res["MAX_ROBOT_NUM_2"] << ";"
+                << std::endl;
     outputFile << "int max_boat_num_ = " << res["MAX_BOAT_NUM"] << ";"
                << std::endl;
+    outputFile << "int avr_money_differential_ = " << res["AVR_MONEY_DIFFERENTIAL"] << ";"
+                << std::endl;
+    outputFile << "int find_neighbor_max_robot_ = " << res["FIND_NEIGHBOR_MAX_ROBOT"] << ";"
+                << std::endl;
     outputFile.close();  // 关闭文件
     std::cout << "写入money成功" << std::endl;
   } else {
