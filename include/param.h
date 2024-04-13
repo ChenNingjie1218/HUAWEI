@@ -10,6 +10,13 @@
 
 // 货物生存周期
 #define LIFETIME 1000
+
+// 第一种机器人的价格
+#define ROBOT_PRICE_TYPE_1 2000
+
+// 第二种机器人的价格
+#define ROBOT_PRICE_TYPE_2 5000
+
 // 地图长度
 const int n = 200;
 const int N = 210;

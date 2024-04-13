@@ -18,10 +18,11 @@ extern int id;
 bool can_astar = true;  // 每次决策只用一次astar
 DecisionManager *DecisionManager::instance_ = nullptr;
 
-Decision::Decision(int type, int param_1, int param_2) {
+Decision::Decision(int type, int param_1, int param_2, int param_3) {
   this->type = type;
   this->param_1 = param_1;
   this->param_2 = param_2;
+  this->param_3 = param_3;
 }
 
 DecisionManager *&DecisionManager::GetInstance() {
@@ -1118,12 +1119,6 @@ void DecisionManager::DecisionPurchase() {
       sort(target_goods.begin(), target_goods.end(),
            std::greater<std::pair<double, Goods *>>());
       int size = target_goods.size();
-#ifdef DEBUG
-
-      for (int i = 0; i < size; ++i) {
-        std::cerr << " " << target_goods[i].first << std::endl;
-      }
-#endif
       for (int i = 0; i < size; ++i) {
         Goods *p_goods = target_goods[i].second;
         goods.push(p_goods);
@@ -1134,7 +1129,7 @@ void DecisionManager::DecisionPurchase() {
                   << ")购买机器人" << std::endl;
 #endif
         --rest_num;
-        rest_money -= 2000;
+        rest_money -= ROBOT_PRICE_TYPE_1;
         if (!rest_num) {
 #ifdef DEBUG
           std::cerr << "已经买够机器人了" << std::endl;

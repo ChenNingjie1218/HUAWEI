@@ -22,8 +22,8 @@ OutputController*& OutputController::GetInstance() {
  * @param x - 机器人的x坐标
  * @param y - 机器人的y坐标
  */
-void OutputController::SendLbot(int x, int y) {
-  printf("lbot %d %d\n", x, y);
+void OutputController::SendLbot(int x, int y, int type) {
+  printf("lbot %d %d %d\n", x, y, type);
   fflush(stdout);
 }
 
@@ -126,7 +126,8 @@ void OutputController::Output() {
     DecisionManager::GetInstance()->q_decision.pop();
     switch (next_decision.type) {
       case DECISION_TYPE_ROBOT_LBOT:
-        SendLbot(next_decision.param_1, next_decision.param_2);
+        SendLbot(next_decision.param_1, next_decision.param_2,
+                 next_decision.param_3);
 #ifdef DEBUG
         fprintf(debug_command_file, "lbot %d %d\n", next_decision.param_1,
                 next_decision.param_2);

@@ -17,7 +17,7 @@ struct OutputController {
    * @param x - 机器人的x坐标
    * @param y - 机器人的y坐标
    */
-  void SendLbot(int x, int y);
+  void SendLbot(int x, int y, int type);
 
   /**
    * @brief 机器人如何移动

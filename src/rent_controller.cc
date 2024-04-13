@@ -21,10 +21,10 @@ void RentController::RentBoat(int purchase_point_id) {
 }
 
 // 租机器人
-void RentController::RentRobot(int purchase_point_id) {
+void RentController::RentRobot(int purchase_point_id, int type) {
   auto &robot_purchase_point =
       MapController::GetInstance()->robot_purchase_point;
   DecisionManager::GetInstance()->q_decision.push(Decision(
       DECISION_TYPE_ROBOT_LBOT, robot_purchase_point[purchase_point_id].x - 1,
-      robot_purchase_point[purchase_point_id].y - 1));
+      robot_purchase_point[purchase_point_id].y - 1, type));
 }

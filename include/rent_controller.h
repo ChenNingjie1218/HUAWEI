@@ -19,8 +19,12 @@ class RentController {
   // 租船
   void RentBoat(int purchase_point_id);
 
-  // 租机器人
-  void RentRobot(int purchase_point_id);
+  /*
+   * 租机器人
+   * type 0 容量1
+   * type 1 容量2
+   */
+  void RentRobot(int purchase_point_id, int type = 0);
 
   std::vector<Robot> robot;  // 当前的机器人
 
