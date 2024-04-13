@@ -73,7 +73,12 @@ class DynamicParam {
   int GetFinalTolerantTime() { return final_tolerant_time_; }
   int GetBusyValve() { return busy_valve_; }
   int GetBoatCapacityReduce() { return boat_capacity_reduce_; }
-  int GetMaxRobotNum() { return max_robot_num_; }
+  // 机器人总数
+  int GetMaxRobotNum() { return max_robot_num_1_ + max_robot_num_2_; }
+  // 容量为1的机器人数量
+  int GetMaxRobotNum1() { return max_robot_num_1_; }
+  // 容量为2的机器人数量
+  int GetMaxRobotNum2() { return max_robot_num_2_; }
   int GetMaxBoatNum() { return max_boat_num_; }
   bool GetMultipleAstar() { return multiple_astar_; }
   double GetAvrMoneyDifferential() { return avr_money_differential_; }
@@ -99,7 +104,12 @@ class DynamicParam {
   void SetBoatCapacityReduce(int boat_capacity_reduce) {
     boat_capacity_reduce_ = boat_capacity_reduce;
   }
-  void SetMaxRobotNum(int max_robot_num) { max_robot_num_ = max_robot_num; }
+  void SetMaxRobotNum1(int max_robot_num_1) {
+    max_robot_num_1_ = max_robot_num_1;
+  }
+  void SetMaxRobotNum2(int max_robot_num_2) {
+    max_robot_num_2_ = max_robot_num_2;
+  }
   void SetMaxBoatNum(int max_boat_num) { max_boat_num_ = max_boat_num; }
   void SetMultipleAstar(bool multiple_astar) {
     multiple_astar_ = multiple_astar;
@@ -120,7 +130,8 @@ class DynamicParam {
   int final_tolerant_time_ = 200;  // 参数 最后冲刺阶段的容忍时间
   int busy_valve_ = 5;             // 参数 判断该点拥堵的域值
   int boat_capacity_reduce_ = 0;   // 参数 改变船容量
-  int max_robot_num_ = 10;         // 参数 机器人最大数量
+  int max_robot_num_1_ = 10;       // 参数 容量为1的机器人最大数量
+  int max_robot_num_2_ = 10;       // 参数 容量为2的机器人最大数量
   int max_boat_num_ = 1;           // 参数 船舶最大数量
   double avr_money_differential_ = 0;  // 参数 寻找邻居货物时更新权重的差值
   int find_neighbor_max_robot_ = 2;  // 参数 寻找邻居货物的机器人数量限制

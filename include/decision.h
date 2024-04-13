@@ -59,6 +59,13 @@ struct DecisionManager {
    */
   void DecisionPurchase();
 
+  /*
+   * 决策购买机器人
+   * type 0 购买容量为1的机器人
+   * type 1 购买容量为2的机器人
+   */
+  void DecisionPurchaseRobot(int type);
+
   // 决策队列
   std::queue<Decision> q_decision;
 
